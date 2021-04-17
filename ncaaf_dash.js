@@ -161,7 +161,7 @@ function drawGameDetails(game_details_data) {
     let game_details_width = d3.select('#game_details_contents').node().getBoundingClientRect().width;
     let game_details_height = d3.select('#game_details_contents').node().getBoundingClientRect().height;
     let game_status_padding = 5;
-    let navbar_height = 35;
+    let navbar_height = d3.select('#navbar').node().getBoundingClientRect().height;
 
     let game_details_svg = d3.select('#game_details_contents')
                                 .append('svg')
