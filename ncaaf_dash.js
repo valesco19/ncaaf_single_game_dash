@@ -1389,7 +1389,7 @@ function updateScheduleInfo(schedule_data) {
 
 
 //Connect to websocket
-var ws_conn = new WebSocket('ws://api.untouted.com');
+var ws_conn = new WebSocket('wss://api.untouted.com');
 
 ws_conn.onmessage = function incoming(event) {
     
