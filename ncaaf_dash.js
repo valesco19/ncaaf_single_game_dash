@@ -896,7 +896,8 @@ function drawChartElements() {
                                         })
                                         .attr('y1', 0)
                                         .attr('y2', chart_contents_height - 10)
-                                        .attr('stroke', color_dict.med_gray)
+                                        .attr('stroke', color_dict.black)
+                                        .style("stroke-dasharray", ("1, 3"))
                                         .attr('stroke-width', .25)
                                         .style('shape-rendering', 'CrispEdges');
 
