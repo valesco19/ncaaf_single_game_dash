@@ -136,7 +136,7 @@ function closeGameSelectorDiv() {
 
 
         game_selector_div.transition().duration(300)
-            .style('height', '157px');
+            .style('height', '167px');
 
         game_selector_svg.transition().duration(300)
             .attr('height', game_selector_svg_height);
@@ -206,8 +206,9 @@ function drawGameDetails(game_details_data) {
                                     .attr('id', 'game_ou_text')
                                     .attr('class', 'game_details_font')
                                     .attr('x', game_details_width / 2)
-                                    .attr('y', game_details_height - 5)
+                                    .attr('y', game_details_height + 5)
                                     .attr('text-anchor', 'middle')
+                                    .style('dominant-baseline', 'hanging')
                                     .attr('font-size', game_betting_font_size)
                                     .attr('fill', color_dict.dark_gray);
     
@@ -230,9 +231,10 @@ function drawGameDetails(game_details_data) {
                                             return (game_details_width / 2) + game_score_offset
                                             }
                                         })
-                                    .attr('y', game_details_height - 5)
+                                    .attr('y', game_details_height + 5)
                                     .attr('font-size', game_betting_font_size)
                                     .attr('text-anchor', 'middle')
+                                    .style('dominant-baseline', 'hanging')
                                     .attr('fill', color_dict.dark_gray)
                                     .attr('font-weight', 100);
     
@@ -243,6 +245,7 @@ function drawGameDetails(game_details_data) {
                                     .attr('x', game_details_width / 2 - game_score_offset - 30)
                                     .attr('y', game_details_height - 5)
                                     .attr('text-anchor', 'end')
+                                    .style('dominant-baseline', 'hanging')
                                     .attr('font-size', '10px')
                                     .attr('font-weight', 100)
                                     .attr('fill', color_dict.med_gray);
