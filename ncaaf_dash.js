@@ -41,7 +41,7 @@ let schedule_week = 'P';
 let chart_margin = {left: 40, top: 0, right: 40, bottom: 120};
 let chart_title_margin = {left: 0, top: 40, right: 0, bottom: 10};
 let chart_title_height = 40;
-let chart_title_button_data = ['Game Chart', 'Team Stats'];
+let chart_title_button_data = ['Game Chart', 'Team Stats', 'Player Stats'];
 let chart_title_button_spacing = 0
 let chart_title_button_width = 120;
 let chart_title_button_height = 25;
@@ -98,6 +98,31 @@ for (var i = 0; i < dummy_chart_sidebar_data.chart_categories.length; i++) {
         }
     
     }
+
+
+let domain_dict = {
+    away_points_diff: 40, home_points_diff: 40,
+    away_num_drives_diff: 5, home_num_drives_diff: 5,
+    away_num_plays_diff: 30, home_num_plays_diff: 30,
+    away_rush_epa_diff: 25, home_rush_epa_diff: 25,
+    away_pass_epa_diff: 25, home_pass_epa_diff: 25,
+    away_epa_diff: 35, home_epa_diff: 35,
+    away_rush_yards_diff: 200, home_rush_yards_diff: 200,
+    away_pass_yards_diff: 300, home_pass_yards_diff: 300,
+    away_total_yards_diff: 400, home_total_yards_diff: 400,
+    away_rush_att_diff: 20, home_rush_att_diff: 20,
+    away_pass_att_diff: 25, home_pass_att_diff: 25,
+    away_pass_comp_diff: 20, home_pass_comp_diff: 20,
+    away_sacks_diff: 6, home_sacks_diff: 6,
+    away_turnover_diff: 4, home_turnover_diff: 4,
+    away_total_penalties_diff: 5, home_total_penalties_diff: 5,
+    away_total_penalty_yards_diff: 50, home_total_penalty_yards_diff: 50,
+    away_plays_10_yards_plus_diff: 15, home_plays_10_yards_plus_diff: 15,
+    away_plays_20_yards_plus_diff: 10, home_plays_20_yards_plus_diff: 10,
+    away_plays_40_yards_plus_diff: 4, home_plays_40_yards_plus_diff: 4,
+    away_first_downs_diff: 20, home_first_downs_diff: 20,
+    away_red_zone_count_diff: 10, home_red_zone_count_diff: 10
+}
 
 
 function repositionVizElements() {
@@ -206,7 +231,7 @@ function drawGameDetails(game_details_data) {
                                     .attr('id', 'game_ou_text')
                                     .attr('class', 'game_details_font')
                                     .attr('x', game_details_width / 2)
-                                    .attr('y', game_details_height + 5)
+                                    .attr('y', game_details_height - 13)
                                     .attr('text-anchor', 'middle')
                                     .style('dominant-baseline', 'hanging')
                                     .attr('font-size', game_betting_font_size)
@@ -231,7 +256,7 @@ function drawGameDetails(game_details_data) {
                                             return (game_details_width / 2) + game_score_offset
                                             }
                                         })
-                                    .attr('y', game_details_height + 5)
+                                    .attr('y', game_details_height - 13)
                                     .attr('font-size', game_betting_font_size)
                                     .attr('text-anchor', 'middle')
                                     .style('dominant-baseline', 'hanging')
@@ -243,7 +268,7 @@ function drawGameDetails(game_details_data) {
                                     .attr('id', 'game_pregame_line_text')
                                     .attr('class', 'game_details_font')
                                     .attr('x', game_details_width / 2 - game_score_offset - 30)
-                                    .attr('y', game_details_height - 5)
+                                    .attr('y', game_details_height - 10)
                                     .attr('text-anchor', 'end')
                                     .style('dominant-baseline', 'hanging')
                                     .attr('font-size', '10px')
@@ -819,12 +844,94 @@ function drawChartElements() {
     let chart_x_axis = chart_contents_g.append('line')
                                     .attr('id','chart_x_axis')
                                     .attr('x1', 0)
-                                    .attr('y1', (chart_contents_height + chart_contents_top) / 2)
+                                    .attr('y1', (chart_contents_height) / 2)
                                     .attr('x2', chart_contents_width)
-                                    .attr('y2', (chart_contents_height + chart_contents_top) / 2)
+                                    .attr('y2', (chart_contents_height) / 2)
                                     .attr('stroke', color_dict.black)
                                     .attr('stroke-width', .25)
                                     .style('shape-rendering', 'CrispEdges');
+
+    /*let chart_x_top = chart_contents_g.append('line')
+                                    .attr('id', 'chart_x_top')
+                                    .attr('x1', 0)
+                                    .attr('y1', 0)
+                                    .attr('x2', chart_contents_width)
+                                    .attr('y2', 0)
+                                    .attr('stroke', color_dict.dark_gray)
+                                    .attr('stroke-width', .25)
+                                    .style('shape-rendering', 'CrispEdges');
+
+    let chart_x_bottom = chart_contents_g.append('line')
+                                    .attr('id', 'chart_x_bottom')
+                                    .attr('x1', 0)
+                                    .attr('y1', chart_contents_height)
+                                    .attr('x2', chart_contents_width)
+                                    .attr('y2', chart_contents_height)
+                                    .attr('stroke', color_dict.dark_gray)
+                                    .attr('stroke-width', .25)
+                                    .style('shape-rendering', 'CrispEdges');
+    */
+
+    let x_axis_marker_array = [0, 15, 30, 45, 60]
+
+    let x_axis_markers = chart_contents_g.selectAll('.x_axis_markers')
+                                        .data(x_axis_marker_array)
+                                        .enter()
+                                        .append('line')
+                                        .attr('class', 'x_axis_markers')
+                                        .attr('x1', function(d,i) {
+                                            
+                                            let x_axis_spacing = chart_contents_width / (x_axis_marker_array.length - 1);
+                                            console.log(x_axis_spacing)
+
+                                            return i * x_axis_spacing;
+
+                                        })
+                                        .attr('x2', function(d,i) {
+                                            
+                                            let x_axis_spacing = chart_contents_width / (x_axis_marker_array.length - 1);
+
+                                            return i * x_axis_spacing;
+
+                                        })
+                                        .attr('y1', 0)
+                                        .attr('y2', chart_contents_height - 10)
+                                        .attr('stroke', color_dict.med_gray)
+                                        .attr('stroke-width', .25)
+                                        .style('shape-rendering', 'CrispEdges');
+
+    let x_axis_game_min_nums = chart_contents_g.selectAll('.x_axis_game_min_nums')
+                                        .data(x_axis_marker_array)
+                                        .enter()
+                                        .append('text')
+                                        .text(function(d) {return d})
+                                        .attr('class', 'x_axis_game_min_nums')
+                                        .attr('x', function(d,i) {
+                                            
+                                            let x_axis_spacing = chart_contents_width / (x_axis_marker_array.length - 1);
+                                            console.log(x_axis_spacing)
+
+                                            return i * x_axis_spacing;
+
+                                        })
+                                        .attr('y', chart_contents_height)
+                                        .attr('font-size', '12px')
+                                        .attr('fill', color_dict.black)
+                                        .attr('text-anchor', 'middle');
+
+    let x_axis_label = chart_contents_g.append('text')
+                                        .text('Game Minute')
+                                        .attr('id', 'x_axis_label')
+                                        .attr('x', chart_contents_width / 2)
+                                        .attr('y', chart_contents_height + 10)
+                                        .attr('text-anchor', 'middle')
+                                        .attr('font-size', '14px')
+                                        .attr('font-weight', 300)
+                                        .attr('fill', color_dict.black)
+                                        .style('dominant-baseline', 'hanging')
+    
+
+    
                             
     
     //Draw chartbars   
@@ -939,6 +1046,7 @@ function drawChartElements() {
     
     let away_sidebar_highlight = away_sidebar_button_g.append('rect')
                                         .attr('id', function(d, i) {
+
                                             return 'away_sidebar_button_highlight_' + i;
                                         })
                                         .attr('class', 'chart_sidebar_button_highlight')
@@ -946,7 +1054,19 @@ function drawChartElements() {
                                         .attr('y', 2)
                                         .attr('width', chart_sidebar_highlight_width)
                                         .attr('height', chart_sidebar_highlight_height)
-                                        .attr('fill', color_dict.transparent);
+                                        .attr('fill', function(d) {
+                                            
+                                            let col_name = 'away' + d.col_name;
+
+                                            if (sidebar_click_dict[col_name] == 1) {
+                                                
+                                                return color_dict[col_name];
+                                            } else {
+
+                                                return color_dict.transparent;
+                                            }
+
+                                        });
     
     
     let home_sidebar_g = chart_g.append('g')
@@ -1066,13 +1186,23 @@ function drawChartElements() {
                                         .attr('y', 2)
                                         .attr('width', chart_sidebar_highlight_width)
                                         .attr('height', chart_sidebar_highlight_height)
-                                        .attr('fill', color_dict.transparent);                    
+                                        .attr('fill', function(d) {
+                                            
+                                            let col_name = 'home' + d.col_name;
+
+                                            if (sidebar_click_dict[col_name] == 1) {
+                                                
+                                                return color_dict[col_name];
+                                            } else {
+
+                                                return color_dict.transparent;
+                                            }
+
+                                        });                   
     
 }
 
 function drawDiffLine(diff_col, diff_data) {
-
-    console.log('draw_diff_line', diff_col);
 
     let chart_contents_g = d3.select('#chart_contents_g'); 
     let chart_width = chart_contents_g.node().getBoundingClientRect().width;
@@ -1100,14 +1230,16 @@ function drawDiffLine(diff_col, diff_data) {
     }
 
     let x_end_margin = chart_bg_width - (chart_sidebar_width + chart_sidebar_padding) * 2;
+    let diff_begin_domain = domain_dict[diff_col] * -1
+    let diff_end_domain = domain_dict[diff_col]
 
     let diff_x_scale = d3.scaleLinear()
                             .domain([0, 60])
                             .range([0, x_end_margin]);
 
     let diff_y_scale = d3.scaleLinear()
-                            .domain([-30, 30])
-                            .range([chart_contents_height, chart_contents_top]);
+                            .domain([diff_begin_domain, diff_end_domain])
+                            .range([chart_contents_height, 0]);
 
     chart_contents_g.append('path')
                     .datum(line_data)
@@ -1157,7 +1289,6 @@ function drawDiffChart(diff_data, sidebar_click_dict) {
             if (typeof(line_element) != 'undefined' && line_element != null) {
                 continue;
             } else {
-                console.log(diff_col, i);
                 drawDiffLine(diff_col, diff_data);
             }
         }
