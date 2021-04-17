@@ -1502,6 +1502,6 @@ setTimeout(function() {
             });
 
     
-    }, 300);
+    }, 1200);
 
 // Call onResize like this
