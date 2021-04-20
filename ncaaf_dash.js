@@ -5,6 +5,8 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
+var ws_conn;
+
 let color_dict = {black: '#000', 'white': '#fff', 'gray_bg': '#ebebeb', red: '#f55e5e',
                  med_gray: '#c0c0c0', dark_gray: '#777', transparent: 'rgba(0,0,0,0)',
                  away_points_diff: '#ffabab', home_points_diff: '#ad4444',
@@ -1002,7 +1004,8 @@ function drawChartElements() {
                                                 
                                                 sidebar_click_dict[category_name] = 1 
 
-                                                drawDiffLine(category_name, diff_data)
+                                                drawDiffLine(category_name, diff_data);
+                                                drawDiffTooltips(diff_data, sidebar_click_dict);
                                                 
                                             } else {
                                                 
@@ -1015,6 +1018,7 @@ function drawChartElements() {
                                                 sidebar_click_dict[category_name] = 0
 
                                                 removeDiffLine(category_name);
+                                                removeDiffTooltip(category_name);
                                                 
                                             }
                                         });
@@ -1133,6 +1137,7 @@ function drawChartElements() {
                                                 sidebar_click_dict[category_name] = 1 
 
                                                 drawDiffLine(category_name, diff_data)
+                                                drawDiffTooltips(diff_data, sidebar_click_dict);
                                                 
                                             } else {
                                                 
@@ -1145,6 +1150,7 @@ function drawChartElements() {
                                                 sidebar_click_dict[category_name] = 0
 
                                                 removeDiffLine(category_name);
+                                                removeDiffTooltip(category_name);
                                                 
                                             }
                                             
@@ -1199,9 +1205,207 @@ function drawChartElements() {
                                                 return color_dict.transparent;
                                             }
 
-                                        });                   
+                                        });     
+    
+    
     
 }
+
+function drawDiffTooltips(diff_data, sidebar_click_dict) {
+
+    //remove any previous tooltips
+    d3.select('#diff_tooltips_g').remove();
+    
+    let chart_contents_g = d3.select('#chart_contents_g'); 
+    let chart_width = chart_contents_g.node().getBoundingClientRect().width;
+    let chart_height = chart_contents_g.node().getBoundingClientRect().height;
+    let chart_bg_height = d3.select('#chart_bg').node().getBoundingClientRect().height;
+    let chart_bg_width = d3.select('#chart_bg').node().getBoundingClientRect().width;
+    let chart_contents_top = chart_title_margin.top + chart_title_button_height + chart_title_margin.bottom;
+    let chart_contents_width = chart_bg_width - (2 * (chart_sidebar_width + chart_sidebar_padding));
+    let chart_contents_height = chart_bg_height - chart_contents_top;
+
+    let diff_display_cols = Object.keys(sidebar_click_dict);
+    let tooltip_data = [];
+
+    for (var i = 0; i < diff_display_cols.length; i++) {
+    
+        let diff_col = diff_display_cols[i];
+      
+        if (sidebar_click_dict[diff_col] == 1) {
+            
+            let line_data = [];
+            let cum_sum = 0;
+
+
+            for (var z = 0; z < 61; z++) {
+
+                if (z == 0) {
+                    line_data.push({game_min: z, cum_sum: cum_sum})
+                } else {
+        
+                    cum_sum = cum_sum + diff_data[diff_col][z - 1];
+                    line_data.push({game_min: z, cum_sum: cum_sum});
+                }
+                
+            }
+            
+
+            //BUILD TOOLTIP DATA
+            tooltip_data.push({diff_col: diff_col, data: line_data})
+        }
+    }
+
+
+    let diff_lines = document.getElementsByClassName('diff_lines');
+
+    var diff_tooltips_g = chart_contents_g.append('g')
+                                    .attr('id', 'diff_tooltips_g');
+
+    diff_tooltips_g.append('path')
+                .attr('class', 'diff_tooltip_game_min_line')
+                .attr('stroke', color_dict.black)
+                .attr('stroke-width', '1px')
+                .style('opacity', 0);
+
+    diff_tooltips_g.append('text')
+                .text('0')
+                .attr('class', 'diff_tooltip_game_min_text')
+                .attr('stroke', color_dict.black)
+                .attr('font-size', '12px')
+                .style('font-weight', 300)
+                .attr('text-anchor', 'middle');
+
+    var tooltip_per_line = diff_tooltips_g.selectAll('.tooltip_per_line')
+                                        .data(tooltip_data)
+                                        .enter()
+                                        .append('g')
+                                        .attr('class', 'tooltip_per_line')
+                                        .attr('id', function(d) {
+                                            return d.diff_col + '_tooltip_g'
+                                        });
+
+    tooltip_per_line.append('circle')
+                    .attr('r', 7)
+                    .style('stroke', function(d) {
+                        return color_dict[d.diff_col];
+                    })
+                    .style('fill', 'none')
+                    .style('stroke-width', '1px')
+                    .style('opacity', '0');
+
+    tooltip_per_line.append('text')
+                    .attr('transform', 'translate(12,5)')
+
+    diff_tooltips_g.append('svg:rect')
+                    .attr('width', chart_contents_width)
+                    .attr('height', chart_contents_height)
+                    .attr('fill', 'none')
+                    .attr('pointer-events', 'all')
+                    .on('mouseout', function() {
+                        d3.select('.diff_tooltip_game_min_line')
+                            .style('opacity', 0)
+
+                        d3.select('.diff_tooltip_game_min_text')
+                            .style('opacity', 0)
+
+                        d3.selectAll('.tooltip_per_line circle')
+                            .style('opacity', 0)
+
+                        d3.selectAll('.tooltip_per_line text')
+                            .style('opacity', 0)
+                    })
+                    .on('mouseover', function() {
+                        d3.select('.diff_tooltip_game_min_line')
+                            .style('opacity', 1)
+
+                        d3.select('.diff_tooltip_game_min_text')
+                            .style('opacity', 1)
+
+                        d3.selectAll('.tooltip_per_line circle')
+                            .style('opacity', 1)
+
+                        d3.selectAll('.tooltip_per_line text')
+                            .style('opacity', 1)
+                    })
+                    .on('mousemove', function() {
+                        
+                        var mouse = d3.mouse(this);
+                        let x_end_margin = chart_bg_width - (chart_sidebar_width + chart_sidebar_padding) * 2;
+
+                        let diff_x_scale = d3.scaleLinear()
+                                                .domain([0, 60])
+                                                .range([0, x_end_margin]);
+                        
+                        var x_game_min = diff_x_scale.invert(mouse[0])
+
+                        d3.select('.diff_tooltip_game_min_line')
+                            .attr('d', function() {
+                                var d = 'M' + mouse[0] + ',' + (chart_contents_height - 23);
+                                d += ' ' + mouse[0] + ',' + (chart_contents_height - 15);
+                                return d;
+                            })
+
+                        d3.select('.diff_tooltip_game_min_text')
+                            .attr('x', mouse[0])
+                            .attr('y', chart_contents_height - 30)
+                            .text(function() {
+                                return x_game_min.toFixed(0);
+                            })
+
+                        d3.selectAll('.tooltip_per_line')
+                            .attr('transform', function(d, i) {
+                                let diff_col = d.diff_col;
+
+                                let x_end_margin = chart_bg_width - (chart_sidebar_width + chart_sidebar_padding) * 2;
+                                let diff_begin_domain = domain_dict[diff_col] * -1
+                                let diff_end_domain = domain_dict[diff_col]
+
+                                let diff_x_scale = d3.scaleLinear()
+                                                    .domain([0, 60])
+                                                    .range([0, x_end_margin]);
+
+                                let diff_y_scale = d3.scaleLinear()
+                                                    .domain([diff_begin_domain, diff_end_domain])
+                                                    .range([chart_contents_height, 0]);
+
+
+                                var x_game_min = diff_x_scale.invert(mouse[0])
+                                var bisect = d3.bisector(function(d) {return d.game_min;}).right;
+                                var idx = bisect(d.data, x_game_min);
+
+                                var beginning = 0
+                                var end = diff_lines[i].getTotalLength();
+                                var target = null;
+
+                                while(true) {
+                                    target = Math.floor((beginning + end) / 2);
+                                    pos = diff_lines[i].getPointAtLength(target);
+
+                                    if ((target === end || target == beginning) && pos.x !== mouse[0]) {
+                                        break;
+                                    }
+
+                                    if (pos.x > mouse[0]) end = target;
+                                    else if (pos.x < mouse[0]) beginning = target;
+                                    else break;
+
+                                }
+
+                                d3.select(this).select('text')
+                                    .text(diff_y_scale.invert(pos.y).toFixed(1));
+
+                                return 'translate(' + mouse[0] + ',' + pos.y + ')';
+
+
+                            })
+
+                    });
+
+
+}
+
+
 
 function drawDiffLine(diff_col, diff_data) {
 
@@ -1248,7 +1452,7 @@ function drawDiffLine(diff_col, diff_data) {
                     .attr('stroke', color_dict[diff_col])
                     .attr('stroke-width', 2)
                     .attr('id', line_id_name)
-                    .attr('class', 'removable_chart_elements')
+                    .attr('class', 'diff_lines')
                     .attr('d', d3.line()
                                     .curve(d3.curveBasis)
                                     .x(function(d) { return diff_x_scale(d.game_min)})
@@ -1259,6 +1463,14 @@ function drawDiffLine(diff_col, diff_data) {
                     .style('opacity', 1);
 
 
+
+}
+
+function removeDiffTooltip(diff_col) {
+
+    let tooltip_id_name = '#' + diff_col + '_tooltip_g';
+
+    d3.selectAll(tooltip_id_name).remove();
 
 }
 
@@ -1294,6 +1506,8 @@ function drawDiffChart(diff_data, sidebar_click_dict) {
             }
         }
     }
+
+    drawDiffTooltips(diff_data, sidebar_click_dict);
 
 }
 
@@ -1522,49 +1736,58 @@ function updateScheduleInfo(schedule_data) {
 }
 
 
-
 //Connect to websocket
-var ws_conn = new WebSocket('wss://api.untouted.com');
+function startWebSocket() {
+    ws_conn = new WebSocket('wss://api.untouted.com');
+    console.log('Websocket Connected.')
 
-ws_conn.onmessage = function incoming(event) {
-    
-    let resp_dict = JSON.parse(event.data)
-    
-    let resp_type = resp_dict['resp_type']
-    
-    console.log(resp_dict);
-    
-    if (resp_type == 'schedule_info') {
+    ws_conn.onmessage = function incoming(event) {
         
-        schedule_data = resp_dict['data']
-        updateScheduleInfo(schedule_data);
+        let resp_dict = JSON.parse(event.data)
         
-    } else if (resp_type == 'game_details') {
-        d3.select('#game_details_svg').remove();
+        let resp_type = resp_dict['resp_type']
         
-        var game_details_data = resp_dict['data']
-        drawGameDetails(game_details_data);   
+        console.log(resp_dict);
         
-    } else if (resp_type == 'diff_chart') {
+        if (resp_type == 'schedule_info') {
+            
+            schedule_data = resp_dict['data']
+            updateScheduleInfo(schedule_data);
+            
+        } else if (resp_type == 'game_details') {
+            d3.select('#game_details_svg').remove();
+            
+            var game_details_data = resp_dict['data']
+            drawGameDetails(game_details_data);   
+            
+        } else if (resp_type == 'diff_chart') {
+            
+            let chart_contents_g = d3.select('#chart_contents_g');
         
-        let chart_contents_g = d3.select('#chart_contents_g');
-    
-        //Clear out previous chart elements Here 
-        chart_contents_g.selectAll('.removable_chart_elements').remove();
+            //Clear out previous chart elements Here 
+            chart_contents_g.selectAll('.diff_lines').remove();
 
-        diff_data = resp_dict['data']
-        drawDiffChart(diff_data, sidebar_click_dict)
+            diff_data = resp_dict['data']
+            drawDiffChart(diff_data, sidebar_click_dict)
+            
+        }
         
     }
-    
+
+    ws_conn.onclose = function() {
+        ws_conn = null;
+        console.log('Websocket Disconnected.')
+        setTimeout(startWebSocket, 500);
+    }
+
 }
 
-
+startWebSocket();
 
 // Handle browser resize
 let APP = (function () {
 
-  // Debounce is a private function
+    // Debounce is a private function
 	function debounce(func, wait, immediate) {
 		let timeout;
 		return function() {
