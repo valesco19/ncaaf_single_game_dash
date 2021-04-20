@@ -1295,7 +1295,7 @@ function drawDiffTooltips(diff_data, sidebar_click_dict) {
                     .style('opacity', '0');
 
     tooltip_per_line.append('text')
-                    .attr('transform', 'translate(12,5)')
+                    .attr('transform', 'translate(8,-8)')
 
     diff_tooltips_g.append('svg:rect')
                     .attr('width', chart_contents_width)
