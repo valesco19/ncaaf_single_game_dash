@@ -5,7 +5,7 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-var ws_conn, team_stats_domain_data, team_stat_data;
+var ws_conn, team_stats_domain_data, team_stat_data, game_details_data;
 
 let color_dict = {black: '#000', 'white': '#fff', 'gray_bg': '#ebebeb', red: '#f55e5e',
                  med_gray: '#c0c0c0', dark_gray: '#777', transparent: 'rgba(0,0,0,0)',
@@ -226,7 +226,7 @@ function closeGameSelectorDiv() {
 }
 
 ///Game Details Functions
-function drawGameDetails(game_details_data) {
+function drawGameDetails(game_details_data, game_details) {
     game_details_data = game_details_data;
     
     let game_details_width = d3.select('#game_details_contents').node().getBoundingClientRect().width;
@@ -234,16 +234,27 @@ function drawGameDetails(game_details_data) {
     let game_status_padding = 5;
     let navbar_height = d3.select('#navbar').node().getBoundingClientRect().height;
 
-    let game_details_svg = d3.select('#game_details_contents')
-                                .append('svg')
-                                    .attr('id', 'game_details_svg')
-                                    .attr('width', '100%')
-                                    .attr('height', '100%');
+    var game_details_svg;
+
+    if (game_details === 1) {
+
+        game_details_svg = d3.select('#game_details_contents')
+                                    .append('svg')
+                                        .attr('id', 'game_details_svg')
+                                        .attr('width', '100%')
+                                        .attr('height', '100%');
+    } else {
+
+        game_details_svg = d3.select('#chart_svg');
+                           
+    }
     
     let game_status_font_size = '16px';
 
+    let game_details_content_g = game_details_svg.append('g')
+                                    .attr('id', 'game_details_content_g')
 
-    let game_status_text = game_details_svg.append('text')
+    let game_status_text = game_details_content_g.append('text')
                                     .text(game_details_data.game_status)
                                     .attr('id', 'game_status_text')
                                     .attr('class', 'game_details_font')
@@ -258,7 +269,7 @@ function drawGameDetails(game_details_data) {
     
     let game_details_font_size = '14px';
     
-    let game_date_text = game_details_svg.append('text')
+    let game_date_text = game_details_content_g.append('text')
                                     .text(game_details_data.game_date)
                                     .attr('id', 'game_date_text')
                                     .attr('class', 'game_details_font')
@@ -272,7 +283,7 @@ function drawGameDetails(game_details_data) {
     let game_betting_font_size = '14px';
     let game_score_offset = 100;
     
-    let game_ou_text = game_details_svg.append('text')
+    let game_ou_text = game_details_content_g.append('text')
                                     .text('o/u ' + game_details_data.game_ou)
                                     .attr('id', 'game_ou_text')
                                     .attr('class', 'game_details_font')
@@ -283,7 +294,7 @@ function drawGameDetails(game_details_data) {
                                     .attr('font-size', game_betting_font_size)
                                     .attr('fill', color_dict.dark_gray);
     
-    let game_spread_text = game_details_svg.selectAll('.game_spread_text')
+    let game_spread_text = game_details_content_g.selectAll('.game_spread_text')
                                     .data(game_details_data.spreads)
                                     .enter()
                                     .append('text')
@@ -309,7 +320,7 @@ function drawGameDetails(game_details_data) {
                                     .attr('fill', color_dict.dark_gray)
                                     .attr('font-weight', 100);
     
-    let game_pregame_line_text = game_details_svg.append('text')
+    let game_pregame_line_text = game_details_content_g.append('text')
                                     .text('Closing Lines')
                                     .attr('id', 'game_pregame_line_text')
                                     .attr('class', 'game_details_font')
@@ -325,7 +336,7 @@ function drawGameDetails(game_details_data) {
     
     
     let game_scores_font_size = '48px';
-    let game_score_text = game_details_svg.selectAll('.game_status_score_text')
+    let game_score_text = game_details_content_g.selectAll('.game_status_score_text')
                                     .data(game_details_data.team_scores)
                                     .enter()
                                     .append('text')
@@ -354,7 +365,7 @@ function drawGameDetails(game_details_data) {
     
     let game_logo_offset = 350;
     let game_logo_height = 70;
-    let game_logo_logos = game_details_svg.selectAll('.game_details_logos')
+    let game_logo_logos = game_details_content_g.selectAll('.game_details_logos')
                                     .data(game_details_data.team_logos)
                                     .enter()
                                     .append('svg:image')
@@ -402,7 +413,7 @@ function drawGameDetails(game_details_data) {
     let team_name_font_size = '14px';
     let team_name_spacing = 8;
 
-    let game_team_locs = game_details_svg.selectAll('.game_details_team_names')
+    let game_team_locs = game_details_content_g.selectAll('.game_details_team_names')
                                     .data(game_details_data.team_locs)
                                     .enter()
                                     .append('text')
@@ -441,7 +452,7 @@ function drawGameDetails(game_details_data) {
                                         }
                                     });
     
-    let game_team_names = game_details_svg.selectAll('.game_details_team_names')
+    let game_team_names = game_details_content_g.selectAll('.game_details_team_names')
                                     .data(game_details_data.team_names)
                                     .enter()
                                     .append('text')
@@ -764,13 +775,21 @@ function drawExportButton(chart_svg, chart_bg_width, chart_height) {
                                         .style('cursor', 'pointer')
                                         .on('click', function() {
 
+                                            //drawGameDetails(game_details_data, 0);
+
                                             d3.select('#chart_export_button_g').style('opacity', 0)
 
                                             saveSvgAsPng(document.getElementById("chart_svg"), "plot.png", {scale: 1, backgroundColor: '#fff',
                                                         left: 150, top: 100, width: 900, height: 700}); 
 
                                             
-                                            setTimeout(function() {d3.select('#chart_export_button_g').style('opacity', 1)}, 300);
+                                            setTimeout(function() {
+                                                
+                                                d3.select('#chart_export_button_g').style('opacity', 1);
+                                                //d3.select('#game_details_content_g').remove();
+                                            
+                                            
+                                            }, 300);
  
                                         })
     
@@ -1108,7 +1127,6 @@ function convertTeamStat(team_stat_value, change_team_stat_key_index) {
 
     let team_stat_button_g = d3.select('#team_stat_button_g_' + change_team_stat_key_index);
     let chart_bg_width = d3.select('#chart_bg').node().getBoundingClientRect().width;
-    let chart_sidebar_width = d3.select('#team_stat_bg').node().getBoundingClientRect().width;
     let team_stats_margin_left = (chart_bg_width / 2) - (chart_sidebar_width / 2);
     //let team_stat_value = team_stat_order_dict[change_team_stat_key_index];
     let stat_display_text = team_stats_display_dict[team_stat_value];
@@ -1174,22 +1192,18 @@ function changeTeamStat(change_team_stat_key_index) {
     let chart_height = chart_svg.node().getBoundingClientRect().height;
     let chart_bg_height = d3.select('#chart_bg').node().getBoundingClientRect().height;
     let chart_bg_width = d3.select('#chart_bg').node().getBoundingClientRect().width;
-    let chart_sidebar_width = d3.select('#team_stat_bg').node().getBoundingClientRect().width;
-
+    
     let chart_contents_top = chart_title_margin.top + chart_title_button_height + chart_title_margin.bottom;
     let chart_contents_height = chart_bg_height - chart_contents_top;
     let chart_team_stats_total_height = d3.select('#team_stat_g').node().getBoundingClientRect().height;
-    let team_stats_margin_left = (chart_bg_width / 2) - (chart_sidebar_width / 2);
+    let team_stats_margin_left = (chart_bg_width / 2) - (chart_sidebar_width / 2) + chart_margin.left;
     let chart_sidebar_padding_top = (chart_contents_height - chart_team_stats_total_height) / 2 + chart_contents_top;
-
 
     let team_stat_top = d3.select('#team_stat_bg').node().getBoundingClientRect().y;
     let team_stat_height = d3.select('#team_stat_g').node().getBoundingClientRect().height;
     let team_stat_button_g = d3.select('#team_stat_button_g_' + change_team_stat_key_index)
     let team_stat_button_position = team_stat_button_g.select('.team_stat_button_bg').node().getBoundingClientRect();
     let team_stat_button_type = team_stat_button_g.select('.team_stat_button_text').text();
-
-    console.log(team_stat_button_type, team_stat_button_position);
 
     let change_team_stat_g = chart_svg.append('g')
                                         .attr('id', 'change_team_stat_g');
@@ -1201,7 +1215,7 @@ function changeTeamStat(change_team_stat_key_index) {
                                             .attr('fill', color_dict.transparent_white);
 
     let change_team_base_g = change_team_stat_g.append('g')
-                            .attr('transform', 'translate(' + (team_stat_button_position.x + chart_sidebar_width) + ',' + chart_sidebar_padding_top + ')');     
+                            .attr('transform', 'translate(' + (team_stats_margin_left + chart_sidebar_width) + ',' + chart_sidebar_padding_top + ')');     
                             
     let change_team_base_bg = change_team_base_g.append('rect')
                                         .attr('id', 'change_team_base_bg')
@@ -1239,7 +1253,7 @@ function changeTeamStat(change_team_stat_key_index) {
     let change_team_stat_button_top = team_stat_button_position.y - chart_sidebar_padding_top - chart_sidebar_button_height - 4;
 
     let change_team_stat_button_g = change_team_stat_g.append('g')
-                                        .attr('transform', 'translate(' + team_stat_button_position.x + ',' + change_team_stat_button_top + ')')
+                                        .attr('transform', 'translate(' + team_stats_margin_left + ',' + change_team_stat_button_top + ')')
                                         .style('cursor', 'pointer')
                                         .on('click', function() {
                                             
@@ -1319,9 +1333,6 @@ function changeTeamStat(change_team_stat_key_index) {
                                             let change_team_stat_first_col_x = change_team_stat_contents_middle - 125;
                                             let change_team_stat_third_col_x = change_team_stat_contents_middle + 125;
 
-
-                                            console.log(change_team_stat_col_num, d.display_name)
-
                                             if (change_team_stat_col_num === 0) {
                                                    
                                                 var change_team_stat_button_x = change_team_stat_first_col_x;
@@ -1388,7 +1399,6 @@ function populateTeamStatData(team_stat_order_dict, team_stat_data, team_stats_d
     
     let team_stat_keys = Object.keys(team_stat_order_dict);
     let chart_bg_width = d3.select('#chart_bg').node().getBoundingClientRect().width;
-    let chart_sidebar_width = d3.select('#team_stat_bg').node().getBoundingClientRect().width;
     let team_stats_margin_left = (chart_bg_width / 2) - (chart_sidebar_width / 2);
 
 
@@ -1988,7 +1998,7 @@ function updateScheduleInfo(schedule_data) {
 
 //Connect to websocket
 function startWebSocket() {
-    ws_conn = new WebSocket('wss://api.untouted.com');
+    ws_conn = new WebSocket('ws://localhost:9191/');
     console.log('Websocket Connected.')
 
     ws_conn.onmessage = function incoming(event) {
@@ -2007,12 +2017,12 @@ function startWebSocket() {
         } else if (resp_type == 'game_details') {
             d3.select('#game_details_svg').remove();
             
-            var game_details_data = resp_dict['data']
+            game_details_data = resp_dict['data']
 
             color_dict['away_team_color'] = game_details_data['team_colors'][0]
             color_dict['home_team_color'] = game_details_data['team_colors'][1]
 
-            drawGameDetails(game_details_data);   
+            drawGameDetails(game_details_data, 1);   
             
         } else if (resp_type == 'diff_chart') {
                  
