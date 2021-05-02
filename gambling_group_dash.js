@@ -506,7 +506,7 @@ function drawGameSelector() {
                                     .style('left', game_details_left)
                                     .style('top', game_details_height);
     
-    let game_selector_g_x = game_details_width - 300;
+    let game_selector_g_x = game_details_width - 100;
     
     let game_selector_open_button_g = game_selector_svg.append('g')
                                         .attr('id', 'game_selector_open_button_g')
@@ -549,7 +549,7 @@ function drawGameSelector() {
                                         .attr('closed', 1);
                                         
     
-    let game_selector_season_array = ['2020','2019', '2018', '2017', '2016', '2015', '2014'];
+    let game_selector_season_array = ['2020','2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012'];
     let game_selector_week_array = ['P', '16', '15', '14', '13', '12', '11', '10', '9', '8', '7', '6', '5', '4', '3', '2', '1'];
     let game_selector_season_margin_top = 80;
     let game_selector_season_spacing = 70;
@@ -794,7 +794,7 @@ function drawExportButton(chart_svg, chart_bg_width, chart_height) {
                                         .attr('dominant-baseline', 'middle')
                                         .attr('font-size', '14px')
                                         .style('font-weight', 500)
-                                        .style('font-family', 'Work Sans');
+                                        .style('font-family', 'Inter');
 
 
 }
@@ -846,7 +846,80 @@ function drawTeamStatElements() {
                                 .style('shape-rendering', 'CrispEdges');
     */
     ////Chart title buttons
+    let chart_title_buttons = chart_title_g.selectAll('.chart_title_buttons')
+                                        .data(chart_title_button_data)
+                                        .enter()
+                                        .append('g')
+                                        .attr('id', function(d) {return d.replace(' ', '') + '_button'})
+                                        .attr('class', '.chart_title_buttons')
+                                        .attr('transform', function(d,i) {
+                                            return 'translate(' + (i * (chart_title_button_spacing + chart_title_button_width)) + ',0)'
+                                        })
+                                        .style('cursor', 'pointer')
+                                        .on('click', function(d,i) {
+  
+                                                let button_text_id = '#' + d.replace(' ','') + '_button_text';
+                                                let button_bg_id = '#' + d.replace(' ', '') + '_button_bg';
+
+                                                d3.selectAll('.chart_title_button_text')
+                                                    .style('font-weight', 300);
+
+                                                d3.selectAll('.chart_title_button_bg')
+                                                    .attr('fill', color_dict.gray_bg)
+
+                                                d3.select(button_text_id)
+                                                    .style('font-weight', 500);
+
+                                                d3.select(button_bg_id)
+                                                    .attr('fill', color_dict.transparent); 
+                                            
+                                                
+                                                if (i == 0) {
+                                                    game_chart_selected = 1
+                                                    team_stats_selected = 0
+                                                } else if (i == 1) {
+                                                    game_chart_selected = 0
+                                                    team_stats_selected = 1
+                                                }
+                                                
+                                        })
+                                       
     
+    
+    let chart_title_bgs = chart_title_buttons.append('rect')  
+                                        .attr('id', function(d) {return d.replace(' ', '') + '_button_bg'})
+                                        .attr('class', 'chart_title_button_bg')
+                                        .attr('width', chart_title_button_width)
+                                        .attr('height', chart_title_button_height)
+                                        .attr('fill', function(d,i) {
+                                            if (i == 0) {
+                                                return color_dict.transparent
+                                            } else {
+                                                return color_dict.gray_bg
+                                            }
+                                        })
+                                        .attr('stroke', color_dict.med_gray)
+                                        .attr('stroke-width', 1)
+                                        .style('shape-rendering', 'CrispEdges');
+    
+        
+    let chart_title_button_text = chart_title_buttons.append('text')
+                                        .text(function(d) {return d})
+                                        .attr('id', function(d) {return d.replace(' ','') + '_button_text'})
+                                        .attr('class', 'chart_title_button_text')
+                                        .attr('font-size', chart_title_button_text_font_size)
+                                        .attr('x', chart_title_button_width / 2)
+                                        .attr('y', chart_title_button_height / 2)
+                                        .attr('text-anchor', 'middle')
+                                        .attr('dominant-baseline', 'middle')
+                                        .attr('fill', color_dict.black)
+                                        .style('font-weight', function(d, i) {
+                                            if (i == 0) {
+                                                return 500
+                                            } else {
+                                                return 300
+                                            }
+                                        });
     
     
     let chart_contents_top = chart_title_margin.top + chart_title_button_height + chart_title_margin.bottom;
@@ -962,7 +1035,7 @@ function drawTeamStatElements() {
                                         .text('+')
                                         .attr('font-size', '12px')
                                         .style('font-weight', 500)
-                                        .style('font-family', 'Work Sans');
+                                        .style('font-family', 'Inter');
 
     let away_team_stat_bars = team_stat_button_g.append('rect')
                                         .attr('id', function(d, i) {
@@ -1192,7 +1265,7 @@ function changeTeamStat(change_team_stat_key_index) {
                                         .attr('class', 'sidebar_text')
                                         .attr('font-size', '12px')
                                         .style('font-weight', 500)
-                                        .style('font-family', 'Work Sans')
+                                        .style('font-family', 'Inter')
                                         .style('opacity', 0)
                                         .transition()
                                         .duration(50)
@@ -1293,7 +1366,7 @@ function changeTeamStat(change_team_stat_key_index) {
                                                     .attr('text-anchor', 'middle')
                                                     .style('dominant-baseline', 'middle')
                                                     .style('font-size', '12px')
-                                                    .style('font-family', 'Work Sans')
+                                                    .style('font-family', 'Inter')
                                                     .style('font-weight', 500)
                                                     .style('opacity', 0)
                                                     .on('click', function(d) {
@@ -1915,7 +1988,7 @@ function updateScheduleInfo(schedule_data) {
 
 //Connect to websocket
 function startWebSocket() {
-    ws_conn = new WebSocket('wss://api.untouted.com');
+    ws_conn = new WebSocket('ws://api.untouted.com/');
     console.log('Websocket Connected.')
 
     ws_conn.onmessage = function incoming(event) {
