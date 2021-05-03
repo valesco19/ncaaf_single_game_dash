@@ -2055,7 +2055,7 @@ function startWebSocket() {
     ws_conn.onclose = function() {
         ws_conn = null;
         console.log('Websocket Disconnected.')
-        setTimeout(startWebSocket, 500);
+        setTimeout(startWebSocket, 2000);
     }
 
 }
