@@ -2008,7 +2008,7 @@ function updateScheduleInfo(schedule_data) {
 
 //Connect to websocket
 function startWebSocket() {
-    ws_conn = new WebSocket('ws://localhost:9191/');
+    ws_conn = new WebSocket('wss://api.untouted.com/');
     console.log('Websocket Connected.')
 
     ws_conn.onmessage = function incoming(event) {
