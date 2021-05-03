@@ -230,9 +230,9 @@ function drawGameDetails(game_details_data, game_details) {
     game_details_data = game_details_data;
     
     let game_details_width = d3.select('#game_details_contents').node().getBoundingClientRect().width;
-    let game_details_height = d3.select('#game_details_contents').node().getBoundingClientRect().height;
+    let game_details_height = d3.select('#game_details_contents').node().getBoundingClientRect().height
     let game_status_padding = 5;
-    let navbar_height = d3.select('#navbar').node().getBoundingClientRect().height;
+    let navbar_height = game_details == 1 ? d3.select('#navbar').node().getBoundingClientRect().height: -100;
 
     var game_details_svg;
 
@@ -313,6 +313,7 @@ function drawGameDetails(game_details_data, game_details) {
                                             return (game_details_width / 2) + game_score_offset
                                             }
                                         })
+                                    .attr('class', 'game_spread_text')
                                     .attr('y', game_details_height - 13)
                                     .attr('font-size', game_betting_font_size)
                                     .attr('text-anchor', 'middle')
@@ -361,52 +362,57 @@ function drawGameDetails(game_details_data, game_details) {
                                     .style('font-weight', 100)
                                     .style('dominant-baseline', 'middle')
                                     .style('text-anchor', 'middle');
+    
+    if (game_details == 1) {
+            let game_logo_offset = 350;
+            let game_logo_height = 70;
+            let game_logo_logos = game_details_content_g.selectAll('.game_details_logos')
+                                            .data(game_details_data.team_logos)
+                                            .enter()
+                                            .append('svg:image')
+                                            .attr('id', function(d, i) {
+                                                if (i == 0) {
+                                                    return 'game_away_logo'
+                                                } else {
+                                                    return 'game_home_logo'
+                                                }
+                                                
+                                            })
+                                            .attr('x', function(d, i) {
+                                                if (i == 0) {
+                                                    return (game_details_width / 2) - game_logo_offset 
+                                                } else {
+                                                    return (game_details_width / 2) + game_logo_offset
+                                                    }
+                                                })
+                                            .attr('y', (game_details_height - navbar_height) / 2 + navbar_height - (game_logo_height / 2))
+                                            .attr('height', game_logo_height)
+                                            .attr('width', game_logo_height)
+                                            .attr('xlink:href', function(d) {return d});
+            
 
-    
-    let game_logo_offset = 350;
-    let game_logo_height = 70;
-    let game_logo_logos = game_details_content_g.selectAll('.game_details_logos')
-                                    .data(game_details_data.team_logos)
-                                    .enter()
-                                    .append('svg:image')
-                                    .attr('id', function(d, i) {
-                                        if (i == 0) {
-                                            return 'game_away_logo'
-                                        } else {
-                                            return 'game_home_logo'
-                                        }
-                                        
-                                    })
-                                    .attr('x', function(d, i) {
-                                        if (i == 0) {
-                                            return (game_details_width / 2) - game_logo_offset 
-                                        } else {
-                                            return (game_details_width / 2) + game_logo_offset
-                                            }
-                                        })
-                                    .attr('y', (game_details_height - navbar_height) / 2 + navbar_height - (game_logo_height / 2))
-                                    .attr('height', game_logo_height)
-                                    .attr('width', game_logo_height)
-                                    .attr('xlink:href', function(d) {return d});
-    
+            
+            
+            
+            //Calc width of logos to transform to center for spacing
+            let away_logo_width = d3.select('#game_away_logo').node().getBoundingClientRect().width;
+            let home_logo_width = d3.select('#game_home_logo').node().getBoundingClientRect().width;
+            
+            d3.select('#game_away_logo')
+                .attr('transform', 'translate(' + (-1 * (away_logo_width / 2)) + ',0)')
+            
+            d3.select('#game_home_logo')
+                .attr('transform', 'translate(' + (-1 * (home_logo_width / 2)) + ',0)')
+    }
 
-    
-    
-    
-    //Calc width of logos to transform to center for spacing
-    let away_logo_width = d3.select('#game_away_logo').node().getBoundingClientRect().width;
-    let home_logo_width = d3.select('#game_home_logo').node().getBoundingClientRect().width;
-    
-    d3.select('#game_away_logo')
-        .attr('transform', 'translate(' + (-1 * (away_logo_width / 2)) + ',0)')
-    
-    d3.select('#game_home_logo')
-        .attr('transform', 'translate(' + (-1 * (home_logo_width / 2)) + ',0)')
-    
+
     let team_name_padding = 10;
     let away_team_bbox = d3.select('#game_away_logo').node().getBBox()
     let home_team_bbox = d3.select('#game_home_logo').node().getBBox()
-    
+
+    let away_logo_width = d3.select('#game_away_logo').node().getBoundingClientRect().width;
+    let home_logo_width = d3.select('#game_home_logo').node().getBoundingClientRect().width;
+
     let away_team_name_x = away_team_bbox.x + away_team_bbox.width + team_name_padding;
     let home_team_name_x = home_team_bbox.x - team_name_padding;
     let team_loc_font_size = '18px';
@@ -775,18 +781,22 @@ function drawExportButton(chart_svg, chart_bg_width, chart_height) {
                                         .style('cursor', 'pointer')
                                         .on('click', function() {
 
-                                            //drawGameDetails(game_details_data, 0);
+                                            drawGameDetails(game_details_data, 0);
+
+                                            chart_svg.select('#game_ou_text').style('opacity', 0);
+                                            chart_svg.selectAll('.game_spread_text').style('opacity', 0);
+                                            chart_svg.select('#game_pregame_line_text').style('opacity', 0);
 
                                             d3.select('#chart_export_button_g').style('opacity', 0)
 
                                             saveSvgAsPng(document.getElementById("chart_svg"), "plot.png", {scale: 1, backgroundColor: '#fff',
-                                                        left: 150, top: 100, width: 900, height: 700}); 
+                                                        left: 150, top: 0, width: 900, height: 900}); 
 
                                             
                                             setTimeout(function() {
                                                 
                                                 d3.select('#chart_export_button_g').style('opacity', 1);
-                                                //d3.select('#game_details_content_g').remove();
+                                                chart_svg.select('#game_details_content_g').remove();
                                             
                                             
                                             }, 300);
