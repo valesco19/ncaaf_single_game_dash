@@ -131,7 +131,6 @@ for (var i = 0; i < alpha_team_stats_array.length; i++ ){
     }   
 }   
 
-console.log(final_team_stats_alpha_array);
 //List categories that load clicked
 let preclicked_team_stats = ['team_score', 'rush_att', 'rush_yards', 'pass_att', 'pass_comp', 'pass_yards',
                             'total_yards', 'passer_rating', 'points_quarter_1', 'points_quarter_2', 'points_quarter_3',
@@ -1137,7 +1136,7 @@ function closeChangeTeamStat() {
 }
 
 function convertTeamStat(team_stat_value, change_team_stat_key_index) {
-    console.log(team_stat_value);
+   
     //change team_stat_order_dit
     team_stat_order_dict[change_team_stat_key_index] = team_stat_value
 
@@ -1201,7 +1200,6 @@ function convertTeamStat(team_stat_value, change_team_stat_key_index) {
 
 function changeTeamStat(change_team_stat_key_index) {
 
-    console.log(change_team_stat_key_index);
 
     let chart_svg = d3.select('#chart_svg');
     let chart_width = chart_svg.node().getBoundingClientRect().width;
@@ -2101,9 +2099,7 @@ function startWebSocket() {
         let resp_dict = JSON.parse(event.data)
         
         let resp_type = resp_dict['resp_type']
-        
-        console.log(resp_dict);
-        
+                
         if (resp_type == 'schedule_info') {
             
             schedule_data = resp_dict['data']
@@ -2131,8 +2127,7 @@ function startWebSocket() {
         } else if (resp_type == 'team_stats_domain') {
 
             team_stats_domain_data = resp_dict['data'];
-            console.log(team_stats_domain_data, 'loaded')
-
+            
         }
         
     }
