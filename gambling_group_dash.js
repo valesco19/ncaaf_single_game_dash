@@ -2094,7 +2094,7 @@ function startWebSocket() {
         
         closeProcessingScreen();
 
-    }, 1400)
+    }, 3500)
 
     ws_conn.onmessage = function incoming(event) {
         
