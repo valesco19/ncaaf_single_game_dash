@@ -773,6 +773,8 @@ function drawGameSelector() {
     
 }
 
+
+
 function drawExportButton(chart_svg, chart_bg_width, chart_height) {
 
     let chart_export_button_g = chart_svg.append('g')
@@ -781,7 +783,10 @@ function drawExportButton(chart_svg, chart_bg_width, chart_height) {
                                         .style('cursor', 'pointer')
                                         .on('click', function() {
 
+                                            openProcessingScreen('Exporting Chart');
+
                                             drawGameDetails(game_details_data, 0);
+                                            
 
                                             chart_svg.select('#game_ou_text').style('opacity', 0);
                                             chart_svg.selectAll('.game_spread_text').style('opacity', 0);
@@ -797,9 +802,10 @@ function drawExportButton(chart_svg, chart_bg_width, chart_height) {
                                                 
                                                 d3.select('#chart_export_button_g').style('opacity', 1);
                                                 chart_svg.select('#game_details_content_g').remove();
-                                            
-                                            
-                                            }, 300);
+
+                                                closeProcessingScreen();
+                                                
+                                            }, 1000);
  
                                         })
     
@@ -1774,6 +1780,79 @@ function drawDiffChart(diff_data, sidebar_click_dict) {
 
 }
 
+function loader(config) {
+    return function() {
+      var radius = Math.min(config.width, config.height) / 2;
+      var tau = 2 * Math.PI;
+  
+      var arc = d3.arc()
+              .innerRadius(radius*0.6)
+              .outerRadius(radius*0.7)
+              .startAngle(0);
+  
+      var svg = d3.select(config.container).append("svg")
+          .attr("id", config.id)
+          .attr('class', 'loader')
+          .attr("width", config.width)
+          .attr("height", config.height)
+          .style('margin', 'auto')
+          .style('display', 'block')
+        .append("g")
+          .attr("transform", "translate(" + config.width / 2 + "," + config.height / 2 + ")")
+  
+      var background = svg.append("path")
+              .datum({endAngle: 0.33*tau})
+              .style("fill", color_dict.red)
+              .attr("d", arc)
+              .call(spin, 1000)
+
+      var title = svg.append('text')
+                    .text(config.title)
+                    .attr('class', 'loader')
+                    .attr('x', 0)
+                    .attr('y', 0)
+                    .attr('text-anchor', 'middle')
+                    .style('dominant-baseline', 'hanging')
+                    .attr('font-size', '14px')
+                    .style('font-family', 'Inter')
+                    .style('font-weight', 500)
+  
+      function spin(selection, duration) {
+          selection.transition()
+              .ease(d3.easeLinear)
+              .duration(duration)
+              .attrTween("transform", function() {
+                  return d3.interpolateString("rotate(0)", "rotate(360)");
+              });
+  
+          setTimeout(function() { spin(selection, duration); }, duration);
+      }
+  
+      function transitionFunction(path) {
+          path.transition()
+              .duration(7500)
+              .attrTween("stroke-dasharray", tweenDash)
+              .each("end", function() { d3.select(this).call(transition); });
+      }
+  
+    };
+  }
+  
+function openProcessingScreen(title) {
+
+    var myLoader = loader({width: 200, height: 200, container: "#processing_screen", id: "processing_loader", title: title});
+    myLoader();
+
+    d3.select('#processing_screen').style('height', '100vh');
+
+}
+
+
+function closeProcessingScreen() {
+    
+    d3.selectAll('.loader').remove()
+    d3.select('#processing_screen').style('height', 0);
+}
 
 function updateScheduleInfo(schedule_data) {
 
@@ -2008,8 +2087,14 @@ function updateScheduleInfo(schedule_data) {
 
 //Connect to websocket
 function startWebSocket() {
-    ws_conn = new WebSocket('wss://api.untouted.com/');
+    ws_conn = new WebSocket('wss://api.untouted.com');
     console.log('Websocket Connected.')
+
+    setTimeout(function() {
+        
+        closeProcessingScreen();
+
+    }, 1400)
 
     ws_conn.onmessage = function incoming(event) {
         
@@ -2055,11 +2140,12 @@ function startWebSocket() {
     ws_conn.onclose = function() {
         ws_conn = null;
         console.log('Websocket Disconnected.')
-        setTimeout(startWebSocket, 2000);
+        setTimeout(startWebSocket, 500);
     }
 
 }
 
+openProcessingScreen('Connecting')
 startWebSocket();
 
 // Handle browser resize
@@ -2149,6 +2235,6 @@ setTimeout(function() {
             });
 
     
-    }, 3000);
+    }, 3500);
 
 
