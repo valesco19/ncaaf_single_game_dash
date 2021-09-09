@@ -35,8 +35,8 @@ let color_dict = {black: '#000', 'white': '#fff', 'gray_bg': '#ebebeb', red: '#f
 //Button clicked switches game chart loads first
 let game_chart_selected = 1;
 let team_stats_selected = 0;
-let schedule_season = 2020;
-let schedule_week = 'P';
+let schedule_season = 2021;
+let schedule_week = '1';
 
 
 //Initial Chart Parameters
