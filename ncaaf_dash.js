@@ -505,7 +505,7 @@ function drawGameSelector() {
                                         .attr('closed', 1);
                                         
     
-    let game_selector_season_array = ['2020','2019', '2018', '2017', '2016', '2015', '2014', '2013', '2012'];
+    let game_selector_season_array = ['2021', '2020','2019', '2018', '2017', '2016', '2015', '2014'];
     let game_selector_week_array = ['P', '16', '15', '14', '13', '12', '11', '10', '9', '8', '7', '6', '5', '4', '3', '2', '1'];
     let game_selector_season_margin_top = 80;
     let game_selector_season_spacing = 70;
