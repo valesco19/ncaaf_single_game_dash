@@ -7,7 +7,7 @@ d3.selection.prototype.moveToFront = function() {
 
 var ws_conn;
 
-let color_dict = {black: '#000', 'white': '#fff', 'gray_bg': '#ebebeb', red: '#f55e5e',
+let color_dict = {black: '#000', 'white': '#fff', 'gray_bg': '#ececec', red: '#f55e5e',
                  med_gray: '#c0c0c0', dark_gray: '#777', transparent: 'rgba(0,0,0,0)',
                  away_points_diff: '#ffabab', home_points_diff: '#ad4444',
                  away_num_drives_diff: '#73eaf5', home_num_drives_diff: '#469ea6',
@@ -35,8 +35,7 @@ let color_dict = {black: '#000', 'white': '#fff', 'gray_bg': '#ebebeb', red: '#f
 //Button clicked switches game chart loads first
 let game_chart_selected = 1;
 let team_stats_selected = 0;
-let schedule_season = 2021;
-let schedule_week = '1';
+let schedule_season, schedule_week;
 
 
 //Initial Chart Parameters
@@ -208,7 +207,7 @@ function drawGameDetails(game_details_data) {
                                     .style('dominant-baseline', 'hanging')
                                     .style('text-anchor', 'middle')
                                     .style('font-size', game_status_font_size)
-                                    .style('font-weight', 500)
+                                    .style('font-weight', 700)
                                     .style('fill', color_dict.black);
     
     
@@ -223,7 +222,8 @@ function drawGameDetails(game_details_data) {
                                     .style('text-anchor', 'middle')
                                     .style('dominant-baseline', 'hanging')
                                     .style('font-size', game_details_font_size)
-                                    .style('fill', color_dict.dark_gray);
+                                    .style('fill', color_dict.dark_gray)
+                                    .style('font-weight', 500)
     
     let game_betting_font_size = '14px';
     let game_score_offset = 100;
@@ -237,7 +237,8 @@ function drawGameDetails(game_details_data) {
                                     .attr('text-anchor', 'middle')
                                     .style('dominant-baseline', 'hanging')
                                     .attr('font-size', game_betting_font_size)
-                                    .attr('fill', color_dict.dark_gray);
+                                    .attr('fill', color_dict.dark_gray)
+                                    .style('font-weight', 500);
     
     let game_spread_text = game_details_svg.selectAll('.game_spread_text')
                                     .data(game_details_data.spreads)
@@ -263,7 +264,7 @@ function drawGameDetails(game_details_data) {
                                     .attr('text-anchor', 'middle')
                                     .style('dominant-baseline', 'hanging')
                                     .attr('fill', color_dict.dark_gray)
-                                    .attr('font-weight', 100);
+                                    .attr('font-weight', 500);
     
     let game_pregame_line_text = game_details_svg.append('text')
                                     .text('Closing Lines')
@@ -274,8 +275,8 @@ function drawGameDetails(game_details_data) {
                                     .attr('text-anchor', 'end')
                                     .style('dominant-baseline', 'hanging')
                                     .attr('font-size', '10px')
-                                    .attr('font-weight', 100)
-                                    .attr('fill', color_dict.med_gray);
+                                    .style('font-weight', 500)
+                                    .attr('fill', color_dict.dark_gray);
     
     
     
@@ -303,7 +304,7 @@ function drawGameDetails(game_details_data) {
                                         })
                                     .attr('y', (game_details_height - navbar_height) / 2 + navbar_height)
                                     .attr('font-size', game_scores_font_size)
-                                    .style('font-weight', 100)
+                                    .style('font-weight', 300)
                                     .style('dominant-baseline', 'middle')
                                     .style('text-anchor', 'middle');
 
@@ -428,7 +429,7 @@ function drawGameDetails(game_details_data) {
                                     .attr('class', 'game_team_names')
                                     .attr('y', (game_details_height - navbar_height) / 2 + navbar_height + (team_name_spacing / 2))
                                     .attr('font-size', team_name_font_size)
-                                    .style('font-weight', 300)
+                                    .style('font-weight', 500)
                                     .style('dominant-baseline', 'hanging')
                                     .style('text-anchor', function(d, i) {
                                         if (i == 0) {
@@ -440,8 +441,121 @@ function drawGameDetails(game_details_data) {
     }
 
 //Draw Game selector
+function drawGameSelectorWeeks(game_selector_week_array) {
 
-function drawGameSelector() {
+    console.log(game_selector_week_array);
+    
+    //Remove any existing week elements
+    d3.select('#game_selector_week_g').remove();
+    
+    let game_selector_svg = d3.select('#game_selector_svg');
+    let game_details_width = d3.select('#game_details_contents').node().getBoundingClientRect().width;
+    let game_selector_week_margin_top = 110;
+    let game_selector_week_spacing = 35;
+    let game_selector_week_width = (game_selector_week_array.length - 1) * game_selector_week_spacing;
+    let game_selector_week_margin_left = (game_details_width - game_selector_week_width) / 2;
+
+    
+    let game_selector_week_g = game_selector_svg.append('g')
+                                        .attr('id', 'game_selector_week_g')
+                                        .attr('transform', 'translate(' + game_selector_week_margin_left  + ',' + game_selector_week_margin_top + ')')
+                                        
+    
+    let game_selector_week_font_size_selected = '12px'
+    let game_selector_week_font_size_unselected = '10px'
+                                        
+    
+    let game_selector_week = game_selector_week_g.selectAll('.game_selector_week')
+                                        .data(game_selector_week_array)
+                                        .enter()
+                                        .append('text')
+                                        .text(function(d) {return d})
+                                        .attr('id', function(d,i) {
+                                            return 'game_selector_week_' + d
+                                        })
+                                        .attr('class', 'game_selector_week')
+                                        .attr('x', function(d,i) {
+                                            return i * game_selector_week_spacing;
+                                        })
+                                        .attr('fill', function(d,i) {
+                                            if (d == schedule_week) {
+                                                return color_dict.black;
+                                            } else {
+                                                return color_dict.med_gray;
+                                            }
+                                        })
+                                        .attr('font-size', function(d,i) {
+                                            if (d == schedule_week) {
+                                                return game_selector_week_font_size_selected
+                                            } else {
+                                                return game_selector_week_font_size_unselected
+                                            }
+                                        })
+                                        .style('font-weight', 500)
+                                        .attr('text-anchor', 'middle')
+                                        .style('cursor', 'pointer')
+                                        .attr('selected', function(d,i) {
+                                            if (d == schedule_week) {
+                                                return 1
+                                            } else {
+                                                return 0
+                                            }
+                                        })
+                                        .attr('value', function(d,i){
+                                            let season_map = {SB: 21, Conf: 20, Div: 19, WC: 18};
+                                            let season_keys = Object.keys(season_map);
+                                            
+                                            if (season_keys.includes(d)) {
+                                                return season_map[d]
+                                            } else {
+                                                return d;
+                                            }
+                                        })
+                                        .on('mouseover', function() {
+                                            
+                                            let week_element = d3.select(this)
+                                                
+                                            if (week_element.attr('selected') == 0) {
+                                                
+                                                week_element.transition().duration(100)
+                                                    .attr('font-size', game_selector_week_font_size_selected)
+                                                
+                                                }
+                                            })
+                                        .on('mouseout', function() {
+                                            
+                                            let week_element = d3.select(this)
+                                            
+                                            if (week_element.attr('selected') == 0) {
+                                                week_element.transition().duration(100)
+                                                    .attr('font-size', game_selector_week_font_size_unselected)
+                                            }
+                                        })
+                                        .on('click', function() {
+                                            
+                                            let week_element = d3.select(this);
+                                            schedule_week = week_element.attr('value');
+                                            let req_dict = {req_type: 'schedule_info', season: schedule_season, week: schedule_week}
+                        
+                                            ws_conn.send(JSON.stringify(req_dict))
+                                            
+                                            if (week_element.attr('selected') == 0) {
+                                                
+                                                d3.selectAll('.game_selector_week')
+                                                    .attr('font-size', game_selector_week_font_size_unselected)
+                                                    .attr('fill', color_dict.med_gray)
+                                                    .attr('selected', 0)
+                                                
+                                                week_element.attr('fill', color_dict.black)
+                                                    .attr('font-size', game_selector_week_font_size_selected)
+                                                    .attr('selected', 1)
+                                            
+                                            }
+                                    });
+
+}
+
+function drawGameSelector(init_schedule_data) {
     let width = d3.select('#viz').node().getBoundingClientRect().width;
     let height = d3.select('#viz').node().getBoundingClientRect().height;
     let game_details_width = d3.select('#game_details_contents').node().getBoundingClientRect().width;
@@ -476,7 +590,7 @@ function drawGameSelector() {
                                         .attr('id', 'game_selector_open_button_bg')
                                         .attr('width', game_selector_button_width)
                                         .attr('height', game_selector_button_height)
-                                        .attr('fill', color_dict.white)
+                                        .attr('fill', color_dict.gray_bg)
                                         .attr('y', 2)
                                         .style('shape-rendering', 'CrispEdges');
     
@@ -485,7 +599,7 @@ function drawGameSelector() {
                                         .attr('id', 'game_selector_open_button_text')
                                         .attr('class', 'game_selector_font')
                                         .attr('font-size', '12px')
-                                        .attr('font-weight', 300)
+                                        .attr('font-weight', 500)
                                         .attr('x', game_selector_button_width - 20)
                                         .attr('y', game_selector_button_height / 2 + 1)
                                         .attr('text-anchor', 'end')
@@ -496,7 +610,7 @@ function drawGameSelector() {
                                         .attr('id', 'game_selector_open_button_chevron')
                                         .attr('class', 'font_awesome_text_icon')
                                         .attr('font-size', '12px')
-                                        .style('font-weight', 300)
+                                        .style('font-weight', 500)
                                         .attr('fill', color_dict.black)
                                         .attr('x', game_selector_button_width - 5)
                                         .attr('y', game_selector_button_height / 2 + 1)
@@ -505,8 +619,12 @@ function drawGameSelector() {
                                         .attr('closed', 1);
                                         
     
-    let game_selector_season_array = ['2021', '2020','2019', '2018', '2017', '2016', '2015', '2014'];
-    let game_selector_week_array = ['P', '16', '15', '14', '13', '12', '11', '10', '9', '8', '7', '6', '5', '4', '3', '2', '1'];
+    let game_selector_season_array = init_schedule_data['schedule_order']
+
+ 
+    let game_selector_week_array = init_schedule_data['schedule_dict'][schedule_season];
+    
+
     let game_selector_season_margin_top = 80;
     let game_selector_season_spacing = 70;
     let game_selector_season_width = (game_selector_season_array.length - 1) * game_selector_season_spacing;
@@ -597,113 +715,17 @@ function drawGameSelector() {
                                                 season_element.attr('fill', color_dict.black)
                                                     .attr('font-size', game_selector_season_font_size_selected)
                                                     .attr('selected', 1)
+                                                
+                                                let game_selector_week_array = init_schedule_data['schedule_dict'][schedule_season];
+                                                
+                                                console.log(schedule_season);
+                                                drawGameSelectorWeeks(game_selector_week_array)
                                             
                                             }
                                         });
     
     
-    let game_selector_week_margin_top = 110;
-    let game_selector_week_spacing = 35;
-    let game_selector_week_width = (game_selector_week_array.length - 1) * game_selector_week_spacing;
-    let game_selector_week_margin_left = (game_details_width - game_selector_week_width) / 2;
-    
-    
-    let game_selector_week_g = game_selector_svg.append('g')
-                                        .attr('id', 'game_selector_week_g')
-                                        .attr('transform', 'translate(' + game_selector_week_margin_left  + ',' + game_selector_week_margin_top + ')')
-                                        .attr('visibility', 'hidden');
-    
-    let game_selector_week_font_size_selected = '12px'
-    let game_selector_week_font_size_unselected = '10px'
-                                        
-    
-    let game_selector_week = game_selector_week_g.selectAll('.game_selector_week')
-                                        .data(game_selector_week_array)
-                                        .enter()
-                                        .append('text')
-                                        .text(function(d) {return d})
-                                        .attr('id', function(d,i) {
-                                            return 'game_selector_week_' + d
-                                        })
-                                        .attr('class', 'game_selector_week')
-                                        .attr('x', function(d,i) {
-                                            return i * game_selector_week_spacing;
-                                        })
-                                        .attr('fill', function(d,i) {
-                                            if (i == 0) {
-                                                return color_dict.black;
-                                            } else {
-                                                return color_dict.med_gray;
-                                            }
-                                        })
-                                        .attr('font-size', function(d,i) {
-                                            if (i == 0) {
-                                                return game_selector_week_font_size_selected
-                                            } else {
-                                                return game_selector_week_font_size_unselected
-                                            }
-                                        })
-                                        .style('font-weight', 500)
-                                        .attr('text-anchor', 'middle')
-                                        .style('cursor', 'pointer')
-                                        .attr('selected', function(d,i) {
-                                            if (i == 0) {
-                                                return 1
-                                            } else {
-                                                return 0
-                                            }
-                                        })
-                                        .attr('value', function(d,i){
-                                            let season_map = {SB: 21, Conf: 20, Div: 19, WC: 18};
-                                            let season_keys = Object.keys(season_map);
-                                            
-                                            if (season_keys.includes(d)) {
-                                                return season_map[d]
-                                            } else {
-                                                return d;
-                                            }
-                                        })
-                                        .on('mouseover', function() {
-                                            
-                                            let week_element = d3.select(this)
-                                                
-                                            if (week_element.attr('selected') == 0) {
-                                                
-                                                week_element.transition().duration(100)
-                                                    .attr('font-size', game_selector_week_font_size_selected)
-                                                
-                                                }
-                                            })
-                                        .on('mouseout', function() {
-                                            
-                                            let week_element = d3.select(this)
-                                            
-                                            if (week_element.attr('selected') == 0) {
-                                                week_element.transition().duration(100)
-                                                    .attr('font-size', game_selector_week_font_size_unselected)
-                                            }
-                                        })
-                                        .on('click', function() {
-                                            
-                                            let week_element = d3.select(this);
-                                            schedule_week = week_element.attr('value');
-                                            let req_dict = {req_type: 'schedule_info', season: schedule_season, week: schedule_week}
-                          
-                                            ws_conn.send(JSON.stringify(req_dict))
-                                            
-                                            if (week_element.attr('selected') == 0) {
-                                                
-                                                d3.selectAll('.game_selector_week')
-                                                    .attr('font-size', game_selector_week_font_size_unselected)
-                                                    .attr('fill', color_dict.med_gray)
-                                                    .attr('selected', 0)
-                                                
-                                                week_element.attr('fill', color_dict.black)
-                                                    .attr('font-size', game_selector_week_font_size_selected)
-                                                    .attr('selected', 1)
-                                            
-                                            }
-                                     });
+    drawGameSelectorWeeks(game_selector_week_array)
     
     //Append g to pull on schedule info response to update
     let game_selector_results_g = game_selector_svg.append('g')
@@ -775,13 +797,13 @@ function drawChartElements() {
                                                 let button_bg_id = '#' + d.replace(' ', '') + '_button_bg';
 
                                                 d3.selectAll('.chart_title_button_text')
-                                                    .style('font-weight', 300);
+                                                    .style('font-weight', 500);
 
                                                 d3.selectAll('.chart_title_button_bg')
                                                     .attr('fill', color_dict.gray_bg)
 
                                                 d3.select(button_text_id)
-                                                    .style('font-weight', 500);
+                                                    .style('font-weight', 700);
 
                                                 d3.select(button_bg_id)
                                                     .attr('fill', color_dict.transparent); 
@@ -828,9 +850,9 @@ function drawChartElements() {
                                         .attr('fill', color_dict.black)
                                         .style('font-weight', function(d, i) {
                                             if (i == 0) {
-                                                return 500
+                                                return 700
                                             } else {
-                                                return 300
+                                                return 500
                                             }
                                         });
     
@@ -884,8 +906,7 @@ function drawChartElements() {
                                         .attr('x1', function(d,i) {
                                             
                                             let x_axis_spacing = chart_contents_width / (x_axis_marker_array.length - 1);
-                                            console.log(x_axis_spacing)
-
+                                
                                             return i * x_axis_spacing;
 
                                         })
@@ -912,8 +933,7 @@ function drawChartElements() {
                                         .attr('x', function(d,i) {
                                             
                                             let x_axis_spacing = chart_contents_width / (x_axis_marker_array.length - 1);
-                                            console.log(x_axis_spacing)
-
+                                
                                             return i * x_axis_spacing;
 
                                         })
@@ -929,7 +949,7 @@ function drawChartElements() {
                                         .attr('y', chart_contents_height + 10)
                                         .attr('text-anchor', 'middle')
                                         .attr('font-size', '14px')
-                                        .attr('font-weight', 300)
+                                        .attr('font-weight', 500)
                                         .attr('fill', color_dict.black)
                                         .style('dominant-baseline', 'hanging')
     
@@ -967,7 +987,7 @@ function drawChartElements() {
                                 .attr('class', 'chart_title_button_text')
                                 .attr('font-size', '14px')
                                 .attr('fill', color_dict.black)
-                                .style('font-weight', 500)
+                                .style('font-weight', 700)
                                 .attr('x', chart_sidebar_width / 2)
                                 .attr('y', chart_sidebar_button_height / 2)
                                 .attr('text-anchor', 'middle')
@@ -1000,7 +1020,7 @@ function drawChartElements() {
                                                     .attr('fill', color_dict[category_name]);
 
                                                 d3.select(this).select('.chart_sidebar_button_text')
-                                                    .style('font-weight', 500);
+                                                    .style('font-weight', 700);
                                                 
                                                 sidebar_click_dict[category_name] = 1 
 
@@ -1013,7 +1033,7 @@ function drawChartElements() {
                                                     .attr('fill', color_dict.transparent);
 
                                                 d3.select(this).select('.chart_sidebar_button_text')
-                                                    .style('font-weight', 300);
+                                                    .style('font-weight', 500);
                                                 
                                                 sidebar_click_dict[category_name] = 0
 
@@ -1043,7 +1063,16 @@ function drawChartElements() {
                                         .attr('class', 'chart_sidebar_button_text')
                                         .attr('font-size', chart_sidebar_button_font_size)
                                         .attr('fill', color_dict.black)
-                                        .style('font-weight', 300)
+                                        .style('font-weight', function(d) {
+
+                                            let col_name = 'home' + d.col_name;
+
+                                            if (sidebar_click_dict[col_name] == 1) {
+                                                return 700
+                                            } else {
+                                                return 500
+                                            }
+                                        })
                                         .attr('x', 5)
                                         .attr('y', chart_sidebar_button_height / 2)
                                         .attr('dominant-baseline', 'middle')
@@ -1099,7 +1128,7 @@ function drawChartElements() {
                                 .attr('class', 'chart_title_button_text')
                                 .attr('font-size', '14px')
                                 .attr('fill', color_dict.black)
-                                .style('font-weight', 500)
+                                .style('font-weight', 700)
                                 .attr('x', chart_sidebar_width / 2)
                                 .attr('y', chart_sidebar_button_height / 2)
                                 .attr('text-anchor', 'middle')
@@ -1132,7 +1161,7 @@ function drawChartElements() {
                                                     .attr('fill', color_dict[category_name]);
 
                                                 d3.select(this).select('.chart_sidebar_button_text')
-                                                    .style('font-weight', 500);
+                                                    .style('font-weight', 700);
                                                 
                                                 sidebar_click_dict[category_name] = 1 
 
@@ -1145,7 +1174,7 @@ function drawChartElements() {
                                                     .attr('fill', color_dict.transparent);
 
                                                 d3.select(this).select('.chart_sidebar_button_text')
-                                                    .style('font-weight', 300);
+                                                    .style('font-weight', 500);
                                                 
                                                 sidebar_click_dict[category_name] = 0
 
@@ -1178,7 +1207,17 @@ function drawChartElements() {
                                         .attr('class', 'chart_sidebar_button_text')
                                         .attr('font-size', chart_sidebar_button_font_size)
                                         .attr('fill', color_dict.black)
-                                        .style('font-weight', 300)
+                                        .style('font-weight', function(d) {
+
+                                            let col_name = 'home' + d.col_name;
+
+                                            if (sidebar_click_dict[col_name] == 1) {
+                                                return 700
+                                            } else {
+                                                return 500
+                                            }
+
+                                        })
                                         .attr('x', 5)
                                         .attr('y', chart_sidebar_button_height / 2)
                                         .attr('dominant-baseline', 'middle')
@@ -1273,7 +1312,7 @@ function drawDiffTooltips(diff_data, sidebar_click_dict) {
                 .attr('class', 'diff_tooltip_game_min_text')
                 .attr('stroke', color_dict.black)
                 .attr('font-size', '12px')
-                .style('font-weight', 300)
+                .style('font-weight', 500)
                 .attr('text-anchor', 'middle');
 
     var tooltip_per_line = diff_tooltips_g.selectAll('.tooltip_per_line')
@@ -1613,7 +1652,7 @@ function updateScheduleInfo(schedule_data) {
                                                 .attr('x', game_selector_game_width / 2)
                                                 .attr('y', game_selector_game_height / 2)
                                                 .attr('font-size', game_selector_at_sign_font_size)
-                                                .style('font-weight', 300)
+                                                .style('font-weight', 500)
                                                 .attr('text-anchor', 'middle')
                                                 .attr('dominant-baseline', 'middle')
                                                 .attr('fill', color_dict.med_gray);
@@ -1693,7 +1732,7 @@ function updateScheduleInfo(schedule_data) {
                                                 .attr('text-anchor', 'start')
                                                 .attr('dominant-baseline', 'middle')
                                                 .attr('font-size', game_selector_date_font_size)
-                                                .style('font-weight', 300)
+                                                .style('font-weight', 500)
                                                 .attr('fill', color_dict.black);
     
     let game_selector_status_text = game_selector_games_g.append('text')
@@ -1707,7 +1746,7 @@ function updateScheduleInfo(schedule_data) {
                                                 .attr('text-anchor', 'end')
                                                 .attr('dominant-baseline', 'middle')
                                                 .attr('font-size', game_selector_date_font_size)
-                                                .style('font-weight', 300)
+                                                .style('font-weight', 500)
                                                 .attr('fill', color_dict.black);
     
     let game_selector_highlight_width = 4;
@@ -1735,6 +1774,53 @@ function updateScheduleInfo(schedule_data) {
     
 }
 
+function populateInitDetails(init_schedule_data, latest_game_id) {
+    
+    //Initial draw functions go here
+    width = d3.select('#viz').node().getBoundingClientRect().width;
+    height = d3.select('#viz').node().getBoundingClientRect().height;
+    orient = (width / height) > (4 / 3)   ? 'landscape' : 'portrait';
+
+    drawGameSelector(init_schedule_data);
+    drawChartElements();
+    
+    console.log('Latest Game Id', latest_game_id);
+
+    //Send init requests
+    let init_game_req = {
+        req_type: 'game_details',
+        game_id: latest_game_id
+    }
+            
+    let init_schedule_req = {
+        req_type: 'schedule_info',
+        'season': schedule_season,
+        'week': schedule_week
+    }
+    
+    let init_diff_chart_req = {
+        req_type: 'diff_chart',
+        game_id: latest_game_id
+    }
+    
+    console.log(init_game_req);
+
+    ws_conn.send(JSON.stringify(init_game_req));
+    ws_conn.send(JSON.stringify(init_schedule_req));  
+    ws_conn.send(JSON.stringify(init_diff_chart_req));
+
+    APP.onResize(function() {
+        
+            
+        //Resize functions go here
+        //ws_conn.send('Buenos Diaz')
+        
+        repositionVizElements();
+        
+        });
+
+
+}
 
 //Connect to websocket
 function startWebSocket() {
@@ -1770,6 +1856,19 @@ function startWebSocket() {
             diff_data = resp_dict['data']
             drawDiffChart(diff_data, sidebar_click_dict)
             
+        } else if (resp_type == 'init_schedule_vars') {
+
+            let init_schedule_data = resp_dict['data'];
+
+            schedule_season = init_schedule_data['current_season'];
+            schedule_week = init_schedule_data['current_week'];
+            
+            let latest_game_id = init_schedule_data['game_id_dict'][schedule_season][schedule_week];
+
+            console.log(schedule_season, latest_game_id);
+
+            populateInitDetails(init_schedule_data, latest_game_id);
+
         }
         
     }
@@ -1816,47 +1915,16 @@ let APP = (function () {
 
 
 setTimeout(function() {
-    
-        //Initial draw functions go here
-        width = d3.select('#viz').node().getBoundingClientRect().width;
-        height = d3.select('#viz').node().getBoundingClientRect().height;
-        orient = (width / height) > (4 / 3)   ? 'landscape' : 'portrait';
 
-        drawGameSelector();
-        drawChartElements();
-        
-        //Send init requests
-        let init_game_req = {
-            req_type: 'game_details',
-            game_id: 82331
-        }
-                
-        let init_schedule_req = {
-            req_type: 'schedule_info',
-            'season': 2020,
-            'week': 16
-        }
-        
-        let init_diff_chart_req = {
-            req_type: 'diff_chart',
-            game_id: 82331
-        }
-        
-        ws_conn.send(JSON.stringify(init_game_req));
-        ws_conn.send(JSON.stringify(init_schedule_req));  
-        ws_conn.send(JSON.stringify(init_diff_chart_req));
-    
-        APP.onResize(function() {
-            
-                
-            //Resize functions go here
-            //ws_conn.send('Buenos Diaz')
-            
-            repositionVizElements();
-            
-            });
+    let init_schedule_vars_req = {
+        req_type: 'init_schedule_vars'
+    }
 
-    
-    }, 2500);
+    ws_conn.send(JSON.stringify(init_schedule_vars_req));
+
+}, 2200)
+
+
+
 
 // Call onResize like this
