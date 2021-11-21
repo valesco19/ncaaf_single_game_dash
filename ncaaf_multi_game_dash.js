@@ -11,12 +11,26 @@ var ws_conn, teams_array, team_sched_data, curr_team_id, chart_to_display;
 var time_series_data = [], time_series_domain_data = [];
 var time_series_color_dict = {};
 
-var stat_select_dict = {stat_category: 'none', stat_selected: 'none', stat_for_against: 'none'};
+var stat_select_dict = {stat_category: 'none', stat_selected: 'none', stat_for_against: 'none', ratio_num_games: 'none',
+                        prev_ratio_game_ids: []};
+
 let sidebar_stat_for_against_selected = 0;
 
 let color_dict = {black: '#000', 'white': '#fff', 'gray_bg': '#ebebeb', red: '#f55e5e', light_green: '#87f069',
-                 med_gray: '#c0c0c0', dark_gray: '#777', transparent: 'rgba(0,0,0,0)'
+                 orange: '#fe502d', med_gray: '#c0c0c0', dark_gray: '#777', transparent: 'rgba(0,0,0,0)'
                 };
+
+let line_color_array = [
+                '#ef476f',
+                '#dddf00',
+                '#06d6a0',
+                '#118ab2',
+                '#073b4c',
+                '#ff0000',
+                '#9636ff',
+                '#ff6d00',
+                '#096644'
+                ];
 
 
 let conference_array = [
@@ -39,7 +53,7 @@ let stat_array = {totals: [
     {stat_name: 'first_downs', display_name: 'First Downs'},
     {stat_name: 'off_points', display_name: 'Off Points'},
     {stat_name: 'def_points', display_name: 'Def Points'},
-    {stat_name: 'points', display_name: 'Points'},
+    {stat_name: 'points', display_name: 'Total Points'},
     {stat_name: 'rush_att', display_name: 'Rush Att'},
     {stat_name: 'rush_yards', display_name: 'Rush Yards'},
     {stat_name: 'pass_att', display_name: 'Pass Att'},
@@ -58,7 +72,7 @@ let stat_array = {totals: [
     {stat_name: 'fumbles_lost', display_name: 'Fumbles Lost'},
     {stat_name: 'int', display_name: 'Interceptions'},
     {stat_name: 'turnover', display_name: 'Turnovers'},
-    //{stat_name: 'tackle_for_loss', display_name: 'Tackles for Loss'},
+    {stat_name: 'tackle_for_loss', display_name: 'Tackles for Loss'},
     {stat_name: 'sacks', display_name: 'Sacks'},
     {stat_name: 'sack_yards', display_name: 'Sack Yards'},
     {stat_name: 'plays_10_yards_plus', display_name: 'Plays 10 Yards+'},
@@ -71,7 +85,24 @@ let stat_array = {totals: [
     {stat_name: 'first_down_epa', display_name: 'First Down EPA'},
     {stat_name: 'second_down_epa', display_name: 'Second Down EPA'},
     {stat_name: 'third_down_epa', display_name: 'Third Down EPA'},
-    {stat_name: 'red_zone_count', display_name: 'Num Red Zones'}
+    {stat_name: 'first_down_count', display_name: 'First Down Count'},
+    {stat_name: 'second_down_count', display_name: 'Second Down Count'},
+    {stat_name: 'third_down_count', display_name: 'Third Down Count'},
+    {stat_name: 'fourth_down_count', display_name: 'Fourth Down Count'},
+    {stat_name: 'first_down_yards', display_name: 'First Down Yards'},
+    {stat_name: 'second_down_yards', display_name: 'Second Down Yards'},
+    {stat_name: 'third_down_yards', display_name: 'Third Down Yards'},
+    {stat_name: 'third_down_conv', display_name: 'Third Down Conversion'},
+    {stat_name: 'red_zone_count', display_name: 'Num Red Zones'},
+    {stat_name: 'red_zone_td', display_name: 'Num Red Zone TDs'},
+    {stat_name: 'red_zone_fg', display_name: 'Num Red Zone FGs'},
+    {stat_name: 'tackle_for_loss', display_name: 'Tackles For Loss'},
+    {stat_name: 'success_play', display_name: 'Success Plays'},
+    {stat_name: 'first_down_success', display_name: 'First Down Success Plays'},
+    {stat_name: 'second_down_success', display_name: 'Second Down Success Plays'},
+    {stat_name: 'third_down_success', display_name: 'Third Down Success Plays'},
+    {stat_name: 'fourth_down_success', display_name: 'Fourth Down Success Plays'},
+    {stat_name: 'fourth_down_att', display_name: 'Fourth Down Attempts'},
     ],
     ratios: [
         {stat_name: 'plays_per_drive', display_name: 'Plays Per Drive'},
@@ -85,12 +116,13 @@ let stat_array = {totals: [
         {stat_name: 'pass_comp_per_drive', display_name: 'Pass Comp Per Drive'},
         {stat_name: 'rush_yards_per_drive', display_name: 'Rush Yards Per Drive'},
         {stat_name: 'pass_yards_per_drive', display_name: 'Pass Yards Per Drive'},
+        {stat_name: 'total_yards_per_drive', display_name: 'Total Yards Per Drive'},
         {stat_name: 'rush_att_percent', display_name: 'Rush Att Percent'},
         {stat_name: 'rush_yards_per_att', display_name: 'Rush Yards Per Att'},
         {stat_name: 'rush_epa_per_att', display_name: 'Rush EPA Per Att'},
         {stat_name: 'pass_att_percent', display_name: 'Pass Att Percent'},
-        {stat_name: 'pass_yards_per_att', display_name: 'Pass Yards Per Att'},
-        {stat_name: 'pass_epa_per_att', display_name: 'Pass EPA Per Comp'},
+        {stat_name: 'pass_yards_per_att', display_name: 'Pass Yards Per Attempt'},
+        {stat_name: 'pass_epa_per_att', display_name: 'Pass EPA Per Attempt'},
         {stat_name: 'pass_yards_per_comp', display_name: 'Pass Yards Per Comp'},
         {stat_name: 'pass_epa_per_comp', display_name: 'Pass EPA Per Comp'},
         {stat_name: 'total_yards_per_play', display_name: 'Total Yards Per Play'},
@@ -107,6 +139,7 @@ let stat_array = {totals: [
         {stat_name: 'int_per_drive', display_name: 'Interception Per Drive'},
         {stat_name: 'turnovers_per_drive', display_name: 'Turnovers Per Drive'},
         {stat_name: 'sacks_per_opp_drive', display_name: 'Sacks Per Opp Drive'},
+        {stat_name: 'sacks_allowed_per_drive', display_name: 'Sacks Allowed Per Drive'},
         {stat_name: 'tackles_for_loss_per_opp_drive', display_name: 'Tackle For Loss Per Opp Drive'},
         {stat_name: 'plays_10_yards_plus_per_drive', display_name: 'Plays 10 Yards+ Per Drive'},
         {stat_name: 'plays_20_yards_plus_per_drive', display_name: 'Plays 20 Yards+ Per Drive'},
@@ -115,23 +148,23 @@ let stat_array = {totals: [
         {stat_name: 'epa_per_first_down', display_name: 'First Down EPA'},
         {stat_name: 'epa_per_second_down', display_name: 'Second Down EPA'},
         {stat_name: 'epa_per_third_down', display_name: 'Third Down EPA'},
-        {stat_name: 'yards_per_first_down', display_name: 'First Down Yards'},
-        {stat_name: 'yards_per_second_down', display_name: 'Second Down Yards'},
-        {stat_name: 'yards_per_third_down', display_name: 'Third Down Yards'},
+        {stat_name: 'yards_per_first_down', display_name: 'Yards Per First Down'},
+        {stat_name: 'yards_per_second_down', display_name: 'Yards Per Second Down'},
+        {stat_name: 'yards_per_third_down', display_name: 'Yards Per Third Down'},
         {stat_name: 'success_rate_first_down', display_name: 'First Down Success Rate'},
         {stat_name: 'success_rate_second_down', display_name: 'Second Success Rate'},
         {stat_name: 'success_rate_third_down', display_name: 'Third Down Success Rate'},
         {stat_name: 'third_down_conv_percent', display_name: 'Third Down Conversion Percent'},
-        {stat_name: 'red_zone_points_conv', display_name: 'TD/FG per Red Zone'},
+        {stat_name: 'red_zone_points_conv', display_name: 'Points per Red Zone'},
         {stat_name: 'red_zone_td_conv', display_name: 'TD per Red Zone'},
-        {stat_name: 'red_zone_fg_conv', display_name: 'FG per Red Zone'},
-
+        {stat_name: 'red_zone_fg_conv', display_name: 'FG per Red Zone'}
 
     ]
 }
 
 let sidebar_width = 220;
 let slider_num_games = 13;
+let ratio_num_games = 5;
 
 function openTeamSelect(teams_array, conference_id) {
 
@@ -236,7 +269,7 @@ function openTeamSelect(teams_array, conference_id) {
                         .attr('y', -10)
                         .attr('width', 3)
                         .attr('height', 10)
-                        .attr('fill', color_dict.red)
+                        .attr('fill', color_dict.orange)
                         .style('opacity', 0)
                         .attr('id', function(d,i) {
                             return 'sidebar_team_title_highlight_' + d.team_id;
@@ -355,7 +388,7 @@ function openConferenceSelector(conference_array) {
                                                     .attr('y', -10)
                                                     .attr('width', 3)
                                                     .attr('height', 10)
-                                                    .attr('fill', color_dict.red)
+                                                    .attr('fill', color_dict.orange)
                                                     .style('opacity', 0)
                                                     .attr('id', function(d,i) {
                                                         return 'sidebar_conf_title_highlight_' + d.conf_id;
@@ -396,14 +429,15 @@ function closeSidebarTeamSelector() {
 
 function openStatSelector(stat_array) {
 
+    let width = d3.select('#viz').node().getBoundingClientRect().width;
     let sidebar_svg = d3.select('#sidebar_svg');
     let sidebar_contents = d3.select('#sidebar_contents');
     let select_stat_chevron = d3.select('#sidebar_select_stat_chevron')
     let select_team_chevron = d3.select('#select_team_chevron')
     let select_stat_close_x = d3.select('#select_stat_close_x')
     let height = d3.select('#viz').node().getBoundingClientRect().height;
-    let stat_row_height = 15;
-    let sidebar_stat_width = sidebar_width * 2.7;
+    let stat_row_height = 20;
+    let sidebar_stat_width = width;
 
     if (select_team_chevron.attr('closed') == 0) {
 
@@ -444,30 +478,33 @@ function openStatSelector(stat_array) {
 
     let sidebar_stat_g = sidebar_svg.append('g')
                                     .attr('id', 'sidebar_stat_g');
-
   
     let sidebar_stat_border_line = sidebar_stat_g.append('line')
                                                     .attr('id', 'sidebar_stat_border_line')
                                                     .attr('x1', sidebar_width)
-                                                    .attr('x2', 220)
+                                                    .attr('x2', sidebar_width)
                                                     .attr('y1', 40)
                                                     .attr('y2', height - 40)
                                                     .attr('stroke', color_dict.gray_bg)
                                                     .attr('stroke-width', 1)
                                                     .style('shape-rendering', 'CrispEdges');
 
+    let sidebar_stat_title_padding = 20;
+
     let sidebar_stat_title = sidebar_stat_g.append('text')
-                                                    .text('Differential Stats')
+                                                    .text('Time Series Stats')
                                                     .attr('class', 'sidebar_header_text')
                                                     .attr('id', 'sidebar_stat_title')
-                                                    .attr('x', (sidebar_width * 1.7 / 2) + sidebar_width)
-                                                    .attr('y', 30)
-                                                    .style('dominant-baseline', 'auto')
+                                                    .attr('x', (sidebar_stat_width + sidebar_width) / 2)
+                                                    .attr('y', sidebar_stat_title_padding)
+                                                    .style('font-size', '30px')
+                                                    .style('font-weight', 500)
+                                                    .style('dominant-baseline', 'hanging')
                                                     .attr('text-anchor', 'middle');
 
-    let sidebar_stat_for_against_padding_top = 40;
-    let sidebar_stat_for_against_button_width = 70;
-    let sidebar_stat_for_against_button_height = 20;
+    let sidebar_stat_for_against_padding_top = 60;
+    let sidebar_stat_for_against_button_width = 80;
+    let sidebar_stat_for_against_button_height = 30;
 
     let sidebar_stat_for_against_g = sidebar_stat_g.append('g')
                                                     .attr('id', 'sidebar_stat_for_against_g')
@@ -485,7 +522,7 @@ function openStatSelector(stat_array) {
 
                                                     })
                                                     .attr('transform', function(d,i) {
-                                                        let x_value = (sidebar_width * 1.7 / 2) + sidebar_width;
+                                                        let x_value = (sidebar_stat_width + sidebar_width) / 2;
 
                                                         if (i === 0) {
                                                              x_value = x_value - sidebar_stat_for_against_button_width 
@@ -508,7 +545,7 @@ function openStatSelector(stat_array) {
                                                                         .attr('fill', color_dict.gray_bg)
 
                                                                 other_sub_g.select('.sidebar_stat_for_against_text')
-                                                                        .style('font-weight', 300);
+                                                                        .style('font-weight', 500);
 
                                                                 
                                                                 let this_sub_g = d3.select(this);
@@ -535,7 +572,7 @@ function openStatSelector(stat_array) {
                                                                         .attr('fill', color_dict.gray_bg)
 
                                                                 other_sub_g.select('.sidebar_stat_for_against_text')
-                                                                        .style('font-weight', 300);
+                                                                        .style('font-weight', 500);
 
                                                                 
                                                                 let this_sub_g = d3.select(this);
@@ -610,7 +647,7 @@ function openStatSelector(stat_array) {
 
                                                             } else {
 
-                                                                return 300;
+                                                                return 500;
                                                             }
 
                                                         } else {
@@ -621,7 +658,7 @@ function openStatSelector(stat_array) {
 
                                                             } else {
 
-                                                                return 300;
+                                                                return 500;
                                                             }
                                                         }
                                                     })
@@ -633,10 +670,22 @@ function openStatSelector(stat_array) {
 
 
 
-    let sidebar_stat_subtitle_padding_top = 75;
-    let sidebar_cum_stat_x = (sidebar_width * 1.7 / 4) + sidebar_width
-    let sidebar_ratio_stat_x = (sidebar_width * 1.7 / 4 * 3) + sidebar_width;
+    let sidebar_stat_subtitle_padding_top = 105;
+    
+    //Draw divider between cummulative and ratio stats
+    let sidebar_stat_divider_line = sidebar_stat_g.append('line')
+                                                .attr('id', 'sidebar_stat_divider_line')
+                                                .attr('x1', (sidebar_stat_width + sidebar_width) / 2)
+                                                .attr('x2', (sidebar_stat_width + sidebar_width) / 2)
+                                                .attr('y1', sidebar_stat_subtitle_padding_top)
+                                                .attr('y2', height - 40)
+                                                .attr('stroke', color_dict.gray_bg)
+                                                .attr('stroke-width', 1)
+                                                .style('shape-rendering', 'CrispEdges');
 
+    let sidebar_cum_stat_x = ((sidebar_stat_width + sidebar_width) / 2) - ((sidebar_stat_width - sidebar_width) / 4);
+    let sidebar_ratio_stat_x = ((sidebar_stat_width + sidebar_width) / 2) + ((sidebar_stat_width - sidebar_width) / 4);
+    let sidebar_eighth_width = (sidebar_stat_width - sidebar_width) / 8;
     let sidebar_stat_sub_titles = sidebar_stat_g.selectAll('.sidebar_stat_sub_titles')
                                                     .data(['Cummulative Stats', 'Ratio Stats'])
                                                     .enter()
@@ -659,7 +708,7 @@ function openStatSelector(stat_array) {
                                                     .attr('text-anchor', 'middle')
                                                     .style('dominant-baseline', 'hanging')
                                                     .attr('font-weight', 500)
-                                                    .attr('font-size', '14px')
+                                                    .attr('font-size', '18px')
                                                     .style('font-family', 'Work Sans');
 
 
@@ -671,8 +720,20 @@ function openStatSelector(stat_array) {
                                                     .style('cursor', 'pointer')
                                                     .attr('transform', function(d, i) {
                                                         
-                                                        let sidebar_stat_cum_stat_x = sidebar_cum_stat_x;
-                                                        let sidebar_stat_cum_stat_y = sidebar_stat_subtitle_padding_top + 15 + stat_row_height + (i * stat_row_height)
+                                                        let sidebar_stat_cum_stat_x, sidebar_stat_cum_stat_y;
+
+                                                        if (i + 1 < stat_array.totals.length / 2) {
+
+                                                            sidebar_stat_cum_stat_x = sidebar_cum_stat_x - 170
+                                                            sidebar_stat_cum_stat_y = sidebar_stat_subtitle_padding_top + 35 + stat_row_height + (i * stat_row_height)
+
+                                                        } else {
+
+                                                            let z = i - parseInt(stat_array.totals.length / 2)
+
+                                                            sidebar_stat_cum_stat_x = sidebar_cum_stat_x + 30
+                                                            sidebar_stat_cum_stat_y = sidebar_stat_subtitle_padding_top + 35 + stat_row_height + (z * stat_row_height)
+                                                        }
 
                                                         return 'translate(' + sidebar_stat_cum_stat_x + ',' + sidebar_stat_cum_stat_y + ')'
                                                     })
@@ -690,7 +751,8 @@ function openStatSelector(stat_array) {
                                                         
                                                         let for_against_text = sidebar_stat_for_against_selected == 0 ? 'For ' : 'Against ';
 
-                                                        stat_select_dict = {stat_category: 'total', stat_selected: d.stat_name, stat_for_against: sidebar_stat_for_against_selected}
+                                                        stat_select_dict = {stat_category: 'total', stat_selected: d.stat_name, stat_for_against: sidebar_stat_for_against_selected,
+                                                                           ratio_num_games: 0};
                                                         
                                                         d3.select('#sidebar_stat_type_text')
                                                             .text(for_against_text + d.display_name);
@@ -705,22 +767,20 @@ function openStatSelector(stat_array) {
                                                     .attr('id', function(d,i) {
                                                         return 'sidebar_stat_title_text_' + i;
                                                     })
-                                                    .attr('text-anchor', 'middle')
+                                                    .attr('text-anchor', 'start')
                                                     .style('font-family', 'Work Sans')
-                                                    .style('font-weight', 300)
-                                                    .style('font-size', '12px')
+                                                    .style('font-weight', 500)
+                                                    .style('font-size', '14px')
 
     let sidebar_cum_stat_highlight  = sidebar_cum_stat_title_g.append('rect')
                                                     .attr('transform', function(d, i) {
 
-                                                        let stat_text_width = d3.select('#sidebar_stat_title_text_' + i).node().getBoundingClientRect().width;
-
-                                                        return 'translate(' + ((stat_text_width / 2 * -1) - 10)  + ',-10)'
+                                                        return 'translate(-6,' + (-1 * stat_row_height + 5) + ')'
 
                                                     })
                                                     .attr('width', 3)
-                                                    .attr('height', 10)
-                                                    .attr('fill', color_dict.red)
+                                                    .attr('height', stat_row_height)
+                                                    .attr('fill', color_dict.orange)
                                                     .style('opacity', 0)
                                                     .attr('id', function(d,i) {
                                                         return 'sidebar_cum_stat_highlight_' + d.conf_id;
@@ -735,8 +795,20 @@ function openStatSelector(stat_array) {
                                                     .style('cursor', 'pointer')
                                                     .attr('transform', function(d, i) {
                                                         
-                                                        let sidebar_stat_ratio_stat_x = sidebar_ratio_stat_x;
-                                                        let sidebar_stat_ratio_stat_y = sidebar_stat_subtitle_padding_top + 15 + stat_row_height + (i * stat_row_height)
+                                                        let sidebar_stat_ratio_stat_x, sidebar_stat_ratio_stat_y;
+
+                                                        if (i < stat_array.ratios.length / 2) {
+
+                                                            sidebar_stat_ratio_stat_x = sidebar_ratio_stat_x - 180
+                                                            sidebar_stat_ratio_stat_y = sidebar_stat_subtitle_padding_top + 35 + stat_row_height + (i * stat_row_height)
+
+                                                        } else {
+
+                                                            let z = i - parseInt(stat_array.ratios.length / 2)
+
+                                                            sidebar_stat_ratio_stat_x = sidebar_ratio_stat_x + 25
+                                                            sidebar_stat_ratio_stat_y = sidebar_stat_subtitle_padding_top + 35 + stat_row_height + (z * stat_row_height)
+                                                        }
 
                                                         return 'translate(' + sidebar_stat_ratio_stat_x + ',' + sidebar_stat_ratio_stat_y + ')'
                                                     })
@@ -754,7 +826,8 @@ function openStatSelector(stat_array) {
 
                                                         let for_against_text = sidebar_stat_for_against_selected == 0 ? 'For ' : 'Against ';
 
-                                                        stat_select_dict = {stat_category: 'ratio', stat_selected: d.stat_name, stat_for_against: sidebar_stat_for_against_selected}
+                                                        stat_select_dict = {stat_category: 'ratio', stat_selected: d.stat_name, stat_for_against: sidebar_stat_for_against_selected,
+                                                                            ratio_num_games: ratio_num_games}
                                                         
                                                         d3.select('#sidebar_stat_type_text')
                                                             .text(for_against_text + d.display_name);
@@ -769,28 +842,105 @@ function openStatSelector(stat_array) {
                                                     .attr('id', function(d,i) {
                                                         return 'sidebar_ratio_title_text_' + i;
                                                     })
-                                                    .attr('text-anchor', 'middle')
+                                                    .attr('text-anchor', 'start')
                                                     .style('font-family', 'Work Sans')
-                                                    .style('font-weight', 300)
-                                                    .style('font-size', '12px')
+                                                    .style('font-weight', 500)
+                                                    .style('font-size', '14px')
 
 
     let sidebar_ratio_stat_highlight  = sidebar_ratio_stat_title_g.append('rect')
                                                     .attr('transform', function(d, i) {
 
-                                                        let stat_text_width = d3.select('#sidebar_ratio_title_text_' + i).node().getBoundingClientRect().width;
-
-                                                        return 'translate(' + ((stat_text_width / 2 * -1) - 10)  + ',-10)'
+                                                        return 'translate(-6,' + (-1 * stat_row_height + 5) + ')'
 
                                                     })
                                                     .attr('width', 3)
-                                                    .attr('height', 10)
-                                                    .attr('fill', color_dict.red)
+                                                    .attr('height', stat_row_height)
+                                                    .attr('fill', color_dict.orange)
                                                     .style('opacity', 0)
                                                     .attr('id', function(d,i) {
                                                         return 'sidebar_ratio_stat_highlight_' + d.conf_id;
                                                     })
                                                     .attr('class', 'sidebar_ratio_stat_highlight')
+
+    //Draw Ratio Game Smoothing slider
+    let ratio_game_max_games = 20;
+    let ratio_game_slider_top = sidebar_stat_subtitle_padding_top + 4;
+    let ratio_game_slider_x = sidebar_ratio_stat_x + 90;
+    let ratio_game_slider_width = 100;
+    let ratio_game_slider_x_scale = d3.scaleLinear()
+                                    .domain([1, ratio_game_max_games])
+                                    .range([0, ratio_game_slider_width])
+                                    .clamp(true);
+
+    let ratio_game_slider_g = sidebar_stat_g.append('g')
+                                    .attr('id', 'sidebar_ratio_game_slider_g')
+                                    .attr('transform', 'translate(' + ratio_game_slider_x + ',' + ratio_game_slider_top + ')');
+
+    
+    function adjustRatioGameNum(num_games) {
+
+        ratio_game_slider_handle.attr('cx', ratio_game_slider_x_scale(num_games));
+        ratio_num_games_text.text(parseInt(num_games));
+
+        ratio_num_games = parseInt(num_games);
+        
+    }
+
+    let ratio_game_slider_track = ratio_game_slider_g.append('line')
+                                        .attr('id', 'ratio_game_slider_track')
+                                        .attr('x1', ratio_game_slider_x_scale.range()[0])
+                                        .attr('x2', ratio_game_slider_x_scale.range()[1])
+                                    .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+                                        .attr("id", "ratio_game_slider_track_inset")
+                                    .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+                                        .attr("id", "ratio_game_slider_track_overlay")
+                                        .attr('class', 'ratio_game_slider_track_overlays')
+                                        .call(d3.drag()
+                                                .on("start.interrupt", function() { ratio_game_slider_g.interrupt(); })
+                                                .on("start drag", function() { adjustRatioGameNum(ratio_game_slider_x_scale.invert(d3.event.x)); }));
+
+    
+    let ratio_game_slider_ticks = ratio_game_slider_g.insert('g', '.ratio_game_slider_track_overlays')
+                                    .attr('class', 'ratio_game_slider_ticks')
+                                    .attr('transform', 'translate(0,' + 20 + ')')
+                                    .selectAll('text')
+                                    .data([1,5,10,15,20])
+                                    .enter()
+                                    .append('text')
+                                    .attr('x', ratio_game_slider_x_scale)
+                                    .attr('text-anchor', 'middle')
+                                    .style('font-weight', 500)
+                                    .attr('font-size', '12px')
+                                    .text(function(d) {return d;});
+
+
+    let ratio_game_slider_handle = ratio_game_slider_g.insert('circle', '.ratio_game_slider_track_overlays')
+                                    .attr('id', 'ratio_game_slider_handle')
+                                    .attr('r', 5)
+                                    .attr('cx', ratio_game_slider_x_scale(ratio_num_games));
+
+    let ratio_num_games_text = ratio_game_slider_g.append('text')
+                                    .text(ratio_num_games)
+                                    .attr('id', 'ratio_num_games_text')
+                                    .attr('x', ratio_game_slider_width / 2)
+                                    .attr('y', -24)
+                                    .attr('text-anchor', 'middle')
+                                    .style('dominant-baseline', 'auto')
+                                    .style('font-weight', 500)
+                                    .attr('font-size', '22px')
+
+    let ratio_num_games_title_text = ratio_game_slider_g.append('text')
+                                    .text('Game Moving Average')
+                                    .attr('id', 'ratio_num_games_title_text')
+                                    .attr('x', ratio_game_slider_width / 2)
+                                    .attr('y', -8)
+                                    .attr('text-anchor', 'middle')
+                                    .attr('font-weight', 500)
+                                    .attr('font-size', '10px')
+                                    .style('font-family', 'Work Sans');
+
+
 }
 
 function closeSidebarStatSelector() {
@@ -868,7 +1018,7 @@ function drawSidebarContents() {
                             .attr('id', 'team_select_text')
                             .attr('class', 'team_select_font')
                             .attr('font-size', '12px')
-                            .attr('font-weight', 300)
+                            .attr('font-weight', 500)
                             .attr('text-anchor', 'end')
                             .attr('transform', 'translate(' + -15 + ',0)');
 
@@ -877,7 +1027,7 @@ function drawSidebarContents() {
                                 .attr('id', 'select_team_chevron')
                                 .attr('class', 'font_awesome_text_icon')
                                 .attr('font-size', '12px')
-                                .style('font-weight', 300)
+                                .style('font-weight', 500)
                                 .attr('fill', color_dict.black)
                                 .attr('transform', 'translate(' + -5 + ',0)')
                                 .attr('dominant-baseline', 'auto')
@@ -893,7 +1043,7 @@ function drawSidebarContents() {
                                 .attr('class', 'font_awesome_text_icon')
                                 .attr('font-size', '14px')
                                 .style('font-weight', '300')
-                                .attr('fill', color_dict.red)
+                                .attr('fill', color_dict.orange)
                                 .attr('dominant-baseline', 'auto')
                                 .attr('transform', 'translate(' + select_team_close_x_right + ',1)')
                                 .style('opacity', 0);
@@ -919,7 +1069,7 @@ function drawSidebarContents() {
                                 .attr('y', sidebar_team_logo_width + 30)
                                 .attr('id', 'sidebar_team_loc_title')
                                 .attr('class', 'sidebar_title')
-                                .attr('font-size', '18px')
+                                .attr('font-size', '20px')
                                 .attr('font-weight', 700);
 
     let sidebar_team_loc_title_height = sidebar_team_loc_title.node().getBoundingClientRect().height;
@@ -931,7 +1081,7 @@ function drawSidebarContents() {
                                 .attr('id', 'sidebar_team_mascot_title')
                                 .attr('class', 'sidebar_titles')
                                 .attr('font-size', '16px')
-                                .attr('font-weight', 300);
+                                .attr('font-weight', 500);
     
     //Add slider
     let slider_top = navbar_height + sidebar_team_mascot_title_top + sidebar_team_mascot_title.node().getBoundingClientRect().height + 10;
@@ -1055,7 +1205,7 @@ function drawSidebarContents() {
                                             .attr('text-anchor', 'middle')
                                             .style('dominant-baseline', 'middle')
                                             .style('font-size', '14px')
-                                            .style('font-weight', 300)
+                                            .style('font-weight', 500)
                                             .style('font-family', 'Work Sans')
                                             .style('text-decoration', 'none')
                                             .on('mouseover', function() {
@@ -1078,7 +1228,7 @@ function drawSidebarContents() {
                                             .on('mouseover', function() {
                                                 
                                                 d3.select('#sidebar_submit_button_bg')
-                                                    .attr('stroke', color_dict.red);
+                                                    .attr('stroke', color_dict.orange);
                                             })
                                             .on('mouseout', function() {
                                                 
@@ -1087,9 +1237,10 @@ function drawSidebarContents() {
                                             })
                                             .on('click', function() {
                                                 
-                                                let game_select_array = createGameSelectArray();
+                                                let [game_select_array, prev_ratio_game_ids] = createGameSelectArray();
+                                                
 
-                                                submitTimeSeriesRequest(game_select_array, stat_select_dict);
+                                                submitTimeSeriesRequest(game_select_array, prev_ratio_game_ids, stat_select_dict);
 
                                             });
 
@@ -1098,7 +1249,7 @@ function drawSidebarContents() {
                                             .attr('id', 'sidebar_submit_button_bg')
                                             .attr('width', sidebar_button_width)
                                             .attr('height', sidebar_button_height)
-                                            .attr('fill', color_dict.red)
+                                            .attr('fill', color_dict.orange)
                                             .attr('stroke', color_dict.transparent)
                                             .attr('stroke-width', '3px');
     
@@ -1109,7 +1260,7 @@ function drawSidebarContents() {
                                             .attr('y', sidebar_button_height / 2)
                                             .attr('fill', color_dict.white)
                                             .attr('font-size', '16px')
-                                            .style('font-weight', 300)
+                                            .style('font-weight', 500)
                                             .style('text-anchor', 'middle')
                                             .style('dominant-baseline', 'middle')
                                             .style('font-family', 'Work Sans');
@@ -1172,7 +1323,7 @@ function drawSidebarContents() {
                                             .text('Change Stat')
                                             .attr('id', 'sidebar_select_stat_text')
                                             .attr('font-size', '12px')
-                                            .style('font-weight', 300)
+                                            .style('font-weight', 500)
                                             .style('font-family', 'Work Sans')
                                             .attr('fill', color_dict.black)
                                             .attr('x', sidebar_width - 20)
@@ -1202,7 +1353,7 @@ function drawSidebarContents() {
                                 .attr('class', 'font_awesome_text_icon')
                                 .attr('font-size', '14px')
                                 .style('font-weight', '300')
-                                .attr('fill', color_dict.red)
+                                .attr('fill', color_dict.orange)
                                 .attr('text-anchor', 'end')
                                 .attr('dominant-baseline', 'middle')
                                 .attr('x', select_stat_close_x_right)
@@ -1341,7 +1492,7 @@ function populateGameSelector(team_sched_data) {
         //add at symbol
         table_row.select('.game_selector_table_col_2')
                     .text('@')
-                    .style('font-weight', 300);
+                    .style('font-weight', 500);
 
         
         //change home team
@@ -1394,9 +1545,12 @@ function populateGameSelector(team_sched_data) {
 function createGameSelectArray() {
 
     let game_select_array = [];
+    let all_game_id_array = [];
 
     d3.selectAll('.game_selector_table_row')
         .each(function(d,i) {
+
+            all_game_id_array.push(d.game_id);
 
             let display_attr = d3.select('#game_selector_table_row_' + d.game_id).style('display');
 
@@ -1414,7 +1568,12 @@ function createGameSelectArray() {
 
         })
 
-    return game_select_array
+    let first_game = game_select_array[game_select_array.length - 1];
+    let first_game_index = all_game_id_array.findIndex(i => i === first_game);
+
+    let prev_ratio_game_ids = all_game_id_array.slice(first_game_index + 1, first_game_index + 1 + ratio_num_games)
+
+    return [game_select_array, prev_ratio_game_ids]
 
 }
 
@@ -1472,9 +1631,9 @@ function drawChartContents() {
                                     .attr('fill', function(d,i) {
 
                                         if (i == chart_tab_selected) {
-                                            return color_dict.transparent
-                                        } else {
                                             return color_dict.gray_bg
+                                        } else {
+                                            return color_dict.transparent
                                         }
                                     })
                                     .attr('stroke-width', '1px')
@@ -1492,7 +1651,7 @@ function drawChartContents() {
                                         if (i == chart_tab_selected) {
                                             return 700
                                         } else {
-                                            return 300
+                                            return 500
                                         }
                                     });
 
@@ -1539,7 +1698,7 @@ function drawChartContents() {
                                     .attr('x', 0)
                                     .attr('y', chart_legend_title_height + 1)
                                     .attr('fill', color_dict.transparent)
-                                    .attr('stroke', color_dict.gray_bg)
+                                    .attr('stroke', color_dict.med_gray)
                                     .attr('stroke-width', '1px')
                                     .style('shape-rendering', 'crispEdges');
 
@@ -1615,7 +1774,7 @@ function drawGameInfoDetails(game_id, game_info_dict) {
                                                 .attr('y', 0)
                                                 .attr('width', chart_time_series_bottom_width)
                                                 .attr('height', chart_time_series_bottom_height - game_info_details_padding_top)
-                                                .attr('stroke', color_dict.gray_bg)
+                                                .attr('stroke', color_dict.med_gray)
                                                 .attr('fill', color_dict.transparent);
 
     let game_info_details_at_symbol = game_info_details_g.append('text')
@@ -1653,7 +1812,7 @@ function drawGameInfoDetails(game_id, game_info_dict) {
                                                 .attr('text-anchor', 'start')
                                                 .attr('dominant-baseline', 'hanging')
                                                 .attr('font-size', '16px')
-                                                .attr('font-weight', 300)
+                                                .attr('font-weight', 500)
                                                 .style('font-family', 'Work Sans');
 
     let game_info_details_home_team_loc = game_info_details_g.append('text')
@@ -1672,7 +1831,7 @@ function drawGameInfoDetails(game_id, game_info_dict) {
                                                 .attr('text-anchor', 'end')
                                                 .attr('dominant-baseline', 'hanging')
                                                 .attr('font-size', '16px')
-                                                .attr('font-weight', 300)
+                                                .attr('font-weight', 500)
                                                 .style('font-family', 'Work Sans');
 
     let game_info_details_score_padding = 45;
@@ -1874,7 +2033,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                                 .transition()
                                                 .duration(100)
                                                 .attr('stroke', color_dict.med_gray)
-                                                .attr('stroke-width', '2px');
+                                                .attr('stroke-width', '3px');
 
                                         })
                                         .on('mouseout', function(d) {
@@ -1884,7 +2043,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                             d3.select(season_highlight_id)
                                                 .transition()
                                                 .duration(100)
-                                                .attr('stroke', color_dict.gray_bg)
+                                                .attr('stroke', color_dict.med_gray)
                                                 .attr('stroke-width', '1px');
 
                                         });
@@ -1902,7 +2061,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                         .attr('y', 0)
                                         .attr('height', season_title_height)
                                         .attr('fill', color_dict.transparent)
-                                        .attr('stroke', color_dict.gray_bg)
+                                        .attr('stroke', color_dict.med_gray)
                                         .attr('stroke-width', '1px')
                                         .style('shape-rendering', 'CrispEdges');
 
@@ -1921,7 +2080,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                         .attr('text-anchor', 'middle')
                                         .attr('dominant-baseline', 'middle')
                                         .attr('font-size', '12px')
-                                        .attr('font-weight', 300)
+                                        .attr('font-weight', 500)
                                         .style('font-family', 'Work Sans');
 
     let season_highlight_g = season_title_g.selectAll('.season_highlights')
@@ -1957,7 +2116,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                         .attr('class', 'season_highlight_bg')
                                         .attr('id', function(d) {return 'season_highlight_bg_' + d})
                                         .attr('fill', color_dict.transparent)
-                                        .attr('stroke', color_dict.gray_bg)
+                                        .attr('stroke', color_dict.med_gray)
                                         .attr('stroke-width', '1px')
                                         .style('shape-rendering', 'CrispEdges');
 
@@ -1999,7 +2158,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                     d3.select(game_highlight_id)
                                         .transition()
                                         .duration(100)
-                                        .attr('stroke', color_dict.med_gray)
+                                        .attr('stroke', color_dict.black)
                                         .attr('stroke-width', '2px')
 
                                 })
@@ -2014,7 +2173,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                      d3.select(game_highlight_id)
                                          .transition()
                                          .duration(100)
-                                         .attr('stroke', color_dict.gray_bg)
+                                         .attr('stroke', color_dict.med_gray)
                                          .attr('stroke-width', '1px')
 
                                 })
@@ -2032,7 +2191,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                 })
                                 .attr('class', 'game_info_game_bg')
                                 .attr('fill', color_dict.transparent)
-                                .attr('stroke', color_dict.gray_bg)
+                                .attr('stroke', color_dict.med_gray)
                                 .attr('stroke-width', '1px')
                                 .style('shape-rendering', 'CrispEdges');     
                                 
@@ -2091,7 +2250,7 @@ function drawSeasonGameBackgrounds(time_series_dict) {
                                 })
                                 .attr('height', chart_time_series_top_height - season_title_height)
                                 .attr('fill', 'none')
-                                .attr('stroke', color_dict.gray_bg)
+                                .attr('stroke', color_dict.med_gray)
                                 .attr('stroke-width', '1px')
                                 .style("stroke-dasharray", ("3, 3"))
                                 .style('shape-rendering', 'CrispEdges');
@@ -2166,8 +2325,14 @@ function updateTimeSeriesChart(time_series_data) {
 
                 let time_series_count = time_series_dict.data.length - time_series_length;
 
-                cum_sum = cum_sum + time_series_dict['data'][time_series_count]['value']
-                line_data.push({game_min: i, cum_sum: cum_sum});
+                if (time_series_dict['stat_category'] == 'ratio') {
+
+                    line_data.push({game_min: i, cum_sum: time_series_dict['data'][time_series_count]['value']})
+
+                } else {
+                    cum_sum = cum_sum + time_series_dict['data'][time_series_count]['value']
+                    line_data.push({game_min: i, cum_sum: cum_sum});
+                }
 
                 time_series_length = time_series_length - 1;
 
@@ -2175,6 +2340,10 @@ function updateTimeSeriesChart(time_series_data) {
 
         }
 
+        
+        let per_game_diff_value = line_data[line_data.length - 1]['cum_sum'] / time_series_dict.game_order.length
+
+        console.log(time_series_dict.stat_selected, ': ', per_game_diff_value, 'per game.')
 
         ///Draw Time Series Line
         let time_series_y_min_domain_abs = Math.abs(time_series_dict['domain']['min_domain']);
@@ -2195,6 +2364,8 @@ function updateTimeSeriesChart(time_series_data) {
 
         }
 
+        console.log(time_series_y_min_domain, time_series_y_max_domain);
+
         let time_series_x_scale = d3.scaleLinear()
                                     .domain([0, max_time_series_mins])
                                     .range([0, chart_time_series_top_width]);
@@ -2207,7 +2378,7 @@ function updateTimeSeriesChart(time_series_data) {
         let time_series_for_against = time_series_dict['stat_for_against'];
         let time_series_stat_name = time_series_dict['stat_selected'];
         let time_series_team_id = time_series_dict['team_id'];
-        let time_series_line_id = 'time_series_line_' + time_series_team_id + '_' + time_series_stat_name + '_' + time_series_for_against + '_' + max_time_series_mins
+        let time_series_line_id = 'time_series_line_' + time_series_team_id + '_' + time_series_stat_name + '_' + time_series_for_against + '_' + time_series_dict.data.length
         let time_series_color = 0;
 
         if (time_series_color_dict.hasOwnProperty(time_series_line_id)) {
@@ -2216,15 +2387,14 @@ function updateTimeSeriesChart(time_series_data) {
 
         } else {
         
-                time_series_color = (function() {
-                return "hsl(" + Math.random() * 360 + ",100%,50%)";
-                })()
+                time_series_color = line_color_array[0];
+
+                line_color_array.push(line_color_array.shift());
 
                 time_series_color_dict[time_series_line_id] = time_series_color;
         }
 
-        console.log(line_data.length, max_time_series_mins);
-
+        
         let time_series_line = chart_time_series_top_g.append('path')
                                     .datum(line_data)
                                     .attr('fill', 'none')
@@ -2279,7 +2449,7 @@ function updateTimeSeriesChart(time_series_data) {
                                         .attr('stroke', color_dict.med_gray)
                                         .attr('stroke-width', '1px')
                                         .style('shape-rendering', 'CrispEdges')
-                                        .attr('fill', color_dict.transparent);
+                                        .attr('fill', color_dict.gray_bg);
 
         let chart_legend_item_color_rect = chart_legend_item_g.append('rect')
                                                 .attr('class', 'chart_legend_item_color_rect')
@@ -2384,7 +2554,7 @@ function updateTimeSeriesChart(time_series_data) {
                                             .attr('y', 10)
                                             .attr('text-anchor', 'end')
                                             .style('dominant-baseline', 'middle')
-                                            .attr('fill', color_dict.gray_bg)
+                                            .attr('fill', color_dict.med_gray)
                                             .attr('font-size', '14px')
                                             .style('font-weight', 300)
                                             .style('cursor', 'pointer')
@@ -2392,14 +2562,14 @@ function updateTimeSeriesChart(time_series_data) {
 
                                                 d3.select(this).transition()
                                                     .duration(200)
-                                                    .attr('fill', color_dict.red);
+                                                    .attr('fill', color_dict.orange);
 
                                             })
                                             .on('mouseout', function() {
 
                                                 d3.select(this).transition()
                                                     .duration(200)
-                                                    .attr('fill', color_dict.gray_bg)
+                                                    .attr('fill', color_dict.med_gray)
 
                                             })
                                             .on('click', function() {
@@ -2448,7 +2618,7 @@ function updateTimeSeriesChart(time_series_data) {
 
             let chart_legend_item_show_games_bg_circle = chart_legend_item_show_games_g.append('circle')
                                                             .attr('r', 5)
-                                                            .attr('fill', color_dict.gray_bg);
+                                                            .attr('fill', color_dict.med_gray);
 
             let chart_legend_item_show_game_fore_circle = chart_legend_item_show_games_g.append('circle')
                                                             .attr('r', 4)
@@ -2498,11 +2668,14 @@ function clearTimeSeriesChart() {
 }
 
 
-function submitTimeSeriesRequest(game_select_array, stat_select_dict) {
+function submitTimeSeriesRequest(game_select_array, prev_ratio_game_ids, stat_select_dict) {
     
     if  (stat_select_dict['stat_selected'] != 'none') {
 
         let game_request_array = []
+        let ratio_request_array = []
+
+        console.log(stat_select_dict);
 
         for (var i = team_sched_data.length - 1; i >= 0 ; i--) {
 
@@ -2522,13 +2695,26 @@ function submitTimeSeriesRequest(game_select_array, stat_select_dict) {
 
             }
 
+            if (prev_ratio_game_ids.includes(temp_team_data['game_id'])) {
+
+                append_dict = {
+                    game_id: temp_team_data['game_id'],
+                    away_team_id: temp_team_data['away_team_id'],
+                    home_team_id: temp_team_data['home_team_id'],
+                    team_id: curr_team_id        
+
+                    }
+
+                ratio_request_array.push(append_dict);
+
+            }
+
         }
-
-
 
         let time_series_req = {
             req_type: 'time_series_request',
             game_select_array: game_request_array,
+            ratio_select_array: ratio_request_array,
             stat_select_dict: stat_select_dict
         }
 
@@ -2550,7 +2736,7 @@ function submitTimeSeriesRequest(game_select_array, stat_select_dict) {
 
 //Connect to websocket
 function startWebSocket() {
-    ws_conn = new WebSocket('wss://ncaaf-multi-game-api.untouted.com');
+    ws_conn = new WebSocket('ws://localhost:5151/');
     console.log('Websocket Connected.')
 
     ws_conn.onmessage = function incoming(event) {
@@ -2558,6 +2744,8 @@ function startWebSocket() {
         let resp_dict = JSON.parse(event.data)
         
         let resp_type = resp_dict['resp_type']
+
+        console.log(resp_dict);
 
         if (resp_type == 'team_info') {
             
@@ -2665,6 +2853,6 @@ setTimeout(function() {
             });
 
     
-    }, 2500);
+    }, 1200);
 
 // Call onResize like this
