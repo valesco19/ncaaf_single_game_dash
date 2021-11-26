@@ -2736,7 +2736,7 @@ function submitTimeSeriesRequest(game_select_array, prev_ratio_game_ids, stat_se
 
 //Connect to websocket
 function startWebSocket() {
-    ws_conn = new WebSocket('ws://localhost:5151/');
+    ws_conn = new WebSocket('wss://ncaaf-multi-game-api.untouted.com/');
     console.log('Websocket Connected.')
 
     ws_conn.onmessage = function incoming(event) {
