@@ -2853,6 +2853,6 @@ setTimeout(function() {
             });
 
     
-    }, 1200);
+    }, 2300);
 
 // Call onResize like this
