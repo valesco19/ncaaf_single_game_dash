@@ -11,6 +11,8 @@ var ws_conn, teams_array, team_sched_data, curr_team_id, chart_to_display;
 var time_series_data = [], time_series_domain_data = [];
 var time_series_color_dict = {};
 
+let chart_tab_selected = 0;
+
 var stat_select_dict = {stat_category: 'none', stat_selected: 'none', stat_for_against: 'none', ratio_num_games: 'none',
                         prev_ratio_game_ids: []};
 
@@ -162,9 +164,122 @@ let stat_array = {totals: [
     ]
 }
 
+
+//Add global size params
 let sidebar_width = 220;
 let slider_num_games = 13;
 let ratio_num_games = 5;
+let chart_legend_title_height = 22;
+let chart_legend_item_height = 56;
+let chart_legend_color_rect_width = 8;
+
+
+
+function disableTimeSeriesRequestButton() {
+
+    d3.selectAll('#diable_sidebar_submit_button_g')
+        .style('visibility', 'visible');
+
+}
+
+function enableTimeSeriesRequestButton() {
+
+    d3.selectAll('#diable_sidebar_submit_button_g')
+        .style('visibility', 'hidden');
+
+}
+
+function returnLineColor(time_series_color_dict, base_time_series_id, time_series_team_id){
+
+    let time_series_color_index;
+
+    for (var x = 0; x < teams_array.length; x ++) {
+
+        if (teams_array[x]['team_id'] == time_series_team_id) {
+
+            time_series_color_index = x;
+            break;
+        }
+
+    }
+
+    //Handle lines colors
+    if (time_series_color_dict.hasOwnProperty(time_series_color_index)) {
+
+            if (time_series_color_dict[time_series_color_index].hasOwnProperty(base_time_series_id)) {
+
+                time_series_color = time_series_color_dict[time_series_color_index][base_time_series_id]['color'];
+
+            } else {
+
+                let team_color_array = time_series_color_dict[time_series_color_index]['team_colors'];
+                let count_array = [];
+                let min_count = 99;
+                let color_index;
+                
+                console.log('vv', team_color_array)
+
+                for (var i = 0; i < 4; i++) {
+
+                    let count = team_color_array.filter(x => x == i).length;
+
+                    count_array.push(count)
+
+                    if (count < min_count) {
+
+                        min_count = count * 1;
+                    }
+
+                }
+
+
+                if (count_array.filter(x => x == min_count) == 4) {
+
+                    color_index = 0;
+
+                } else {
+
+                    for (var z = 0; z < 4; z++) {
+
+                        if (count_array[z] == min_count) {
+
+                            color_index = z;
+                            break
+
+                        }
+
+                    }
+
+                }
+
+                //Push new color to color_dict
+                time_series_color = teams_array[time_series_color_index]['team_colors'][color_index];
+
+                time_series_color_dict[time_series_color_index]['team_colors'].push(color_index);
+
+                time_series_color_dict[time_series_color_index][base_time_series_id] = {color: time_series_color, 
+                                                                                        index: color_index}
+                
+                
+
+            }
+
+    } else {
+
+            console.log(time_series_color_index)
+    
+            time_series_color = teams_array[time_series_color_index]['team_colors'][0];
+
+            time_series_color_dict[time_series_color_index] = {team_colors: [0]};
+            time_series_color_dict[time_series_color_index][base_time_series_id] = {color: time_series_color, index: 0}
+                                                                            
+
+    }
+
+    return time_series_color;
+
+}
+
 
 function openTeamSelect(teams_array, conference_id) {
 
@@ -251,6 +366,9 @@ function openTeamSelect(teams_array, conference_id) {
                             }
 
                             //Send request to populate team info
+
+                            disableTimeSeriesRequestButton();
+
                             ws_conn.send(JSON.stringify(team_info_req));
 
                             closeSidebarTeamSelector();
@@ -1018,7 +1136,7 @@ function drawSidebarContents() {
                             .attr('id', 'team_select_text')
                             .attr('class', 'team_select_font')
                             .attr('font-size', '12px')
-                            .attr('font-weight', 500)
+                            .attr('font-weight', 300)
                             .attr('text-anchor', 'end')
                             .attr('transform', 'translate(' + -15 + ',0)');
 
@@ -1027,7 +1145,7 @@ function drawSidebarContents() {
                                 .attr('id', 'select_team_chevron')
                                 .attr('class', 'font_awesome_text_icon')
                                 .attr('font-size', '12px')
-                                .style('font-weight', 500)
+                                .style('font-weight', 300)
                                 .attr('fill', color_dict.black)
                                 .attr('transform', 'translate(' + -5 + ',0)')
                                 .attr('dominant-baseline', 'auto')
@@ -1043,7 +1161,7 @@ function drawSidebarContents() {
                                 .attr('class', 'font_awesome_text_icon')
                                 .attr('font-size', '14px')
                                 .style('font-weight', '300')
-                                .attr('fill', color_dict.orange)
+                                .attr('fill', color_dict.red)
                                 .attr('dominant-baseline', 'auto')
                                 .attr('transform', 'translate(' + select_team_close_x_right + ',1)')
                                 .style('opacity', 0);
@@ -1069,7 +1187,7 @@ function drawSidebarContents() {
                                 .attr('y', sidebar_team_logo_width + 30)
                                 .attr('id', 'sidebar_team_loc_title')
                                 .attr('class', 'sidebar_title')
-                                .attr('font-size', '20px')
+                                .attr('font-size', '18px')
                                 .attr('font-weight', 700);
 
     let sidebar_team_loc_title_height = sidebar_team_loc_title.node().getBoundingClientRect().height;
@@ -1081,7 +1199,7 @@ function drawSidebarContents() {
                                 .attr('id', 'sidebar_team_mascot_title')
                                 .attr('class', 'sidebar_titles')
                                 .attr('font-size', '16px')
-                                .attr('font-weight', 500);
+                                .attr('font-weight', 300);
     
     //Add slider
     let slider_top = navbar_height + sidebar_team_mascot_title_top + sidebar_team_mascot_title.node().getBoundingClientRect().height + 10;
@@ -1191,7 +1309,8 @@ function drawSidebarContents() {
                                         .style('cursor', 'pointer')
                                         .on('click', function(){
 
-                                            clearTimeSeriesChart();
+                                            let full_clear = 1
+                                            clearTimeSeriesChart(full_clear);
 
                                         })
 
@@ -1205,7 +1324,7 @@ function drawSidebarContents() {
                                             .attr('text-anchor', 'middle')
                                             .style('dominant-baseline', 'middle')
                                             .style('font-size', '14px')
-                                            .style('font-weight', 500)
+                                            .style('font-weight', 300)
                                             .style('font-family', 'Work Sans')
                                             .style('text-decoration', 'none')
                                             .on('mouseover', function() {
@@ -1228,7 +1347,7 @@ function drawSidebarContents() {
                                             .on('mouseover', function() {
                                                 
                                                 d3.select('#sidebar_submit_button_bg')
-                                                    .attr('stroke', color_dict.orange);
+                                                    .attr('stroke', color_dict.red);
                                             })
                                             .on('mouseout', function() {
                                                 
@@ -1249,7 +1368,7 @@ function drawSidebarContents() {
                                             .attr('id', 'sidebar_submit_button_bg')
                                             .attr('width', sidebar_button_width)
                                             .attr('height', sidebar_button_height)
-                                            .attr('fill', color_dict.orange)
+                                            .attr('fill', color_dict.red)
                                             .attr('stroke', color_dict.transparent)
                                             .attr('stroke-width', '3px');
     
@@ -1260,10 +1379,37 @@ function drawSidebarContents() {
                                             .attr('y', sidebar_button_height / 2)
                                             .attr('fill', color_dict.white)
                                             .attr('font-size', '16px')
-                                            .style('font-weight', 500)
+                                            .style('font-weight', 300)
                                             .style('text-anchor', 'middle')
                                             .style('dominant-baseline', 'middle')
                                             .style('font-family', 'Work Sans');
+
+    //Add disable cover for Time Series Button waiting for schedule data to be populated
+    let disable_sidebar_submit_button_g = sidebar_svg.append('g')
+                                            .attr('id', 'diable_sidebar_submit_button_g')
+                                            .attr('transform', 'translate(' + sidebar_button_left_margin + ',' + sidebar_submit_button_top + ')')
+                                            .style('visibility', 'hidden');
+
+    let disable_sidebar_submit_button_bg = disable_sidebar_submit_button_g.append('rect')
+                                            .attr('id', 'disable_sidebar_submit_button_bg')
+                                            .attr('width', sidebar_button_width)
+                                            .attr('height', sidebar_button_height)
+                                            .attr('fill', color_dict.med_gray)
+                                            .attr('stroke', color_dict.med_gray)
+                                            .attr('stroke-width', '3px');
+                        
+    let disable_sidebar_submit_button_text = disable_sidebar_submit_button_g.append('text')
+                                            .text('Add Time Series')
+                                            .attr('id', 'sidebar_submit_button_text')
+                                            .attr('x', sidebar_button_width / 2)
+                                            .attr('y', sidebar_button_height / 2)
+                                            .attr('fill', color_dict.white)
+                                            .attr('font-size', '16px')
+                                            .style('font-weight', 300)
+                                            .style('text-anchor', 'middle')
+                                            .style('dominant-baseline', 'middle')
+                                            .style('font-family', 'Work Sans');
+    
     
     let sidebar_stat_type_top_margin = 0;
     let stat_type_g_height = sidebar_button_height * 2.25;
@@ -1323,7 +1469,7 @@ function drawSidebarContents() {
                                             .text('Change Stat')
                                             .attr('id', 'sidebar_select_stat_text')
                                             .attr('font-size', '12px')
-                                            .style('font-weight', 500)
+                                            .style('font-weight', 300)
                                             .style('font-family', 'Work Sans')
                                             .attr('fill', color_dict.black)
                                             .attr('x', sidebar_width - 20)
@@ -1353,7 +1499,7 @@ function drawSidebarContents() {
                                 .attr('class', 'font_awesome_text_icon')
                                 .attr('font-size', '14px')
                                 .style('font-weight', '300')
-                                .attr('fill', color_dict.orange)
+                                .attr('fill', color_dict.red)
                                 .attr('text-anchor', 'end')
                                 .attr('dominant-baseline', 'middle')
                                 .attr('x', select_stat_close_x_right)
@@ -1429,6 +1575,7 @@ function populateGameSelector(team_sched_data) {
                                             .attr('height', '14px')
                                             .attr('id', function(d,i) {
                                                 game_selector_row_game_id = d.game_id;
+
                                                 return 'game_selector_table_row_' + d.game_id
                                             })
                                             .attr('class', 'game_selector_table_row')
@@ -1540,6 +1687,8 @@ function populateGameSelector(team_sched_data) {
 
     }
 
+    enableTimeSeriesRequestButton()
+
 }
 
 function createGameSelectArray() {
@@ -1604,8 +1753,6 @@ function drawChartContents() {
     let chart_tabs_array = ['Time Series', 'Distributions', 'Average'];
     let chart_tab_width = 120;
     let chart_tab_height = 30;
-    let chart_tab_selected = 0;
-
     
     let chart_tabs_g = chart_svg.append('g')
                         .attr('id', 'chart_tabs_g')
@@ -1623,17 +1770,73 @@ function drawChartContents() {
 
                                     })
                                     .style('cursor', 'pointer')
+                                    .on('click', function(d,i) {
+
+                                        d3.selectAll('.chart_tab_bg')
+                                            .attr('fill', color_dict.gray_bg)
+
+                                        d3.selectAll('.chart_tab_text')
+                                            .style('font-weight', 300)
+
+                                        d3.select(this)
+                                            .select('.chart_tab_bg')
+                                            .attr('fill', color_dict.transparent);
+
+                                        d3.select(this)
+                                            .select('.chart_tab_text')
+                                            .style('font-weight', 700);
+
+                                        
+                                        
+                                        if (chart_tab_selected != i) {
+
+                                            drawChartAxis(i);
+                                            
+                                            let full_clear = 0;
+
+                                            clearTimeSeriesChart(full_clear);
+
+
+                                            if (i == 0) {
+
+                                                updateTimeSeriesChart(time_series_data);
+
+                                            } 
+
+                                            if (i == 1) {
+
+                                                updateDistributionChart(time_series_data);
+
+                                            }
+
+                                            if (i == 2) {
+
+                                                updateAverageChart(time_series_data);
+
+                                            }
+
+
+                                        }
+                                        
+                                        chart_tab_selected = i;
+
+                                        
+                                        
+
+
+                                    })
 
     let chart_tab_bg = chart_tabs_sub_g.append('rect')
                                     .attr('width', chart_tab_width)
                                     .attr('height', chart_tab_height)
                                     .attr('stroke', color_dict.med_gray)
+                                    .attr('class', 'chart_tab_bg')
                                     .attr('fill', function(d,i) {
 
                                         if (i == chart_tab_selected) {
-                                            return color_dict.gray_bg
-                                        } else {
                                             return color_dict.transparent
+                                        } else {
+                                            return color_dict.gray_bg
                                         }
                                     })
                                     .attr('stroke-width', '1px')
@@ -1641,6 +1844,7 @@ function drawChartContents() {
 
     let chart_tab_text = chart_tabs_sub_g.append('text')
                                     .text(function(d) {return d})
+                                    .attr('class', 'chart_tab_text')
                                     .attr('x', chart_tab_width / 2)
                                     .attr('y', chart_tab_height / 2)
                                     .attr('text-anchor', 'middle')
@@ -1651,7 +1855,7 @@ function drawChartContents() {
                                         if (i == chart_tab_selected) {
                                             return 700
                                         } else {
-                                            return 500
+                                            return 300
                                         }
                                     });
 
@@ -1698,7 +1902,7 @@ function drawChartContents() {
                                     .attr('x', 0)
                                     .attr('y', chart_legend_title_height + 1)
                                     .attr('fill', color_dict.transparent)
-                                    .attr('stroke', color_dict.med_gray)
+                                    .attr('stroke', color_dict.gray_bg)
                                     .attr('stroke-width', '1px')
                                     .style('shape-rendering', 'crispEdges');
 
@@ -1732,7 +1936,44 @@ function drawChartContents() {
                                         .attr('height', chart_time_series_bottom_height)
                                         .attr('fill', 'none');
 
-    let chart_contents_x_axis = chart_contents_g.append('line')
+    
+    drawChartAxis(chart_tab_selected);
+    
+                            
+
+}
+
+function drawChartAxis(chart_tab_selected) {
+
+    let chart_contents_g = d3.select('#chart_contents_g');
+
+    let width = d3.select('#viz').node().getBoundingClientRect().width;
+    let height = d3.select('#viz').node().getBoundingClientRect().height;
+    let navbar_height = d3.select('#navbar').node().getBoundingClientRect().height;
+    let sidebar_width = d3.select('#sidebar_contents').node().getBoundingClientRect().width;
+    let chart_margin_dict = {left: sidebar_width + 30, top: navbar_height + 20, right: 30, bottom: 140};
+
+    let chart_width = width - chart_margin_dict.left - chart_margin_dict.right;
+    let chart_height = height - chart_margin_dict.top - chart_margin_dict.bottom;
+
+    let chart_tab_height = 30;
+    let chart_contents_padding = chart_tab_height + 15;
+    let chart_contents_height = chart_height - chart_contents_padding;
+
+    let chart_legend_width = 180;
+    let chart_time_series_padding = 20;
+    let chart_time_series_width = chart_width - chart_legend_width - chart_time_series_padding;
+    let time_series_height_ratio = .8
+    let chart_time_series_top_height = chart_contents_height * time_series_height_ratio;
+    let chart_time_series_bottom_height = chart_contents_height * (1 - time_series_height_ratio);
+
+    d3.selectAll('#chart_contents_x_axis').remove();
+    d3.selectAll('#chart_contents_y_axis').remove();
+
+    if (chart_tab_selected != 1) {
+
+
+        let chart_contents_x_axis = chart_contents_g.append('line')
                                         .attr('id', 'chart_contents_x_axis')
                                         .attr('x1', 0)
                                         .attr('x2', chart_time_series_width)
@@ -1742,7 +1983,7 @@ function drawChartContents() {
                                         .attr('stroke-width', '1px')
                                         .style('shape-rendering', 'crispEdges');
 
-    let chart_contents_y_axis = chart_contents_g.append('line')
+        let chart_contents_y_axis = chart_contents_g.append('line')
                                         .attr('id', 'chart_contents_y_axis')
                                         .attr('x1', chart_time_series_padding)
                                         .attr('x2', chart_time_series_padding)
@@ -1751,7 +1992,34 @@ function drawChartContents() {
                                         .attr('stroke', color_dict.med_gray)
                                         .attr('stroke-width', '1px')
                                         .style('shape-rendering', 'crispEdges');
-                            
+
+
+    } else {
+
+        let chart_contents_x_axis = chart_contents_g.append('line')
+                                        .attr('id', 'chart_contents_x_axis')
+                                        .attr('x1', 0)
+                                        .attr('x2', chart_time_series_width)
+                                        .attr('y1', chart_time_series_top_height - 20)
+                                        .attr('y2', chart_time_series_top_height - 20)
+                                        .attr('stroke', color_dict.med_gray)
+                                        .attr('stroke-width', '1px')
+                                        .style('shape-rendering', 'crispEdges');
+
+        let chart_contents_y_axis = chart_contents_g.append('line')
+                                        .attr('id', 'chart_contents_y_axis')
+                                        .attr('x1', chart_time_series_padding)
+                                        .attr('x2', chart_time_series_padding)
+                                        .attr('y1', 0)
+                                        .attr('y2', chart_time_series_top_height)
+                                        .attr('stroke', color_dict.med_gray)
+                                        .attr('stroke-width', '1px')
+                                        .style('shape-rendering', 'crispEdges');
+
+
+
+    }
+
 
 }
 
@@ -2258,10 +2526,1062 @@ function drawSeasonGameBackgrounds(time_series_dict) {
 
 }
 
+function drawAverageGameMin(average_hover_dict) {
+
+    let chart_time_series_top_g = d3.select('#chart_time_series_top_g');
+    let chart_time_series_top_width = d3.select('#chart_time_series_top_g').node().getBoundingClientRect().width;
+    let chart_time_series_top_height = d3.select('#chart_time_series_top_g').node().getBoundingClientRect().height;
+
+    let chart_time_series_bottom_g = d3.select('#chart_time_series_bottom_g');
+    let chart_time_series_bottom_width = d3.select('#chart_time_series_bottom_g').node().getBoundingClientRect().width;
+    let chart_time_series_bottom_height = d3.select('#chart_time_series_bottom_g').node().getBoundingClientRect().height;
+
+    let chart_time_series_padding = 20;
+
+    let game_mins = 60;
+    let game_min_array = [0];
+
+    for (var i = 0; i < game_mins; i++) {
+
+        game_min_array.push(i + 1);
+    }
+    
+    let game_min_x_scale = d3.scaleLinear()
+                                    .domain([0, game_mins])
+                                    .range([0, chart_time_series_top_width]);
+
+    //Draw period lines
+    let period_array = [
+                        {game_minute: 15, title: '1Q'},
+                        {game_minute: 30, title: '2Q'},
+                        {game_minute: 45, title: '3Q'},
+                        {game_minute: 60, title: '4Q'}
+                        ];
+
+
+    let average_game_min_g = chart_time_series_top_g.append('g')
+                                                .attr('id', 'average_game_min_g')
+                                                .attr('transform', 'translate(' + chart_time_series_padding + ',0)');
+
+
+    let average_period_lines = average_game_min_g.selectAll('.average_period_lines')
+                                                        .data(period_array)
+                                                        .enter()
+                                                        .append('line')
+                                                        .attr('x1', function(d) {
+
+                                                            return game_min_x_scale(d.game_minute);
+
+                                                        })
+                                                        .attr('x2', function(d) {
+
+                                                            return game_min_x_scale(d.game_minute);
+
+                                                        })
+                                                        .attr('y1', 0)
+                                                        .attr('y2', chart_time_series_top_height - 20)
+                                                        .style('stroke-dasharray', '2,2')
+                                                        .attr('stroke', color_dict.med_gray)
+                                                        .attr('stroke-width', '2px')
+                                                        .attr('class', 'average_period_lines');
+
+    let average_period_line_text = average_game_min_g.selectAll('.average_period_line_text')
+                                                        .data(period_array)
+                                                        .enter()
+                                                        .append('text')
+                                                        .text(function(d) {return d.title})
+                                                        .attr('x', function(d) {
+
+                                                            return game_min_x_scale(d.game_minute);
+                                                        })
+                                                        .attr('y', 0)
+                                                        .attr('fill', color_dict.dark_gray)
+                                                        .attr('class', 'average_period_line_text')
+                                                        .attr('font-size', '10px')
+                                                        .attr('font-weight', 300)
+                                                        .attr('text-anchor', 'middle')
+                                                        .style('dominant-baseline', 'auto');
+
+    
+    let average_game_min_text = average_game_min_g.selectAll('.average_game_min_text')
+                                                    .data(game_min_array)
+                                                    .enter()
+                                                    .append('text')
+                                                    .text(function(d) {
+                                                        return d;
+                                                    })
+                                                    .attr('class', 'average_game_min_text')
+                                                    .attr('font-size', '8px')
+                                                    .attr('font-weight', 300)
+                                                    .attr('text-anchor', 'middle')
+                                                    .attr('x', function(d) {
+                                                        return game_min_x_scale(d);
+                                                    })
+                                                    .attr('y', chart_time_series_top_height)
+                                                    .style('dominant-baseline', 'auto')
+                                                    .style('cursor', 'pointer')
+                                                    .on('mouseover', function(d) {
+
+                                                        d3.select(this)
+                                                            .attr('font-weight', 700)
+                                                            .attr('font-size', '12px');
+
+
+                                                        //draw minute line
+                                                        let mouseover_game_min_line =  average_game_min_g.append('line')
+                                                                                        .attr('x1', function() {
+
+                                                                                            return game_min_x_scale(d);
+
+                                                                                        })
+                                                                                        .attr('x2', function() {
+
+                                                                                            return game_min_x_scale(d);
+
+                                                                                        })
+                                                                                        .attr('y1', 0)
+                                                                                        .attr('y2', chart_time_series_top_height - 20)
+                                                                                        .attr('stroke', color_dict.dark_gray)
+                                                                                        .attr('stroke-width', '2px')
+                                                                                        .attr('id', 'mouseover_game_min_line')                                                                                    
+                                                                                        .style('stroke-dasharray', '2,2');
+
+                                                        //draw hover text
+
+                                                        let num_average_lines = average_hover_dict['num_lines'];
+                                                        let average_value_index = d;
+                                                        let hover_value_array = [];
+
+                                                        for (var a = 0; a < num_average_lines; a++) {
+                                                            
+                                                            hover_value_array.push(average_hover_dict[a]['data'][average_value_index])
+
+                                                        }
+
+                                                        let formatDecimal = d3.format(",.2f");
+
+                                                        let average_hover_text = average_game_min_g.selectAll('.average_hover_text')
+                                                                                                        .data(hover_value_array)
+                                                                                                        .enter()
+                                                                                                        .append('text')
+                                                                                                        .text(function(z){
+
+                                                                                                            return formatDecimal(z);
+
+                                                                                                        })
+                                                                                                        .attr('x', function(){
+                                                                                                            
+                                                                                                            let x_adjust = d <= 55 ? 5 : -30;
+
+                                                                                                            return game_min_x_scale(d) + x_adjust;
+
+                                                                                                        })
+                                                                                                        .attr('y', function(z, i) {
+
+                                                                                                            let circle_y_scale = average_hover_dict[i]['y_scale'];
+
+                                                                                                            console.log(z);
+
+                                                                                                            return circle_y_scale(z) - 10;
+
+                                                                                                        })
+                                                                                                        .attr('fill', function(z, i) {
+
+                                                                                                            return average_hover_dict[i]['color'];
+
+                                                                                                        })
+                                                                                                        .attr('class', 'average_hover_text')
+                                                                                                        .attr('font-size', '12px')
+                                                                                                        .attr('font-weight', 500);
+                                                                                                        
+
+                                                    })
+                                                    .on('mouseout', function() {
+
+                                                        d3.select(this)
+                                                            .attr('font-weight', 300)
+                                                            .attr('font-size', '8px');
+
+                                                        d3.select('#mouseover_game_min_line').remove();
+                                                        d3.selectAll('.average_hover_text').remove();
+
+                                                    })
+
+}
+
+function drawDistributionRugPlots(t, display_t, distribution_dict, time_series_color, distribution_mean_x_scale, time_series_line_id, time_series_dict) {
+
+    let chart_time_series_top_g = d3.select('#chart_time_series_top_g');
+    let chart_time_series_top_width = d3.select('#chart_time_series_top_g').node().getBoundingClientRect().width;
+    let chart_time_series_top_height = d3.select('#chart_time_series_top_g').node().getBoundingClientRect().height;
+
+    let chart_time_series_bottom_g = d3.select('#chart_time_series_bottom_g');
+    let chart_time_series_bottom_width = d3.select('#chart_time_series_bottom_g').node().getBoundingClientRect().width;
+    let chart_time_series_bottom_height = d3.select('#chart_time_series_bottom_g').node().getBoundingClientRect().height;
+
+    let rug_plot_array = []
+
+    Object.keys(distribution_dict).forEach(function(d) {
+
+        //Push to rug plot array
+        rug_plot_array.push({value: distribution_dict[d], game_id: d});
+
+    })
+
+    let rug_plot_width = 2;
+    let rug_plot_height = 18;
+    let formatDecimal = d3.format(",.2f");
+    
+
+    let dist_rug_plots = chart_time_series_top_g.selectAll('#dig_rug_plot_' + t)
+                                            .data(rug_plot_array)
+                                            .enter()
+                                            .append('rect')
+                                            .attr('class', 'dist_rug_plot')
+                                            .attr('value', t)
+                                            .attr('id', function(d, i) {
+                                                return 'dist_rug_plot_' + t + '_' + i
+                                            })
+                                            .attr('x', function(d) {
+                                                return distribution_mean_x_scale(d.value)
+                                            })
+                                            .attr('y', chart_time_series_top_height - rug_plot_height)
+                                            .attr('width', rug_plot_width)
+                                            .attr('height', rug_plot_height)
+                                            .attr('fill', time_series_color)
+                                            .style('cursor', 'pointer')
+                                            .style('visibility', function() {
+
+                                                if (t === display_t) {
+                                                    return 'visible'
+                                                } else {
+                                                    return 'hidden'
+                                                }
+
+                                            })
+                                            .on('mouseover', function(d) {
+                                                
+                                                //Draw value on hover
+                                                chart_time_series_top_g.append('text')
+                                                    .text(formatDecimal(d.value))
+                                                    .attr('class', 'dist_rug_plot_hover_text')
+                                                    .attr('x', function() {
+                                                        return distribution_mean_x_scale(d.value)
+                                                    })
+                                                    .attr('y', chart_time_series_top_height - rug_plot_height - 8)
+                                                    .attr('text-anchor', 'middle')
+                                                    .style('dominant-baseline', 'auto')
+                                                    .attr('font-size', '14px')
+                                                    .attr('fill', time_series_color)
+                                                    .attr('font-weight', '500')
+
+
+
+
+
+                                                let game_info_dict = time_series_dict['game_info'];
+
+                                                //Remove any existing game details
+                                                d3.selectAll('#game_info_details_g').remove();
+
+                                                //console.log(game_info_dict);
+
+                                                drawGameInfoDetails(d.game_id, game_info_dict)
+                                            })
+                                            .on('mouseout', function(){
+
+                                                d3.selectAll('.dist_rug_plot_hover_text')
+                                                    .remove()
+                                            })
+
+
+}
+
+function updateAverageChart(time_series_data) {
+
+    //Remove existing distribution lines
+    d3.selectAll('.average_line').remove();
+    d3.selectAll('.chart_legend_items').remove();
+    d3.selectAll('#average_game_min_g').remove();
+    
+    let chart_time_series_top_g = d3.select('#chart_time_series_top_g');
+    let chart_time_series_top_width = d3.select('#chart_time_series_top_bg').node().getBoundingClientRect().width;
+    let chart_time_series_top_height = d3.select('#chart_time_series_top_bg').node().getBoundingClientRect().height;
+
+    let chart_time_series_bottom_g = d3.select('#chart_time_series_bottom_g');
+    let chart_time_series_bottom_width = d3.select('#chart_time_series_bottom_g').node().getBoundingClientRect().width;
+    let chart_time_series_bottom_height = d3.select('#chart_time_series_bottom_g').node().getBoundingClientRect().height;
+
+
+    let chart_time_series_padding = 20;
+
+    let chart_time_series_padding_left = 50;
+    let chart_time_series_padding_top = 20;
+    let rug_plot_height = 20;
+
+    let average_hover_dict = {num_lines: 0};
+
+    time_series_data.forEach(function(time_series_dict, t) {
+
+        //Create cumsum array for 60 game minutes
+        let total_array = []
+
+        for (var i = 0; i < 60; i++) {
+
+            total_array.push(0)
+
+        }
+
+        let differential_data = time_series_dict['data'];
+        let num_games = time_series_dict['game_order'].length;
+        
+        //iterate through data to calculate the cum sum for each game minute
+        differential_data.forEach(function(d) {
+
+            let game_minute_index = d.game_minute - 1;
+
+            total_array[game_minute_index] += d.value;
+
+        })
+
+        //Divide totals by num games.
+        total_array = total_array.map(function(d) { return d / num_games});
+
+        const cumulativeSum = (sum => value => sum += value)(0);
+
+        let cum_sum_array = total_array.map(cumulativeSum);
+        cum_sum_array.unshift(0);
+
+        ///Draw Time Series Line
+        let time_series_y_min_domain_abs = Math.abs(time_series_dict['domain']['min_single_game_domain']);
+        let time_series_y_max_domain_abs = Math.abs(time_series_dict['domain']['max_single_game_domain']);
+        let time_series_y_min_domain = 0;
+        let time_series_y_max_domain = 0;
+
+        let average_domain_adjustment = 0.20
+
+        //Create symmetry for domains
+        if (time_series_y_min_domain_abs > time_series_y_max_domain_abs) {
+
+            time_series_y_min_domain = time_series_y_min_domain_abs * -1 * average_domain_adjustment;
+            time_series_y_max_domain = time_series_y_min_domain_abs * average_domain_adjustment
+
+        } else {
+            
+            time_series_y_min_domain = time_series_y_max_domain_abs * -1 * average_domain_adjustment;
+            time_series_y_max_domain = time_series_y_max_domain_abs * average_domain_adjustment;
+
+        }
+
+
+        let average_x_scale = d3.scaleLinear()
+                                    .domain([1, 60])
+                                    .range([0, chart_time_series_top_width]);
+
+        let average_y_scale = d3.scaleLinear()
+                                    .domain([time_series_y_min_domain, time_series_y_max_domain])
+                                    .range([chart_time_series_top_height, 0]);
+
+
+
+        let average_for_against = time_series_dict['stat_for_against'];
+        let average_stat_name = time_series_dict['stat_selected'];
+        let average_team_id = time_series_dict['team_id'];
+        let average_line_id = 'average_line_' + average_team_id + '_' + average_stat_name + '_' + average_for_against + '_' + time_series_dict.data.length
+        let base_time_series_id = average_team_id + '_' + average_stat_name + '_' + average_for_against + '_' + time_series_dict.data.length;
+
+        let time_series_color = returnLineColor(time_series_color_dict, base_time_series_id, average_team_id);
+
+        let average_line = chart_time_series_top_g.append('path')
+                                    .datum(cum_sum_array)
+                                    .attr('class', 'average_line')
+                                    .attr('fill', 'none')
+                                    .attr('stroke', time_series_color)
+                                    .attr('stroke-width', 3)
+                                    .attr('id', average_line_id)
+                                    .attr('d', d3.line()
+                                                    .curve(d3.curveBasis)
+                                                    .x(function(d, i) {return average_x_scale(i + 1)})
+                                                    .y(function(d) {return average_y_scale(d)})
+                                        )
+                                    .attr('transform', 'translate(' + chart_time_series_padding + ',0)');
+
+        //Add hover info to hover dict
+        average_hover_dict['num_lines'] += 1
+        average_hover_dict[t] = {
+
+            data: cum_sum_array,
+            y_scale: average_y_scale,
+            color: time_series_color
+
+        }
+
+        //Add legend info
+        let chart_legend_g = d3.select('#chart_legend_g');
+        let chart_legend_width = d3.select('#chart_legend_body_bg').node().getBoundingClientRect().width;
+        let chart_legend_height = d3.select('#chart_legend_body_bg').node().getBoundingClientRect().height;
+        let chart_legend_item_top = chart_legend_title_height + (t * chart_legend_item_height) + 1;
+        let chart_legend_item_id = 'chart_legend_item_' + average_team_id + '_' + average_stat_name + '_' + average_for_against + '_' + num_games
+
+        let chart_legend_item_g = chart_legend_g.append('g')
+                        .attr('id', chart_legend_item_id)
+                        .attr('class', 'chart_legend_items')
+                        .attr('transform', 'translate(0,' + chart_legend_item_top + ')')
+                        .on('mouseover', function() {
+
+                            d3.select('#' + average_line_id)
+                                .transition()
+                                .duration(200)
+                                .attr('stroke-width', '5px')
+
+                        })
+                        .on('mouseout', function() {
+
+                            d3.select('#' + average_line_id)
+                                .transition()
+                                .duration(200)
+                                .attr('stroke-width', '3px')
+
+                        })
+
+        let chart_legend_item_bg = chart_legend_item_g.append('rect')
+                        .attr('class', 'chart_legend_item_bg')
+                        .attr('width', chart_legend_width)
+                        .attr('height', chart_legend_item_height)
+                        .attr('stroke', color_dict.med_gray)
+                        .attr('stroke-width', '1px')
+                        .style('shape-rendering', 'CrispEdges')
+                        .attr('fill', color_dict.gray_bg);
+
+        let chart_legend_item_color_rect = chart_legend_item_g.append('rect')
+                                .attr('class', 'chart_legend_item_color_rect')
+                                .attr('width', chart_legend_color_rect_width)
+                                .attr('height', chart_legend_item_height)
+                                .attr('fill', time_series_color);
+
+        let chart_legend_item_team_title = chart_legend_item_g.append('text')
+                                .text(function() {
+
+                                    let legend_team_name = ''
+
+                                    teams_array.forEach(function(team_dict) {
+
+                                        if (team_dict['team_id'] === average_team_id) {
+
+                                            legend_team_name = team_dict['team_loc']
+
+                                        }
+
+                                    })
+
+                                    return legend_team_name;
+
+                                })
+                                .attr('class', 'chart_legend_item_team_title')
+                                .attr('x', chart_legend_width / 2)
+                                .attr('y', 3)
+                                .attr('text-anchor', 'middle')
+                                .style('dominant-baseline', 'hanging')
+                                .style('font-weight', 700)
+                                .attr('font-size', '12px');
+
+                                let chart_legend_item_for_against_title = chart_legend_item_g.append('text')
+                                .text(function() {
+
+                                    let for_against_text = average_for_against == 0 ? 'For' : 'Against';
+
+                                    return for_against_text;
+                                })
+                                .attr('class', 'chart_legend_item_for_against_title')
+                                .attr('x', chart_legend_width / 2)
+                                .attr('y', chart_legend_item_height / 2 - 1)
+                                .attr('text-anchor', 'middle')
+                                .style('dominant-baseline', 'auto')
+                                .style('font-family', 'Work Sans')
+                                .attr('font-weight', 500)
+                                .attr('font-size', '12px');
+
+        let chart_legend_item_stat_title = chart_legend_item_g.append('text')
+                                .text(function() {
+
+                                    let stat_title = average_stat_name;
+                                    
+                                    stat_array['totals'].forEach(function(stat_dict) {
+
+                                        if (stat_dict['stat_name'] === average_stat_name){
+
+                                            stat_title = stat_dict['display_name'];
+                                        }
+                                    })
+
+                                    return stat_title;
+
+                                })
+                                .attr('class', 'chart_legend_item_stat_title')
+                                .attr('x', chart_legend_width / 2)
+                                .attr('y', chart_legend_item_height / 2 + 2)
+                                .attr('text-anchor', 'middle')
+                                .style('dominant-baseline', 'hanging')
+                                .style('font-family', 'Work Sans')
+                                .attr('font-weight', 500)
+                                .attr('font-size', '12px');
+
+        let chart_legend_item_num_games_title = chart_legend_item_g.append('text')
+                                .text(function() {
+
+                                    if (num_games === 1) {
+                                        return num_games + ' game'
+                                    } else {
+                                        return num_games + ' games'
+                                    }
+
+                                })
+                                .attr('class', 'chart_legend_item_num_games_title')
+                                .attr('x', chart_legend_width / 2)
+                                .attr('y', chart_legend_item_height - 5)
+                                .attr('text-anchor', 'middle')
+                                .style('dominant-baseline', 'auto')
+                                .style('font-family', 'Work Sans')
+                                .attr('font-weight', 500)
+                                .attr('font-size', '10px');
+
+        let chart_legend_item_close_x = chart_legend_item_g.append('text')
+                                .text(function() {return '\uf00d'})
+                                .attr('id', 'chart_legend_item_close_x')
+                                .attr('class', 'font_awesome_text_icon')
+                                .attr('x', chart_legend_width - 3)
+                                .attr('y', 10)
+                                .attr('text-anchor', 'end')
+                                .style('dominant-baseline', 'middle')
+                                .attr('fill', color_dict.med_gray)
+                                .attr('font-size', '14px')
+                                .style('font-weight', 300)
+                                .style('cursor', 'pointer')
+                                .on('mouseover', function() {
+
+                                    d3.select(this).transition()
+                                        .duration(200)
+                                        .attr('fill', color_dict.orange);
+
+                                })
+                                .on('mouseout', function() {
+
+                                    d3.select(this).transition()
+                                        .duration(200)
+                                        .attr('fill', color_dict.med_gray)
+
+                                })
+                                .on('click', function() {
+
+                                    let average_base_id = average_team_id + '_' + average_stat_name + '_' + average_for_against + '_' + num_games;
+                                    
+                                    d3.select('#average_line_' + average_base_id).remove();
+                                    d3.select('#chart_legend_item_' + average_base_id).remove();
+
+                                    time_series_data.splice(t, 1);
+
+                                    updateAverageChart(time_series_data);
+
+                                })
+    })
+
+    //Draw average chart game mins etc
+    drawAverageGameMin(average_hover_dict);
+
+
+
+}
+
+function updateDistributionChart(time_series_data) {
+
+    //Remove existing distribution lines
+    d3.selectAll('.distribution_line').remove();
+    d3.selectAll('.chart_legend_items').remove();
+    d3.selectAll('.dist_rug_plot').remove();
+    d3.selectAll('.distribution_mean_line').remove();
+    d3.selectAll('.distribution_mean_text').remove();
+    
+    let chart_time_series_top_g = d3.select('#chart_time_series_top_g');
+    let chart_time_series_top_width = d3.select('#chart_time_series_top_bg').node().getBoundingClientRect().width;
+    let chart_time_series_top_height = d3.select('#chart_time_series_top_bg').node().getBoundingClientRect().height;
+
+    let chart_time_series_bottom_g = d3.select('#chart_time_series_bottom_g');
+    let chart_time_series_bottom_width = d3.select('#chart_time_series_bottom_g').node().getBoundingClientRect().width;
+    let chart_time_series_bottom_height = d3.select('#chart_time_series_bottom_g').node().getBoundingClientRect().height;
+
+    let chart_time_series_padding_left = 50;
+    let chart_time_series_padding_top = 20;
+    let rug_plot_height = 20;
+
+    //Iterate through time series and calc max_time_series_mins
+    let max_time_series_mins = 0;
+    
+
+    time_series_data.forEach(function(time_series_dict) {
+
+        let num_game_mins = time_series_dict.data.length;
+
+        if (num_game_mins > max_time_series_mins) {
+
+            max_time_series_mins = num_game_mins;
+
+        }
+
+
+    });
+
+
+    ///Iterate through time series data to calc game totals
+    let distribution_game_ids = [];
+
+    console.log(time_series_data);
+
+    time_series_data.forEach(function(time_series_dict, t) {
+
+        let distribution_dict = {};
+
+        time_series_dict.game_order.forEach(function(d){
+
+            distribution_dict[d] = 0;
+
+        })
+
+        time_series_dict.data.forEach(function(d) {
+
+            let game_id = d.game_id;
+
+            distribution_dict[game_id] += d.value;
+
+
+        })
+
+        
+        //Create distribution and calc mean
+        let min_single_game_domain = time_series_dict['domain']['min_single_game_domain'];
+        let max_single_game_domain = time_series_dict['domain']['max_single_game_domain'];
+
+        let single_game_domain = min_single_game_domain > max_single_game_domain ? min_single_game_domain : max_single_game_domain; 
+        
+        let kde_array = []
+        let dist_total = 0
+        let dist_count = 0
+
+        Object.keys(distribution_dict).forEach(function(d) {
+
+            //Push to KDE array
+            kde_array.push(distribution_dict[d] / single_game_domain)
+
+            //Sum total and count
+            dist_total += distribution_dict[d];
+            dist_count += 1;
+
+        })
+
+        let dist_mean = dist_total / dist_count;
+
+        
+        ///Map X ticks to percentage
+
+        let x_ticks = [-1.0, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1.0];
+        
+        let distribution_x_scale = d3.scaleLinear()
+                                        .domain([-1.2, 1.2])
+                                        .range([chart_time_series_padding_left, chart_time_series_top_width]);
+
+        let distribution_mean_x_scale = d3.scaleLinear()
+                                        .domain([-single_game_domain, single_game_domain])
+                                        .range([chart_time_series_padding_left, chart_time_series_top_width]);
+
+        let kde = kernelDensityEstimator(kernelEpanechnikov(.2), x_ticks);
+        let density = kde(kde_array.map(function(d) {return d}));
+        
+        //Add padding to max_density_y_value
+        max_density_y_value = 2.8
+
+        //add starting and end points to density array if needed to have 0 value
+        if (density[0][1] != 0) {
+            let density_x_gap = density[1][0] - density[0][0];
+            let density_start_array = [density[0][0] - density_x_gap, 0]
+
+            density.unshift(density_start_array);
+        };
+
+        if (density[density.length - 1][0] != 0) {
+            let density_x_gap = density[1][0] - density[0][0];
+            let density_end_array = [density[density.length - 1][0] + density_x_gap, 0]
+
+            density.push(density_end_array);
+        }
+
+        let distribution_y_scale = d3.scaleLinear()
+                                        .domain([0, max_density_y_value])
+                                        .range([chart_time_series_top_height - chart_time_series_padding_top, 0])
+
+        if (t === 0) {
+            //Draw 0 mark on chart
+            let dist_chart_0_mark = chart_time_series_top_g.append('line')
+                                                        .attr('id', 'dist_chart_0_mark')
+                                                        .attr('class', 'dist_chart_marks')
+                                                        .attr('x1', distribution_mean_x_scale(0))
+                                                        .attr('x2', distribution_mean_x_scale(0))
+                                                        .attr('y1', chart_time_series_top_height - rug_plot_height)
+                                                        .attr('y2', chart_time_series_top_height - rug_plot_height - 9)
+                                                        .attr('stroke', color_dict.med_gray)
+                                                        .attr('stroke-width', '1px')
+                                                        .style('shape-rendering', 'CrispEdges');
+
+            let dist_chart_0_text =chart_time_series_top_g.append('text')
+                                                        .text('0')
+                                                        .attr('id', 'dist_chart_0_text')
+                                                        .attr('class', 'dist_chart_marks')
+                                                        .attr('x', distribution_mean_x_scale(0))
+                                                        .attr('y', chart_time_series_top_height - rug_plot_height - 12)
+                                                        .attr('font-size', '12px')
+                                                        .attr('font-weight', '300')
+                                                        .attr('fill', color_dict.med_gray)
+                                                        .attr('text-anchor', 'middle')
+                                                        .style('dominant-baseline', 'auto');
+
+        }
+
+
+        let time_series_for_against = time_series_dict['stat_for_against'];
+        let time_series_stat_name = time_series_dict['stat_selected'];
+        let time_series_team_id = time_series_dict['team_id'];
+        let base_time_series_id = time_series_team_id + '_' + time_series_stat_name + '_' + time_series_for_against + '_' + time_series_dict.data.length;
+        let time_series_line_id = 'dist_line_' + base_time_series_id;
+        let time_series_mean_line_id = 'dist_mean_line_' + base_time_series_id;
+        let display_t = time_series_data.length - 1;
+
+
+        let time_series_color = returnLineColor(time_series_color_dict, base_time_series_id, time_series_team_id);
+        
+        //Draw distribution line
+        let distribution_line = chart_time_series_top_g.append('path')
+                                        .attr('class', 'distribution_line')
+                                        .attr('id', time_series_line_id)
+                                        .datum(density)
+                                        .attr('fill', 'none')
+                                        .attr('stroke', time_series_color)
+                                        .attr('stroke-width', '3px')
+                                        .style('shape-rendering', 'CrispEdges')
+                                        .attr('d', d3.line()
+                                                        .curve(d3.curveBasis)   
+                                                        .x(function(d) {return distribution_x_scale(d[0])})
+                                                        .y(function(d) {return distribution_y_scale(d[1])})
+                                                        );
+
+        //Draw mean line
+        let distribution_mean_line = chart_time_series_top_g.append('line')
+                                        .attr('class', 'distribution_mean_line')
+                                        .attr('id', 'distribution_mean_line_' + t)
+                                        .attr('x1', distribution_mean_x_scale(dist_mean))
+                                        .attr('x2', distribution_mean_x_scale(dist_mean))
+                                        .attr('y1', 40)
+                                        .attr('y2', chart_time_series_top_height - 20)
+                                        .attr('stroke-width', '2px')
+                                        .style('shape-rendering', 'CrispEdges')
+                                        .attr('stroke', time_series_color)
+                                        .style('stroke-dasharray', '2,2')
+                                        .style('visibility', function() {
+
+                                            if (t == display_t) {
+                                                return 'visible'
+                                            } else {
+                                                return 'hidden'
+                                            }
+                                        });
+
+        let formatDecimal = d3.format(",.2f");
+
+        let distribution_mean_text = chart_time_series_top_g.append('text')
+                                        .text(formatDecimal(dist_mean))
+                                        .attr('class', 'distribution_mean_text')
+                                        .attr('id', 'distribution_mean_text_' + t)
+                                        .attr('x', distribution_mean_x_scale(dist_mean))
+                                        .attr('y', 35)
+                                        .attr('text-anchor', 'middle')
+                                        .style('dominant-baseline', 'auto')
+                                        .attr('font-size', '14px')
+                                        .attr('fill', time_series_color)
+                                        .style('font-weight', '700')
+                                        .style('visibility', function() {
+
+                                            if (t == display_t) {
+                                                return 'visible'
+                                            } else {
+                                                return 'hidden'
+                                            }
+                                        });
+
+        //Draw Rug Plots
+        drawDistributionRugPlots(t, display_t, distribution_dict, time_series_color, distribution_mean_x_scale, time_series_line_id, time_series_dict);
+
+        //Add legend info
+        let chart_legend_g = d3.select('#chart_legend_g');
+        let chart_legend_width = d3.select('#chart_legend_body_bg').node().getBoundingClientRect().width;
+        let chart_legend_height = d3.select('#chart_legend_body_bg').node().getBoundingClientRect().height;
+        let chart_legend_item_top = chart_legend_title_height + (t * chart_legend_item_height) + 1;
+        let chart_legend_item_id = 'chart_legend_item_' + time_series_team_id + '_' + time_series_stat_name + '_' + time_series_for_against + '_' + max_time_series_mins
+
+        let chart_legend_item_g = chart_legend_g.append('g')
+                        .attr('id', chart_legend_item_id)
+                        .attr('class', 'chart_legend_items')
+                        .attr('transform', 'translate(0,' + chart_legend_item_top + ')')
+                        .on('mouseover', function() {
+
+                            d3.select('#' + time_series_line_id)
+                                .transition()
+                                .duration(200)
+                                .attr('stroke-width', '5px')
+
+                        })
+                        .on('mouseout', function() {
+
+                            d3.select('#' + time_series_line_id)
+                                .transition()
+                                .duration(200)
+                                .attr('stroke-width', '3px')
+
+                        })
+
+                        let chart_legend_item_bg = chart_legend_item_g.append('rect')
+                        .attr('class', 'chart_legend_item_bg')
+                        .attr('width', chart_legend_width)
+                        .attr('height', chart_legend_item_height)
+                        .attr('stroke', color_dict.med_gray)
+                        .attr('stroke-width', '1px')
+                        .style('shape-rendering', 'CrispEdges')
+                        .attr('fill', color_dict.gray_bg);
+
+        let chart_legend_item_color_rect = chart_legend_item_g.append('rect')
+                                        .attr('class', 'chart_legend_item_color_rect')
+                                        .attr('width', chart_legend_color_rect_width)
+                                        .attr('height', chart_legend_item_height)
+                                        .attr('fill', time_series_color);
+
+
+        let chart_legend_item_team_title = chart_legend_item_g.append('text')
+                                    .text(function() {
+
+                                        let legend_team_name = ''
+
+                                        teams_array.forEach(function(team_dict) {
+
+                                            if (team_dict['team_id'] === time_series_team_id) {
+
+                                                legend_team_name = team_dict['team_loc']
+
+                                            }
+
+                                        })
+
+                                        return legend_team_name;
+
+                                    })
+                                    .attr('class', 'chart_legend_item_team_title')
+                                    .attr('x', chart_legend_width / 2)
+                                    .attr('y', 3)
+                                    .attr('text-anchor', 'middle')
+                                    .style('dominant-baseline', 'hanging')
+                                    .style('font-weight', 700)
+                                    .attr('font-size', '12px');
+
+        let chart_legend_item_for_against_title = chart_legend_item_g.append('text')
+                                    .text(function() {
+
+                                        let for_against_text = time_series_for_against == 0 ? 'For' : 'Against';
+
+                                        return for_against_text;
+                                    })
+                                    .attr('class', 'chart_legend_item_for_against_title')
+                                    .attr('x', chart_legend_width / 2)
+                                    .attr('y', chart_legend_item_height / 2 - 1)
+                                    .attr('text-anchor', 'middle')
+                                    .style('dominant-baseline', 'auto')
+                                    .style('font-family', 'Work Sans')
+                                    .attr('font-weight', 500)
+                                    .attr('font-size', '12px');
+
+        let chart_legend_item_stat_title = chart_legend_item_g.append('text')
+                                    .text(function() {
+
+                                        let stat_title = time_series_stat_name;
+                                        
+                                        stat_array['totals'].forEach(function(stat_dict) {
+
+                                            if (stat_dict['stat_name'] === time_series_stat_name){
+
+                                                stat_title = stat_dict['display_name'];
+                                            }
+                                        })
+
+                                        return stat_title;
+
+                                    })
+                                    .attr('class', 'chart_legend_item_stat_title')
+                                    .attr('x', chart_legend_width / 2)
+                                    .attr('y', chart_legend_item_height / 2 + 2)
+                                    .attr('text-anchor', 'middle')
+                                    .style('dominant-baseline', 'hanging')
+                                    .style('font-family', 'Work Sans')
+                                    .attr('font-weight', 500)
+                                    .attr('font-size', '12px');
+
+        let chart_legend_item_num_games_title = chart_legend_item_g.append('text')
+                                    .text(function() {
+
+                                        let num_games = parseInt(time_series_dict.data.length / 60);
+
+                                        if (num_games === 1) {
+                                            return num_games + ' game'
+                                        } else {
+                                            return num_games + ' games'
+                                        }
+
+                                    })
+                                    .attr('class', 'chart_legend_item_num_games_title')
+                                    .attr('x', chart_legend_width / 2)
+                                    .attr('y', chart_legend_item_height - 5)
+                                    .attr('text-anchor', 'middle')
+                                    .style('dominant-baseline', 'auto')
+                                    .style('font-family', 'Work Sans')
+                                    .attr('font-weight', 500)
+                                    .attr('font-size', '10px');
+
+        let chart_legend_item_close_x = chart_legend_item_g.append('text')
+                                    .text(function() {return '\uf00d'})
+                                    .attr('id', 'chart_legend_item_close_x')
+                                    .attr('class', 'font_awesome_text_icon')
+                                    .attr('x', chart_legend_width - 3)
+                                    .attr('y', 10)
+                                    .attr('text-anchor', 'end')
+                                    .style('dominant-baseline', 'middle')
+                                    .attr('fill', color_dict.med_gray)
+                                    .attr('font-size', '14px')
+                                    .style('font-weight', 300)
+                                    .style('cursor', 'pointer')
+                                    .on('mouseover', function() {
+
+                                        d3.select(this).transition()
+                                            .duration(200)
+                                            .attr('fill', color_dict.orange);
+
+                                    })
+                                    .on('mouseout', function() {
+
+                                        d3.select(this).transition()
+                                            .duration(200)
+                                            .attr('fill', color_dict.med_gray)
+
+                                    })
+                                    .on('click', function() {
+
+                                        let time_series_base_id = time_series_team_id + '_' + time_series_stat_name + '_' + time_series_for_against + '_' + max_time_series_mins;
+                                        
+                                        d3.select('#dist_line_' + time_series_base_id).remove();
+                                        d3.select('#chart_legend_item_' + time_series_base_id).remove();
+
+                                        time_series_data.splice(t, 1);
+
+                                        updateDistributionChart(time_series_data);
+
+                                    })
+
+        let chart_legend_item_show_games_g = chart_legend_item_g.append('g')
+                                    .attr('class', 'chart_legend_item_show_games_g')
+                                    .attr('transform', function() {
+
+                                        return 'translate(' + (chart_legend_width - 7) + ',' + (chart_legend_item_height - 7) + ')'
+
+                                    })
+                                    .style('cursor', 'pointer')
+                                    .on('click', function(d, i) {
+
+                                        d3.selectAll('#game_info_details_g').remove();
+
+                                        d3.selectAll('.chart_legend_item_show_game_fore_circle')
+                                            .transition()
+                                            .duration(100)
+                                            .style('opacity', 0);
+
+                                        d3.select(this)
+                                            .select('.chart_legend_item_show_game_fore_circle')
+                                            .transition()
+                                            .duration(200)
+                                            .style('opacity', 1);
+
+                                        //Hide other rug plots and mean line/text
+                                        d3.selectAll('.dist_rug_plot')
+                                            .style('visibility', 'hidden')
+
+                                        d3.selectAll('.distribution_mean_line')
+                                            .style('visibility', 'hidden')
+
+                                        d3.selectAll('.distribution_mean_text')
+                                            .style('visibility', 'hidden')
+
+                                        //Show currently selected rug plots and mean line/text
+                                        d3.selectAll('.dist_rug_plot[value="' + t + '"]')
+                                            .style('visibility', 'visible')
+                                        
+                                        d3.selectAll('#distribution_mean_line_' + t)
+                                            .style('visibility', 'visible')
+
+                                        d3.selectAll('#distribution_mean_text_' + t)
+                                            .style('visibility', 'visible')
+                                        
+
+                                    })
+                                    
+
+        let chart_legend_item_show_games_bg_circle = chart_legend_item_show_games_g.append('circle')
+                                                    .attr('r', 5)
+                                                    .attr('fill', color_dict.med_gray);
+
+        let chart_legend_item_show_game_fore_circle = chart_legend_item_show_games_g.append('circle')
+                                                    .attr('r', 4)
+                                                    .attr('class', 'chart_legend_item_show_game_fore_circle')
+                                                    .attr('fill', color_dict.light_green)
+                                                    .attr('cx', .5)
+                                                    .attr('cy', .5)
+                                                    .style('opacity', function() {
+
+                                                        if (t === time_series_data.length - 1) {
+                                                            return 1
+                                                        } else {
+                                                            return 0
+                                                        }
+
+                                                    })
+
+        let chart_legend_item_show_game_text = chart_legend_item_show_games_g.append('text')
+                                                    .text('display')
+                                                    .attr('x', -5)
+                                                    .attr('y', 3)
+                                                    .attr('text-anchor', 'end')
+                                                    .attr('font-size', '10px')
+                                                    .attr('font-weight', 500)
+                                                    .style('font-family', 'Work Sans');
+                                                    
+
+
+        
+        
+
+
+    })
+
+
+
+
+}
+
 function updateTimeSeriesChart(time_series_data) {
 
     //Remove any existing time series lines
     d3.selectAll('.time_series_lines').remove();
+    d3.selectAll('.distribution_line').remove();
     d3.selectAll('.chart_legend_items').remove();
     d3.selectAll('.game_info_g').remove();
     d3.selectAll('#season_title_g').remove();
@@ -2364,8 +3684,6 @@ function updateTimeSeriesChart(time_series_data) {
 
         }
 
-        console.log(time_series_y_min_domain, time_series_y_max_domain);
-
         let time_series_x_scale = d3.scaleLinear()
                                     .domain([0, max_time_series_mins])
                                     .range([0, chart_time_series_top_width]);
@@ -2379,20 +3697,9 @@ function updateTimeSeriesChart(time_series_data) {
         let time_series_stat_name = time_series_dict['stat_selected'];
         let time_series_team_id = time_series_dict['team_id'];
         let time_series_line_id = 'time_series_line_' + time_series_team_id + '_' + time_series_stat_name + '_' + time_series_for_against + '_' + time_series_dict.data.length
-        let time_series_color = 0;
+        let base_time_series_id = time_series_team_id + '_' + time_series_stat_name + '_' + time_series_for_against + '_' + time_series_dict.data.length;
 
-        if (time_series_color_dict.hasOwnProperty(time_series_line_id)) {
-
-                time_series_color = time_series_color_dict[time_series_line_id];
-
-        } else {
-        
-                time_series_color = line_color_array[0];
-
-                line_color_array.push(line_color_array.shift());
-
-                time_series_color_dict[time_series_line_id] = time_series_color;
-        }
+        let time_series_color = returnLineColor(time_series_color_dict, base_time_series_id, time_series_team_id);
 
         
         let time_series_line = chart_time_series_top_g.append('path')
@@ -2413,10 +3720,6 @@ function updateTimeSeriesChart(time_series_data) {
         let chart_legend_g = d3.select('#chart_legend_g');
         let chart_legend_width = d3.select('#chart_legend_body_bg').node().getBoundingClientRect().width;
         let chart_legend_height = d3.select('#chart_legend_body_bg').node().getBoundingClientRect().height;
-        let chart_legend_title_height = 22;
-        
-        let chart_legend_item_height = 56;
-        let chart_legend_color_rect_width = 8;
         let chart_legend_item_top = chart_legend_title_height + (t * chart_legend_item_height) + 1;
         let chart_legend_item_id = 'chart_legend_item_' + time_series_team_id + '_' + time_series_stat_name + '_' + time_series_for_against + '_' + max_time_series_mins
 
@@ -2455,7 +3758,7 @@ function updateTimeSeriesChart(time_series_data) {
                                                 .attr('class', 'chart_legend_item_color_rect')
                                                 .attr('width', chart_legend_color_rect_width)
                                                 .attr('height', chart_legend_item_height)
-                                                .attr('fill', time_series_color_dict[time_series_line_id]);
+                                                .attr('fill', time_series_color);
 
         
         let chart_legend_item_team_title = chart_legend_item_g.append('text')
@@ -2655,20 +3958,32 @@ function updateTimeSeriesChart(time_series_data) {
 
 }
 
-function clearTimeSeriesChart() {
+function clearTimeSeriesChart(full_clear) {
 
     d3.selectAll('.time_series_lines').remove();
+    d3.selectAll('.distribution_line').remove();
     d3.selectAll('.chart_legend_items').remove();
     d3.selectAll('.game_info_g').remove();
     d3.selectAll('#season_title_g').remove();
     d3.selectAll('#game_info_game_highlight_g').remove();
+    d3.selectAll('#game_info_details_g').remove();
+    d3.selectAll('.dist_rug_plot').remove();
+    d3.selectAll('.distribution_mean_line').remove();
+    d3.selectAll('.distribution_mean_text').remove();
+    d3.selectAll('.dist_chart_marks').remove();
+    d3.selectAll('.average_line').remove();
+    d3.selectAll('#average_game_min_g').remove();
 
-    time_series_data = [];
+    time_series_color_dict = {}
+
+    if (full_clear == 1) {
+        time_series_data = [];
+    }
 
 }
 
-
 function submitTimeSeriesRequest(game_select_array, prev_ratio_game_ids, stat_select_dict) {
+
     
     if  (stat_select_dict['stat_selected'] != 'none') {
 
@@ -2711,6 +4026,8 @@ function submitTimeSeriesRequest(game_select_array, prev_ratio_game_ids, stat_se
 
         }
 
+        console.log('##', game_request_array);
+
         let time_series_req = {
             req_type: 'time_series_request',
             game_select_array: game_request_array,
@@ -2734,9 +4051,26 @@ function submitTimeSeriesRequest(game_select_array, prev_ratio_game_ids, stat_se
 
 }
 
+// Function to compute density
+function kernelDensityEstimator(kernel, X) {
+    return function(V) {
+      return X.map(function(x) {
+        return [x, d3.mean(V, function(v) { return kernel(x - v); })];
+      });
+    };
+  }
+
+
+function kernelEpanechnikov(k) {
+    return function(v) {
+      return Math.abs(v /= k) <= 1 ? 0.75 * (1 - v * v) / k : 0;
+    };
+  }
+
+
 //Connect to websocket
 function startWebSocket() {
-    ws_conn = new WebSocket('wss://ncaaf-multi-game-api.untouted.com/');
+    ws_conn = new WebSocket('ws://localhost:5151/');
     console.log('Websocket Connected.')
 
     ws_conn.onmessage = function incoming(event) {
@@ -2745,13 +4079,13 @@ function startWebSocket() {
         
         let resp_type = resp_dict['resp_type']
 
-        console.log(resp_dict);
-
         if (resp_type == 'team_info') {
             
             updateTeamInfoContents(resp_dict['data'][0]);
 
             curr_team_id = resp_dict['data'][0]['team_id']
+
+            console.log('--', curr_team_id);
 
             let team_sched_req = {
                 req_type: 'team_sched_request',
@@ -2763,16 +4097,30 @@ function startWebSocket() {
         } else if (resp_type == 'teams_request') {
            
             teams_array = resp_dict['data']
-            
-        } else if (resp_type == 'team_sched') {
 
+        } else if (resp_type == 'team_sched') {
+            
             team_sched_data = resp_dict['data']
             populateGameSelector(team_sched_data)
         
         } else if (resp_type == 'time_series_request') {
 
+            console.log(resp_dict);
+
             time_series_data.push(resp_dict);
-            updateTimeSeriesChart(time_series_data);
+
+            if (chart_tab_selected == 0) {
+                updateTimeSeriesChart(time_series_data);
+
+            } else if (chart_tab_selected == 1) {
+
+                updateDistributionChart(time_series_data);
+
+            } else if (chart_tab_selected == 2) {
+
+                updateAverageChart(time_series_data);
+
+            }
 
         }
         
@@ -2853,6 +4201,6 @@ setTimeout(function() {
             });
 
     
-    }, 5000);
+    }, 1200);
 
 // Call onResize like this
