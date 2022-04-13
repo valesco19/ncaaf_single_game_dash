@@ -4070,7 +4070,7 @@ function kernelEpanechnikov(k) {
 
 //Connect to websocket
 function startWebSocket() {
-    ws_conn = new WebSocket('ws://localhost:5151/');
+    ws_conn = new WebSocket('wss://ncaaf-multi-game-api.untouted.com');
     console.log('Websocket Connected.')
 
     ws_conn.onmessage = function incoming(event) {
