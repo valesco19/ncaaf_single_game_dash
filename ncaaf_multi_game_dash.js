@@ -36,17 +36,17 @@ let line_color_array = [
 
 
 let conference_array = [
-    {name: 'American', conf_id: 94},
-    {name: 'ACC', conf_id: 3},
+    {name: 'American', conf_id: 151},
+    {name: 'ACC', conf_id: 1},
     {name: 'Big 12', conf_id: 4},
-    {name: 'Big Ten', conf_id: 6},
-    {name: 'Conference USA', conf_id: 7},
-    {name: 'Independents', conf_id: 8},
-    {name: 'Mid-American', conf_id: 9},
-    {name: 'Mountain West', conf_id: 10},
-    {name: 'Pac-12', conf_id: 11},
-    {name: 'SEC', conf_id: 12},
-    {name: 'Sun Belt', conf_id: 13}
+    {name: 'Big Ten', conf_id: 5},
+    {name: 'Conference USA', conf_id: 12},
+    {name: 'Independents', conf_id: 18},
+    {name: 'Mid-American', conf_id: 15},
+    {name: 'Mountain West', conf_id: 17},
+    {name: 'Pac-12', conf_id: 9},
+    {name: 'SEC', conf_id: 8},
+    {name: 'Sun Belt', conf_id: 37}
 ]
 
 let stat_array = {totals: [
@@ -300,6 +300,8 @@ function openTeamSelect(teams_array, conference_id) {
     }
 
     let filtered_teams_array = teams_array.filter(function(d) {return d.conference_id === conference_id});
+
+    console.log(filtered_teams_array);
 
     let sidebar_svg = d3.select('#sidebar_svg');
     let sidebar_contents = d3.select('#sidebar_contents');
@@ -1625,7 +1627,7 @@ function populateGameSelector(team_sched_data) {
                     .text(temp_data.away_team_abbrev)
                     .style('font-weight', function() {
 
-                        if (temp_data.away_team_id === curr_team_id) {
+                        if (temp_data.away_id === curr_team_id) {
 
                             return 700
                         } else {
@@ -1647,7 +1649,7 @@ function populateGameSelector(team_sched_data) {
                     .text(temp_data.home_team_abbrev)
                     .style('font-weight', function() {
 
-                        if (temp_data.home_team_id === curr_team_id) {
+                        if (temp_data.home_id === curr_team_id) {
 
                             return 700
                         } else {
@@ -4000,8 +4002,8 @@ function submitTimeSeriesRequest(game_select_array, prev_ratio_game_ids, stat_se
 
                 append_dict = {
                                         game_id: temp_team_data['game_id'],
-                                        away_team_id: temp_team_data['away_team_id'],
-                                        home_team_id: temp_team_data['home_team_id'],
+                                        away_id: temp_team_data['away_id'],
+                                        home_id: temp_team_data['home_id'],
                                         team_id: curr_team_id        
             
                                         }
@@ -4014,8 +4016,8 @@ function submitTimeSeriesRequest(game_select_array, prev_ratio_game_ids, stat_se
 
                 append_dict = {
                     game_id: temp_team_data['game_id'],
-                    away_team_id: temp_team_data['away_team_id'],
-                    home_team_id: temp_team_data['home_team_id'],
+                    away_id: temp_team_data['away_id'],
+                    home_id: temp_team_data['home_id'],
                     team_id: curr_team_id        
 
                     }
