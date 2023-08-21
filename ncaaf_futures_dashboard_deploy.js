@@ -1,5 +1,4 @@
-const server_api_url = "http://127.0.0.1:3019/"
-const user_id = "nd7xeF2aAEXaflHkfJ4caQhQOr42"
+const server_api_url = "https://ncaaf-season-sim-api.untouted.com"
 
 let global_pricing_dict = {
     json_data: {},
