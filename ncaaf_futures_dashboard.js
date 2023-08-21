@@ -2995,7 +2995,8 @@ function populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict) 
 
 
 //*******************************Start of APP ***********************************************/
-let sidebar_data_dict = setTimeout(() => {
+let sidebar_data_dict = setTimeout(() => {    
+                                            console.log("Session starting for", user_id);
                                             fetchSidebarData(server_api_url, user_id)
                                                         .then((sidebar_data_dict) => {
                                                             
