@@ -2807,7 +2807,7 @@ function populateH2HTeamWinTotalPricingScreen(json_data, sidebar_data_dict) {
     //Hide Win Totals Screen if shown
     let is_win_totals_hidden = d3.select('#win_totals_screen').style('display') == 'none';
 
-    if (is_win_totals_hidden) {
+    if (!is_win_totals_hidden) {
 
         d3.select('#win_totals_screen').style('display', 'none')
 
