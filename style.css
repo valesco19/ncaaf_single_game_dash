@@ -1,0 +1,534 @@
+.font_awesome_text_icon {
+    font-family: 'FontAwesome';
+}
+
+body {
+    font-family: 'Work Sans';
+}
+
+#navbar {
+    z-index: 10;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 55px;
+    width: 100vw;
+    background: #fff;
+}
+
+#navbar_logo {
+    font-weight: 700;
+    font-size: 48px;
+    height: 40px;
+    text-align: center;
+    padding-top: 5px;
+    padding-left: 15px;
+    color: #000;
+}
+
+#viz {
+    display: inline-block;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1200px;
+    height: 100vh;
+    overflow: auto;
+}
+
+#sidebar_select_div {
+
+    display: inline-block;
+    position: fixed;
+    background-color: #fff;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1;
+    -webkit-box-shadow: 0px 0px 22px -6px rgba(135,135,135,1);
+    -moz-box-shadow: 0px 0px 22px -6px rgba(135,135,135,1);
+    box-shadow: 0px 0px 22px -6px rgba(135,135,135,1);
+}
+
+#sidebar_contents {
+    margin-top: 55px;
+    width: 100%;
+    height: 100vh;
+    position: relative;
+}
+
+#team_elo_slider_track {
+    stroke: #000;
+    stroke-opacity: 0.3;
+    stroke-width: 5px;
+    stroke-linecap: round;
+}
+
+#team_elo_slider_track_inset {
+    stroke: #c0c0c0;
+    stroke-width: 6px;
+    }
+
+.team_elo_slider_track_overlays {
+    pointer-events: stroke;
+    stroke-width: 50px;
+    stroke: transparent;
+    cursor: pointer;
+}
+
+.team_elo_slider_ticks {
+    font-family: 'Red Hat Display', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+#team_elo_slider_handle {
+    fill: #fff;
+    stroke: #000;
+    stroke-opacity: 0.5;
+    stroke-width: 1.25px;
+}
+
+#odds_table_display {
+    position: absolute;
+    left: 420px;
+    top: 40px;
+}
+
+#odds_table {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #bdbdbd;
+}
+
+#odds_table_container {
+    height: 80vh;
+    overflow-y: auto;
+}
+
+#odds_table_thead {
+    background-color: #f2f2f2;
+    padding: 10px;
+    text-align: center;
+    font-weight: 300;
+    font-size: 18px;
+    font-family: "Work Sans";
+}
+
+
+.odds_table_td {
+    border: 1px solid #bdbdbd;
+    padding: 5px;
+    padding-left: 20px;
+    font-size: 16px;
+    font-family: "Work Sans";
+}
+
+#odds_table_heading {
+    font-size: 28px;
+    font-weight: 500;
+    font-family: Work Sans;
+}
+
+.odds_table_th {
+    font-size: 18px;
+    font-weight: 500;
+    font-family: Work Sans;
+}
+
+#market_settings_container {
+    position: absolute;
+    right: 60px;
+    top: 110px;
+    height: auto;
+    min-width: 180px;
+    border: 1px solid #bdbdbd;
+    margin-top: 0px;
+    display: None;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+    padding-bottom: 50px;
+}
+
+#market_settings_header_div {
+    background-color: #f2f2f2;
+    text-align: left;
+    padding: 0px;
+    margin-bottom: 20px;
+    width: 100%;
+    border: 1px solid #bdbdbd;
+    border-top: None;
+}
+
+#market_settings_heading {
+    font-size: 18px;
+    font-weight: 500;
+    font-family: Work Sans;
+    text-align: center;
+}
+
+.market_settings_header {
+    font-weight: 500;
+    margin-left: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+}
+
+#market_select_dropdown {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 200px;
+    background-color: #f0f0f0;
+}
+
+#vig_settings_div {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#vig_percent_input {
+    width: 190px;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius: 4px;
+    background-color: #f0f0f0;
+}
+
+#vig_method_dropdown {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 200px;
+    background-color: #f0f0f0;
+}
+
+#apply_vig_button {
+    margin-top: 20px;
+    width: 120px;
+    cursor: pointer;
+}
+
+#save_vig_button {
+    margin-top: 20px;
+    width: 120px;
+    cursor: pointer;
+}
+
+#save_vig_success_text{
+    font-weight: 500;
+    font-size: 14px;
+    margin-top: 5px;
+    color: #f57e42;
+    opacity: 0;
+}
+
+#odds_table_dropdown {
+    display: none;
+    margin-bottom: 20px;
+}
+
+#win_totals_screen {
+    display: none;
+    position: absolute;
+    left: 420px;
+    top: 70px;
+    font-family: Work Sans;
+}
+
+#win_totals_header_div{
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0px;
+}
+
+#win_totals_team_dropdown_div {
+
+    text-align: center;
+}
+
+#win_totals_team_dropdown {
+    min-width: 200px;
+    display: inline-block;
+}
+
+#win_totals_slider_output {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#win_totals_slider_value {
+    display: block;
+    text-align: center;
+    font-size: 28px;
+    margin-right: 8px;
+}
+
+#win_totals_slider_text {
+    display: block;
+    text-align: center;
+    font-size: 22px;
+}
+
+#win_totals_slider_value {
+    display: block;
+    text-align: center;
+    font-size: 22px;
+}
+
+#win_totals_header_div {
+    font-size: 28px;
+}
+
+#win_totals_team_logo_div {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 0px;
+}
+
+#win_totals_team_logo {
+    max-height: 90px;
+    max-width: 90px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+#win_totals_team_name {
+    margin-top: 10px;
+    font-weight: 500;
+    font-size: 26px;
+}
+
+.win_totals_slider_info {
+    display: flex; 
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+#win_totals_radio_div {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+
+#win_totals_slider {
+    min-width: 300px;
+}
+
+#win_totals_season_win_text { 
+    text-align: center;
+    font-size: 28px;
+    font-weight: 500;
+}
+
+#win_totals_under_price {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 500;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+#win_totals_over_price {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 500;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+.win_totals_ou_text {
+    margin-top: 0px;
+    font-size: 20px;
+    font-weight: 300;
+    text-align: center;
+}
+
+#h2h_screen {
+    display: none;
+    position: absolute;
+    left: 420px;
+    top: 70px;
+    padding-left: 40px;
+    font-family: Work Sans;
+}
+
+#h2h_header {
+    font-size: 28px;
+    font-weight: 500;
+}
+
+#h2h_team_info_div {
+    display: flex;
+}
+
+#h2h_team_1_div{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0px;
+    margin-right: 20px;
+}
+
+#h2h_team_2_div{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0px;
+}
+
+#h2h_team_1_dropdown_div {
+
+    text-align: center;
+}
+
+#h2h_team_2_dropdown_div {
+
+    text-align: center;
+}
+
+#h2h_team_1_dropdown {
+    min-width: 100px;
+    max-width: 180px;
+    display: inline-block;
+}
+
+#h2h_team_2_dropdown {
+    min-width: 100px;
+    max-width: 180px;
+    display: inline-block;
+}
+
+#h2h_team_1_spread_slider {
+    width: 100%;
+}
+
+#h2h_team_1_spread_slider_output {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#h2h_team_1_spread_slider_value {
+    display: block;
+    text-align: center;
+    font-size: 28px;
+    margin-right: 8px;
+}
+
+#h2h_team_1_spread_slider_text {
+    display: block;
+    text-align: center;
+    font-size: 22px;
+}
+
+#h2h_team_1_spread_abbrev_text {
+    display: block;
+    text-align: center;
+    font-size: 22px;
+    margin-right: 10px;
+}
+
+#h2h_team_1_logo_div {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 0px;
+}
+
+#h2h_team_2_logo_div {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 0px;
+}
+
+#h2h_team_1_logo {
+    max-height: 90px;
+    max-width: 90px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+#h2h_team_2_logo {
+    max-height: 90px;
+    max-width: 90px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+#h2h_team_1_name {
+    margin-top: 10px;
+    font-weight: 500;
+    font-size: 26px;
+}
+
+#h2h_team_2_name {
+    margin-top: 10px;
+    font-weight: 500;
+    font-size: 26px;
+}
+
+.h2h_pricing_slider_info {
+    display: flex; 
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+#h2h_team_1_spread_slider {
+    min-width: 300px;
+}
+
+
+#h2h_team_1_price {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 500;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+#h2h_team_2_price {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 500;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+}
+
+.h2h_team_price_text {
+    margin-top: 0px;
+    font-size: 20px;
+    font-weight: 300;
+    text-align: center;
+}
+
+
+
