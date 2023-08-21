@@ -77,6 +77,8 @@ d3.select("#sidebar_div").attr('min-width', base_sidebar_width + 'px');
 //************************API Requests*********************************************/
 async function fetchSidebarData(server_api_url, user_id) {
 
+    console.log("fetching sidebar data for user", user_id);
+
     const payload = {
         'user_id': user_id,
         'request_type': 'SidebarLoadData',
