@@ -1612,7 +1612,7 @@ function createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data
                                                                 .append("option")
                                                                 .text(d => d.market_title)
                                                                 .attr('value', d => d.market_id)
-                                                                .on("click", function(d) {
+                                                                .on("change", function(d) {
                                                                     
                                                                     populateVigSettingValues(sidebar_data_dict, d.market_id);
 
