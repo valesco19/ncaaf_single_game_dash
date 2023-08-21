@@ -1,4 +1,4 @@
-const server_api_url = "https://ncaaf-season-sim-api.untouted.com/api"
+const server_api_url = "https://ncaaf-season-sim-api.untouted.com"
 
 let global_pricing_dict = {
     json_data: {},
