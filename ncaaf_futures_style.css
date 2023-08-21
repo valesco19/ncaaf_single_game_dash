@@ -94,7 +94,11 @@ body {
 #odds_table_display {
     position: absolute;
     left: 420px;
-    top: 40px;
+    top: 80px;
+}
+
+#odds_table_heading {
+    margin-bottom: 20px;
 }
 
 #odds_table {
@@ -249,6 +253,10 @@ body {
     margin-top: 0px;
 }
 
+#win_totals_season_win_text {
+    margin-bottom: 20px;
+}
+
 #win_totals_team_dropdown_div {
 
     text-align: center;
@@ -388,6 +396,11 @@ body {
     margin-right: 20px;
 }
 
+#h2h_team_1_abbrev {
+    font-size: 24px;
+    font-weight: 500;
+}
+
 #h2h_team_2_div{
     position: relative;
     display: flex;
@@ -395,6 +408,11 @@ body {
     align-items: center;
     justify-content: center;
     margin-top: 0px;
+}
+
+#h2h_team_2_abbrev {
+    font-size: 24px;
+    font-weight: 500;
 }
 
 #h2h_team_1_dropdown_div {
