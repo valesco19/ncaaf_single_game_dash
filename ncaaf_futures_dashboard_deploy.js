@@ -1,12 +1,13 @@
-const server_api_url = "https://ncaaf-season-sim-api.untouted.com"
+const server_api_url = "http://127.0.0.1:3019/"
+const user_id = "nd7xeF2aAEXaflHkfJ4caQhQOr42"
 
 let global_pricing_dict = {
     json_data: {},
     pricing_market_id: 1001,
     conference_winner_display_id: 151,
     conference_exacta_display_id: 151,
-    division_conference_winner_display_id: 1,
-    division_winner_display_id: 101,
+    division_conference_winner_display_id: 5,
+    division_winner_display_id: 103,
     bowl_id: 101,
     win_total_team_id: 2005,
     win_totals_slider_value: 8.5,
@@ -76,8 +77,6 @@ d3.select("#sidebar_div").attr('min-width', base_sidebar_width + 'px');
 
 //************************API Requests*********************************************/
 async function fetchSidebarData(server_api_url, user_id) {
-
-    console.log("fetching sidebar data for user", user_id);
 
     const payload = {
         'user_id': user_id,
@@ -347,6 +346,7 @@ async function sendSaveMarketVigRequest(server_api_url, user_id, sidebar_data_di
 
 async function sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict) {
 
+    console.log("Send pricing request for", pricing_request_params.pricing_market_id);
     global_pricing_dict.pricing_market_id = pricing_request_params.pricing_market_id;
 
     const payload = {
@@ -407,7 +407,7 @@ function handlePricingResponse(json_data, sidebar_data_dict) {
 
     } else if (pricing_market_id == 1202) {
 
-        populateH2HTeamWinTotalPricingScreeen(json_data, sidebar_data_dict);
+        populateH2HTeamWinTotalPricingScreen(json_data, sidebar_data_dict);
 
     } else if (pricing_market_id == 1301) {
 
@@ -1611,94 +1611,95 @@ function createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data
                                                                 .enter()
                                                                 .append("option")
                                                                 .text(d => d.market_title)
-                                                                .attr('value', d => d.market_id)
-                                                                .on("change", function(d) {
+                                                                .attr('value', d => d.market_id);
+
+
+
+    market_select_dropdown.on("change", function() {
                                                                     
-                                                                    populateVigSettingValues(sidebar_data_dict, d.market_id);
+                                                                    populateVigSettingValues(sidebar_data_dict, this.value);
 
                                                                     //Playoff Market
-                                                                    if (d.market_id == 1001) {
+                                                                    if (this.value == 1001) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(d.market_id),
+                                                                            pricing_market_id: parseInt(this.value),
 
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
-                                                                    } else if (d.market_id == 1002) {
+                                                                    } else if (this.value == 1002) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(d.market_id),
+                                                                            pricing_market_id: parseInt(this.value),
                                                                         };
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
                                                                     
-                                                                    } else if (d.market_id == 1101) {
+                                                                    } else if (this.value == 1101) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(d.market_id),
+                                                                            pricing_market_id: parseInt(this.value),
                                                                             conference_id: global_pricing_dict.conference_winner_display_id,
 
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
-                                                                    } else if (d.market_id == 1102) {
+                                                                    } else if (this.value == 1102) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(d.market_id),
+                                                                            pricing_market_id: parseInt(this.value),
                                                                             conference_id: global_pricing_dict.division_conference_winner_display_id,
                                                                             division_id: global_pricing_dict.division_winner_display_id,
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
-                                                                    } else if (d.market_id == 1103) {
+                                                                    } else if (this.value == 1103) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(d.market_id),
+                                                                            pricing_market_id: parseInt(this.value),
                                                                             bowl_id: global_pricing_dict.bowl_id,
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
                                                                     
-                                                                    } else if (d.market_id == 1201) {
+                                                                    } else if (this.value == 1201) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(d.market_id),
+                                                                            pricing_market_id: parseInt(this.value),
                                                                             team_id: global_pricing_dict.win_total_team_id,
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
-                                                                    } else if (d.market_id == 1202) {
+                                                                    } else if (this.value == 1202) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(d.market_id),
+                                                                            pricing_market_id: parseInt(this.value),
                                                                             h2h_win_params: {
                                                                                 h2h_win_total_team_1_id: global_pricing_dict.h2h_win_total_team_1_id,
                                                                                 h2h_win_total_team_2_id: global_pricing_dict.h2h_win_total_team_2_id,
                                                                             }
                                                                         }
 
-                                                                        console.log(pricing_request_params);
-
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
                                                                     
-                                                                    } else if (d.market_id == 1301) {
+                                                                    } else if (this.value == 1301) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(d.market_id),
+                                                                            pricing_market_id: parseInt(this.value),
                                                                             conference_id: global_pricing_dict.conference_exacta_display_id,
                                                                         }
 
@@ -1707,7 +1708,7 @@ function createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data
 
                                                                     } else {
 
-                                                                        console.log("Dropdown Market id not list: ", d.market_id);
+                                                                        console.log("Dropdown Market id not list: ", this.value);
 
                                                                     }
 
@@ -1753,22 +1754,26 @@ function populateConferenceWinSelectDropdown(sidebar_data_dict) {
                                                                 .enter()
                                                                 .append("option")
                                                                 .text(d => d.conference_abbrev)
-                                                                .attr('value', d => d.conference_id)
-                                                                .on("click", function(d) {
+                                                                .attr('value', d => d.conference_id);
 
-                                                                    //set  global conference id
-                                                                    global_pricing_dict.conference_winner_display_id = d.conference_id;
-                                                                    
-                                                                    let pricing_request_params = {
 
-                                                                        pricing_market_id: global_pricing_dict.pricing_market_id,
-                                                                        conference_id: d.conference_id,
+    odds_table_dropdown.on("change", function() {
 
-                                                                    }
+                                //set  global conference id
+                                let conference_id = parseInt(this.value);
 
-                                                                     sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                                                                    
-                                                                });
+                                global_pricing_dict.conference_winner_display_id = conference_id;
+                                
+                                let pricing_request_params = {
+
+                                    pricing_market_id: global_pricing_dict.pricing_market_id,
+                                    conference_id: conference_id,
+
+                                }
+
+                                    sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                                
+                            });
 }
 
 function createDivisionOptionsArray(sidebar_data_dict) {
@@ -1818,25 +1823,42 @@ function populateDivisionWinSelectDropdown(sidebar_data_dict) {
                                                                 .text(d => {
                                                                     return d.conference_abbrev + ' - ' +  d.division_name
                                                                 })
-                                                                .attr('value', d => d.division_id)
-                                                                .on("click", function(d) {
+                                                                .attr('value', d => d.division_id);
+    
+    let division_id_to_conference_map = {
+        103: 5,
+        104: 5,
+        109: 8,
+        110: 8,
+        105: 15,
+        106: 15,
+        107: 17,
+        108: 17,
+        111: 37,
+        112: 37,
+    }
 
-                                                                    //set  global conference id
-                                                                    global_pricing_dict.division_conference_winner_display_id = d.conference_id;
-                                                                    global_pricing_dict.division_winner_display_id = d.division_id;
-                                                                    
-                                                                    let pricing_request_params = {
+    odds_table_dropdown.on("change", function() {
 
-                                                                        pricing_market_id: 1102,
-                                                                        conference_id: d.conference_id,
-                                                                        division_id: d.division_id,
+                                                //set  global conference id
+                                                let division_id = parseInt(this.value);
+                                                let conference_id = division_id_to_conference_map[division_id];
+                                                global_pricing_dict.division_conference_winner_display_id = conference_id;
+                                                global_pricing_dict.division_winner_display_id = division_id;
+                                                
 
-                                                                    }
+                                                let pricing_request_params = {
 
-                                                                    console.log(pricing_request_params);
-                                                                     sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                                                                    
-                                                                });
+                                                    pricing_market_id: 1102,
+                                                    conference_id: conference_id,
+                                                    division_id: division_id,
+
+                                                };
+
+                                                console.log(pricing_request_params);
+                                                    sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                                                
+                                            });
 }
 
 function populateBowlWinSelectDropdown(sidebar_data_dict) {
@@ -1858,22 +1880,26 @@ function populateBowlWinSelectDropdown(sidebar_data_dict) {
                                                                 .append("option")
                                                                 .text(d => d.bowl_name)
                                                                 .attr('value', d => d.bowl_id)
-                                                                .on("click", function(d) {
 
-                                                                    //set  global conference id
-                                                                    global_pricing_dict.bowl_id = d.bowl_id;
-                                                                    
-                                                                    let pricing_request_params = {
 
-                                                                        pricing_market_id: 1103,
-                                                                        bowl_id: d.bowl_id,
+    odds_table_dropdown.on("change", function() {
 
-                                                                    }
+                            //set  global conference id
+                            let bowl_id = parseInt(this.value);
 
-                                                                    console.log(pricing_request_params);
-                                                                     sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                                                                    
-                                                                });
+                            global_pricing_dict.bowl_id = bowl_id;
+                            
+                            let pricing_request_params = {
+
+                                pricing_market_id: 1103,
+                                bowl_id: bowl_id,
+
+                            }
+
+                            console.log(pricing_request_params);
+                                sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                            
+                        });
 }
 
 function populateWinTotalsTeamSelectDropdown(sidebar_data_dict) {
@@ -1911,22 +1937,27 @@ function populateWinTotalsTeamSelectDropdown(sidebar_data_dict) {
                             .append("option")
                             .text(d => d.team_name + " " + d.team_mascot)
                             .attr('value', d => d.team_id)
-                            .on("click", function(d) {
+                            .property('selected', d => d.team_id === global_pricing_dict.win_total_team_id);
 
-                                //set  global conference id
-                                global_pricing_dict.win_total_team_id = d.team_id;
-                                
-                                let pricing_request_params = {
 
-                                    pricing_market_id: 1201,
-                                    team_id: d.team_id,
+    win_totals_team_dropdown.on("change", function() {
 
-                                }
+                    //set  global conference id
+                    let team_id = parseInt(this.value);
 
-                                console.log(pricing_request_params);
-                                 sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                                
-                            });
+                    global_pricing_dict.win_total_team_id = team_id;
+                    
+                    let pricing_request_params = {
+
+                        pricing_market_id: 1201,
+                        team_id: team_id,
+
+                    }
+
+                    console.log(pricing_request_params);
+                        sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                    
+                });
 
 }
 
@@ -1964,25 +1995,28 @@ function populateH2HWinTotalTeamsSelectDropdown(sidebar_data_dict) {
                             .append("option")
                             .text(d => d.team_name + " " + d.team_mascot)
                             .attr('value', d => d.team_id)
-                            .property('selected', d => d.team_id === global_pricing_dict.h2h_win_total_team_1_id)
-                            .on("click", function(d) {
+                            .property('selected', d => d.team_id === global_pricing_dict.h2h_win_total_team_1_id);
 
-                                //set  global conference id
-                                global_pricing_dict.h2h_win_total_team_1_id = d.team_id;
-                                
-                                let pricing_request_params = {
+    h2h_team_1_dropdown.on("change", function(d) {
 
-                                    pricing_market_id: 1202,
-                                    h2h_win_params: {
-                                        h2h_win_total_team_1_id: d.team_id,
-                                        h2h_win_total_team_2_id: global_pricing_dict.h2h_win_total_team_2_id,
-                                    }
+                //set  global conference id
+                let team_id = parseInt(this.value);
 
-                                }
+                global_pricing_dict.h2h_win_total_team_1_id = team_id;
+                
+                let pricing_request_params = {
 
-                                 sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                                
-                            });
+                    pricing_market_id: 1202,
+                    h2h_win_params: {
+                        h2h_win_total_team_1_id: team_id,
+                        h2h_win_total_team_2_id: global_pricing_dict.h2h_win_total_team_2_id,
+                    }
+
+                }
+
+                    sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                
+            });
 
     let h2h_team_2_dropdown = d3.select("#h2h_team_2_dropdown");
 
@@ -1994,31 +2028,32 @@ function populateH2HWinTotalTeamsSelectDropdown(sidebar_data_dict) {
                             .append("option")
                             .text(d => d.team_name + " " + d.team_mascot)
                             .attr('value', d => d.team_id)
-                            .property('selected', d => d.team_id === global_pricing_dict.h2h_win_total_team_2_id)
-                            .on("click", function(d) {
+                            .property('selected', d => d.team_id === global_pricing_dict.h2h_win_total_team_2_id);
 
-                                //set  global conference id
-                                global_pricing_dict.h2h_win_total_team_2_id = d.team_id;
-                                
-                                let pricing_request_params = {
+    h2h_team_2_dropdown.on("change", function(d) {
 
-                                    pricing_market_id: 1202,
-                                    h2h_win_params: {
-                                        h2h_win_total_team_1_id: global_pricing_dict.h2h_win_total_team_1_id,
-                                        h2h_win_total_team_2_id: d.team_id,
-                                    }
+                        //set  global conference id
+                        let team_id = parseInt(this.value);
 
-                                }
+                        global_pricing_dict.h2h_win_total_team_2_id = team_id;
+                        
+                        let pricing_request_params = {
 
-                                    sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                                
-                            });
+                            pricing_market_id: 1202,
+                            h2h_win_params: {
+                                h2h_win_total_team_1_id: global_pricing_dict.h2h_win_total_team_1_id,
+                                h2h_win_total_team_2_id: team_id,
+                            }
+
+                        }
+
+                            sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                        
+                    });
 
 }
 
 function populatePlayoffOddsPricingTable(pricing_data, sidebar_data_dict) {
-
-    console.log("PopulatePlayoffOdds");
 
     //Hide Win Totals Screen if shown
     let is_win_totals_hidden = d3.select('#win_totals_screen').style('display') == 'none';
@@ -2757,7 +2792,7 @@ function populateTeamTotalsPricingScreen(json_data, sidebar_data_dict) {
     
 }
 
-function populateH2HTeamWinTotalPricingScreeen(json_data, sidebar_data_dict) {
+function populateH2HTeamWinTotalPricingScreen(json_data, sidebar_data_dict) {
 
     let pricing_data = json_data["h2h_pricing_results"];
 
@@ -2997,18 +3032,14 @@ function populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict) 
 
 
 //*******************************Start of APP ***********************************************/
-console.log("Session Starting for user:", user_id);
 
-
+//set timeout
 let sidebar_data_dict = setTimeout(() => {
+        fetchSidebarData(server_api_url, user_id)
+            .then((sidebar_data_dict) => {
+                
+                drawSidebarContents(sidebar_data_dict);
+                createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data_dict);
 
-    console.log("Session starting for user_id:", user_id);
-  
-    fetchSidebarData(server_api_url, user_id)
-                  .then((sidebar_data_dict) => {
-                      
-                      drawSidebarContents(sidebar_data_dict);
-                      createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data_dict);
-
-                  });
+            });
 }, 3000);
