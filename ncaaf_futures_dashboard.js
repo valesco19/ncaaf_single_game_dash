@@ -2995,13 +2995,11 @@ function populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict) 
 
 
 //*******************************Start of APP ***********************************************/
-let sidebar_data_dict = setTimeout(() => {    
-            console.log("Session starting for", user_id);
-            fetchSidebarData(server_api_url, user_id)
-                        .then((sidebar_data_dict) => {
-                            
-                            drawSidebarContents(sidebar_data_dict);
-                            createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data_dict);
+console.log("Session Starting for user:", user_id);
+let sidebar_data_dict = fetchSidebarData(server_api_url, user_id)
+                                .then((sidebar_data_dict) => {
+                                    
+                                    drawSidebarContents(sidebar_data_dict);
+                                    createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data_dict);
 
-                        });
-                    }, 3000);
+                                });
