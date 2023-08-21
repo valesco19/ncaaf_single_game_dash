@@ -216,12 +216,14 @@ body {
     margin-top: 20px;
     width: 120px;
     cursor: pointer;
+    border: 1px solid #777;
 }
 
 #save_vig_button {
     margin-top: 20px;
     width: 120px;
     cursor: pointer;
+    border: 1px solid #777;
 }
 
 #save_vig_success_text{
