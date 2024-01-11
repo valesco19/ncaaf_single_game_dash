@@ -1104,11 +1104,11 @@ global_var_dict['schedule_date_str'] = pullCurrentDateStr();
 
 setTimeout(function() {
 
-    console.log(logged_in_user);
+    console.log(logged_in_user.uid, "is logged in");
 
     let init_game_req_dict = {
         req_type: "load_games",
-        //user_id: user.uid,
+        user_id: logged_in_user.uid,
         params: {
             "schedule_date_str": global_var_dict['schedule_date_str'],
         }
@@ -1116,7 +1116,7 @@ setTimeout(function() {
 
     let init_games_for_day_req_dict = {
         req_type: "return_games_for_day",
-        //user_id: user.uid,
+        user_id: loggedd_in_user.uid,
         params: {
             "season": 2023,
         }
