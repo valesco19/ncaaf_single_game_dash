@@ -1,0 +1,91 @@
+.font_awesome_text_icon {
+    font-family: 'FontAwesome';
+}
+
+body {
+    font-family: 'Work Sans'; 
+    background-color: #1a1a1a;
+    color: #bdbdbd;
+    padding-top: 80px;
+    padding-bottom: 100px;
+}
+
+#navbar {
+    z-index: 10;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 55px;
+    width: 100vw;
+    background: #fff;
+}
+
+#navbar_logo {
+    font-weight: 700;
+    font-size: 48px;
+    height: 40px;
+    text-align: center;
+    padding-top: 5px;
+    padding-left: 15px;
+    color: #1a1a1a;
+}
+
+#viz {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
+    overflow: auto;
+}
+
+#game_filter_div {
+    width: 100%;
+    width: 700px;
+    /* border: 1px solid #bdbdbd; */
+    height: 120px;
+    margin-bottom: 20px;
+    transform: translateX(-20px);
+}
+
+#game_div {
+    width: 720px;
+    height: 900px;
+    overflow: auto;
+    margin-bottom: 20px;
+    padding-right: 8px;
+}
+
+#game_div::-webkit-scrollbar {
+    width: 12px; /* Adjust the width as needed */
+  }
+  
+  #game_div::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 126, 66, 0.2); /* Color of the scroll rectangle */
+    border: 1px solid rgba(245, 126, 66, 1); /* Set a background color */
+    border-radius: 8px; /* Adjust the border-radius for rounded corners */
+  }
+  
+  #game_div::-webkit-scrollbar-button {
+    display: none; /* Hide default scrollbar buttons */
+  }
+  
+  #game_div::-webkit-scrollbar-track {
+    background-color: transparent; /* No background for the scrollbar track */
+  }
+  
+  #game_div::-webkit-scrollbar-corner {
+    background-color: transparent; /* No background for the scrollbar corner */
+  }
+
+  .game_rows {
+    margin-bottom: 10px;
+    border: 1px solid #bdbdbd;
+    border-radius: 15px;
+  }
+
