@@ -1057,7 +1057,7 @@ function updateGameState(game_state_dict) {
 }
 
 function startWebSocket() {
-    ws_conn = new WebSocket('ws://localhost:3030');
+    ws_conn = new WebSocket('ws://api.untouted.com');
     console.log("Websocket Connected.");
 
     ws_conn.onmessage = function incoming(event) {
