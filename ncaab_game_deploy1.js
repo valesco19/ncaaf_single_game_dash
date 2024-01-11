@@ -1058,7 +1058,7 @@ function updateGameState(game_state_dict) {
 
 function startWebSocket() {
     ws_conn = new WebSocket('wss://api.untouted.com');
-    console.log("Websocket Connected.");
+    console.log("Websocket Connected for", user.uid);
 
     ws_conn.onmessage = function incoming(event) {
 
@@ -1106,6 +1106,7 @@ setTimeout(function() {
 
     let init_game_req_dict = {
         req_type: "load_games",
+        user_id: user.uid,
         params: {
             "schedule_date_str": global_var_dict['schedule_date_str'],
         }
@@ -1113,6 +1114,7 @@ setTimeout(function() {
 
     let init_games_for_day_req_dict = {
         req_type: "return_games_for_day",
+        user_id: user.uid,
         params: {
             "season": 2023,
         }
