@@ -151,6 +151,7 @@ function sendLoadGamesReq() {
     //Send request for new day's games
     let games_req_dict = {
         req_type: "load_games",
+        user_email: logged_in_user.email,
         params: {
             "schedule_date_str": global_var_dict.schedule_date_str,
         }
@@ -1104,11 +1105,11 @@ global_var_dict['schedule_date_str'] = pullCurrentDateStr();
 
 setTimeout(function() {
 
-    console.log(logged_in_user.uid, "is logged in");
+    console.log(logged_in_user.email, "is logged in");
 
     let init_game_req_dict = {
         req_type: "load_games",
-        user_id: logged_in_user.uid,
+        user_email: logged_in_user.email,
         params: {
             "schedule_date_str": global_var_dict['schedule_date_str'],
         }
@@ -1116,7 +1117,7 @@ setTimeout(function() {
 
     let init_games_for_day_req_dict = {
         req_type: "return_games_for_day",
-        user_id: logged_in_user.uid,
+        user_email: logged_in_user.email,
         params: {
             "season": 2023,
         }
