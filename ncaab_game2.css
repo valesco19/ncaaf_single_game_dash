@@ -39,8 +39,8 @@ body {
     width: 98%;
     /* border: 1px solid #bdbdbd; */
     max-width: 720px;
-    height: 120px;
-    margin-bottom: 20px;
+    height: 80px;
+    margin-bottom: 10px;
     transform: translateX(-20px);
 }
 
