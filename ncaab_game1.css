@@ -20,16 +20,6 @@ body {
     background: #fff;
 }
 
-#navbar_logo {
-    font-weight: 700;
-    font-size: 48px;
-    height: 40px;
-    text-align: center;
-    padding-top: 5px;
-    padding-left: 15px;
-    color: #1a1a1a;
-}
-
 #viz {
     display: flex;
     flex-direction: column;
@@ -42,19 +32,21 @@ body {
     max-width: 1200px;
     height: 90vh;
     overflow: auto;
+    top: 70px;
 }
 
 #game_filter_div {
-    width: 100%;
-    width: 700px;
+    width: 98%;
     /* border: 1px solid #bdbdbd; */
+    max-width: 720px;
     height: 120px;
     margin-bottom: 20px;
     transform: translateX(-20px);
 }
 
 #game_div {
-    width: 720px;
+    width: 98%;
+    max-width: 720px;
     height: 900px;
     overflow: auto;
     margin-bottom: 20px;
