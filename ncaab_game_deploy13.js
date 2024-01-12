@@ -466,7 +466,8 @@ function populateSchedule(schedule_array) {
     
     let game_odds_left = game_div_width < global_var_dict.mobile_screen_width ? 260 : 350;
     let game_odds_top = 20;
-    let game_odds_width = game_div_width - game_odds_left - 40;
+    let game_odds_right_padding = game_div_width < global_var_dict.mobile_screen_width ? 20 : 40;
+    let game_odds_width = game_div_width - game_odds_left - game_odds_right_padding;
     let game_odds_middle_padding = 4;
     let game_odds_height = game_row_height - (2 * game_odds_top) - 18;
 
@@ -726,95 +727,100 @@ function populateSchedule(schedule_array) {
     let game_button_height = game_row_width > 550 ? 23 : 20;
     let game_button_padding = 8;
     let game_button_left = game_odds_left + (game_odds_width / 2) - ((game_button_width * 3) + (game_button_padding * 2)) / 2;
+    
+    //Populate buttons if game_div_width > 450;
 
-    let matchup_button_g = game_rows.append('g')
-                                            .attr('id', function(d) {  
-                                                return 'matchup_button_' + d.game_url
-                                            })
-                                            .attr('transform', 'translate(' + game_button_left + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
-                                            .style('cursor', 'pointer')
-                                            .on('click', function(d) {
+    if (game_div_width > 450) {
 
-                                                launchGamePage(d.game_url);
+        let matchup_button_g = game_rows.append('g')
+                                                .attr('id', function(d) {  
+                                                    return 'matchup_button_' + d.game_url
+                                                })
+                                                .attr('transform', 'translate(' + game_button_left + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
+                                                .style('cursor', 'pointer')
+                                                .on('click', function(d) {
 
-                                            });
+                                                    launchGamePage(d.game_url);
 
-    let matchup_button_bg = matchup_button_g.append('rect')
-                                            .attr('width', game_button_width)
-                                            .attr('height', game_button_height)
-                                            .attr('rx', '12px')
-                                            .attr('ry', '12px')
-                                            // .attr('stroke', color_dict.dark_gray)
-                                            // .attr('stroke-width', '1px')
-                                            .attr('fill', color_dict.orange)
-                                            .style('shape-rendering', 'CrispEdges');
+                                                });
 
-    let matchup_button_text = matchup_button_g.append('text')
-                                            .text("Matchup")
-                                            .attr('x', game_button_width / 2)
-                                            .attr('y', game_button_height / 2)
-                                            .attr('text-anchor', 'middle')
-                                            .attr('dominant-baseline', 'middle')
-                                            .attr('fill', color_dict.black)
-                                            .style('font-size', '12px')
-                                            .style('font-weight', 500)
-                                            .style('font-family', 'Work Sans');
+        let matchup_button_bg = matchup_button_g.append('rect')
+                                                .attr('width', game_button_width)
+                                                .attr('height', game_button_height)
+                                                .attr('rx', '12px')
+                                                .attr('ry', '12px')
+                                                // .attr('stroke', color_dict.dark_gray)
+                                                // .attr('stroke-width', '1px')
+                                                .attr('fill', color_dict.orange)
+                                                .style('shape-rendering', 'CrispEdges');
 
-    let ingame_button_g = game_rows.append('g')
-                                            .attr('id', function(d) {
-                                                return 'ingame_button_' + d.game_url
-                                            })
-                                            .attr('transform', 'translate(' + (game_button_left + game_button_width + game_button_padding) + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
-                                            .style('cursor', 'not-allowed');
+        let matchup_button_text = matchup_button_g.append('text')
+                                                .text("Matchup")
+                                                .attr('x', game_button_width / 2)
+                                                .attr('y', game_button_height / 2)
+                                                .attr('text-anchor', 'middle')
+                                                .attr('dominant-baseline', 'middle')
+                                                .attr('fill', color_dict.black)
+                                                .style('font-size', '12px')
+                                                .style('font-weight', 500)
+                                                .style('font-family', 'Work Sans');
 
-    let ingame_button_bg = ingame_button_g.append('rect')
-                                            .attr('width', game_button_width)
-                                            .attr('height', game_button_height)
-                                            .attr('rx', '12px')
-                                            .attr('ry', '12px')
-                                            .attr('stroke', color_dict.dark_gray)
-                                            .attr('stroke-width', '1px')
-                                            .attr('fill', color_dict.dark_gray)
-                                            .style('shape-rendering', 'CrispEdges');
+        let ingame_button_g = game_rows.append('g')
+                                                .attr('id', function(d) {
+                                                    return 'ingame_button_' + d.game_url
+                                                })
+                                                .attr('transform', 'translate(' + (game_button_left + game_button_width + game_button_padding) + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
+                                                .style('cursor', 'not-allowed');
 
-    let ingame_button_text = ingame_button_g.append('text')
-                                            .text("Ingame")
-                                            .attr('x', game_button_width / 2)
-                                            .attr('y', game_button_height / 2)
-                                            .attr('text-anchor', 'middle')
-                                            .attr('dominant-baseline', 'middle')
-                                            .attr('fill', color_dict.black)
-                                            .style('font-size', '12px')
-                                            .style('font-weight', 500)
-                                            .style('font-family', 'Work Sans');
+        let ingame_button_bg = ingame_button_g.append('rect')
+                                                .attr('width', game_button_width)
+                                                .attr('height', game_button_height)
+                                                .attr('rx', '12px')
+                                                .attr('ry', '12px')
+                                                .attr('stroke', color_dict.dark_gray)
+                                                .attr('stroke-width', '1px')
+                                                .attr('fill', color_dict.dark_gray)
+                                                .style('shape-rendering', 'CrispEdges');
 
-    let recap_button_g = game_rows.append('g')
-                                            .attr('id', function(d) {
-                                                return 'recap_button_' + d.game_url
-                                            })
-                                            .attr('transform', 'translate(' + (game_button_left + (game_button_width * 2) + (game_button_padding * 2)) + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
-                                            .style('cursor', 'not-allowed');
+        let ingame_button_text = ingame_button_g.append('text')
+                                                .text("Ingame")
+                                                .attr('x', game_button_width / 2)
+                                                .attr('y', game_button_height / 2)
+                                                .attr('text-anchor', 'middle')
+                                                .attr('dominant-baseline', 'middle')
+                                                .attr('fill', color_dict.black)
+                                                .style('font-size', '12px')
+                                                .style('font-weight', 500)
+                                                .style('font-family', 'Work Sans');
 
-    let recap_button_bg = recap_button_g.append('rect')
-                                            .attr('width', game_button_width)
-                                            .attr('height', game_button_height)
-                                            .attr('rx', '12px')
-                                            .attr('ry', '12px')
-                                            // .attr('stroke', color_dict.dark_gray)
-                                            // .attr('stroke-width', '1px')
-                                            .attr('fill', color_dict.dark_gray)
-                                            .style('shape-rendering', 'CrispEdges');
+        let recap_button_g = game_rows.append('g')
+                                                .attr('id', function(d) {
+                                                    return 'recap_button_' + d.game_url
+                                                })
+                                                .attr('transform', 'translate(' + (game_button_left + (game_button_width * 2) + (game_button_padding * 2)) + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
+                                                .style('cursor', 'not-allowed');
 
-    let recap_button_text = recap_button_g.append('text')
-                                            .text("Recap")
-                                            .attr('x', game_button_width / 2)
-                                            .attr('y', game_button_height / 2)
-                                            .attr('text-anchor', 'middle')
-                                            .attr('dominant-baseline', 'middle')
-                                            .attr('fill', color_dict.black)
-                                            .style('font-size', '12px')
-                                            .style('font-weight', 500)
-                                            .style('font-family', 'Work Sans');
+        let recap_button_bg = recap_button_g.append('rect')
+                                                .attr('width', game_button_width)
+                                                .attr('height', game_button_height)
+                                                .attr('rx', '12px')
+                                                .attr('ry', '12px')
+                                                // .attr('stroke', color_dict.dark_gray)
+                                                // .attr('stroke-width', '1px')
+                                                .attr('fill', color_dict.dark_gray)
+                                                .style('shape-rendering', 'CrispEdges');
+
+        let recap_button_text = recap_button_g.append('text')
+                                                .text("Recap")
+                                                .attr('x', game_button_width / 2)
+                                                .attr('y', game_button_height / 2)
+                                                .attr('text-anchor', 'middle')
+                                                .attr('dominant-baseline', 'middle')
+                                                .attr('fill', color_dict.black)
+                                                .style('font-size', '12px')
+                                                .style('font-weight', 500)
+                                                .style('font-family', 'Work Sans');
+    }
 }
 
 function populateDateSelector() {
@@ -824,17 +830,17 @@ function populateDateSelector() {
     let game_filter_height = game_filter_svg.node().getBoundingClientRect().height;
 
     //Number of games to display on either side of the  currently selected day
-    let num_days_to_display = 2;
+    let num_days_to_display = game_filter_width < global_var_dict.mobile_screen_width ? 1 : 2;
     let arrow_select_width = 30;
 
     let date_padding_dict = {
         left: 20,
         right: 20,
         top: 0,
-        bottom: 20,
+        bottom: 30,
     };
 
-    let game_date_select_height = 60;
+    let game_date_select_height = game_filter_height;
     let game_date_select_width = (game_filter_width - (2 * arrow_select_width) - date_padding_dict.left - date_padding_dict.right) / (num_days_to_display * 2 + 1);
 
     //Populate Date Arrow Selectors
