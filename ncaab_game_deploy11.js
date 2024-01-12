@@ -4,9 +4,9 @@ let color_dict = {
     black: "#000",
     charcoal: "#333",
     white: "#fff",
-    light_gray: "#f2f2f2",
-    med_gray: "#bdbdbd",
-    dark_gray: ' #8d8d8d ',
+    light_gray: "#cec1ae",
+    med_gray: "#cec1ae",
+    dark_gray: '#cec1ae',
     orange: "#f57e42",
     dark_bg: "#1a1a1a",
 }
@@ -15,6 +15,10 @@ let global_var_dict = {
     schedule_date_str: '',
     game_filter_type: "date",
     games_for_day: [],
+    mobile_screen_width: 625,
+    schedule_date_str: pullCurrentDateStr(),
+    schedule_array: [],
+
 }
 
 function convertWinProbToAmericanOdds(win_prob) {
@@ -151,7 +155,6 @@ function sendLoadGamesReq() {
     //Send request for new day's games
     let games_req_dict = {
         req_type: "load_games",
-        user_email: logged_in_user.email,
         params: {
             "schedule_date_str": global_var_dict.schedule_date_str,
         }
@@ -175,9 +178,10 @@ function launchGamePage(game_url) {
 function populateSchedule(schedule_array) {
 
     let game_div = d3.select('#game_div');
+    let game_div_width = game_div.node().getBoundingClientRect().width;
 
-    let game_row_width = 700;
-    let game_row_height = 100;
+    let game_row_width = game_div_width - 30;
+    let game_row_height = 120;
     let game_row_padding = 12;
 
     let game_rows = game_div.selectAll(".game_rows")
@@ -214,21 +218,22 @@ function populateSchedule(schedule_array) {
                                                 //.style('shape-rendering', 'CrispEdges');
 
     let game_padding_dict = {
-        left: 10,
+        left: 20,
         top: 14,
         bottom: 15,
         right: 10,
     };
 
-    let team_name_font_size = '14px';
-    let sub_text_size = '10px';
-    let team_logo_size = 25;
+    let team_name_font_size = game_div_width < global_var_dict.mobile_screen_width ? '16px' : '18px';
+    let sub_text_size = game_div_width < global_var_dict.mobile_screen_width ? '12px' : '14px';
+    let team_logo_size = game_div_width < global_var_dict.mobile_screen_width ? 25 : 32;
+    let away_top_padding = 42;
 
     let game_away_team_rank_text = game_rows.append('text')
                                                                                     .text(function(d) {
                                                                                         return d.away_team_rank
                                                                                     })
-                                                                                    .attr('x', game_padding_dict.left + 10)
+                                                                                    .attr('x', game_padding_dict.left)
                                                                                     .attr('y', game_padding_dict.top + 8)
                                                                                     .attr('id', function(d) {
 
@@ -249,8 +254,8 @@ function populateSchedule(schedule_array) {
                                                                                     .text(function(d) {
                                                                                         return d.home_team_rank
                                                                                     })
-                                                                                    .attr('x', game_padding_dict.left + 10)
-                                                                                    .attr('y', game_row_height - game_padding_dict.bottom - 30)
+                                                                                    .attr('x', game_padding_dict.left)
+                                                                                    .attr('y', game_padding_dict.top + away_top_padding)
                                                                                     .attr('id', function(d) {
 
                                                                                         //Replace "/" with "_" in game_url
@@ -268,7 +273,7 @@ function populateSchedule(schedule_array) {
 
     let game_away_team_logo = game_rows.append("svg:image")
                                                                                     .attr("id", "away_team_logo_img")
-                                                                                    .attr('x', game_padding_dict.left + 27)
+                                                                                    .attr('x', game_padding_dict.left + 17)
                                                                                     .attr('y',  14)
                                                                                     .attr('width', team_logo_size + 'px')
                                                                                     .attr('xlink:href', function(d) {
@@ -279,8 +284,8 @@ function populateSchedule(schedule_array) {
 
     let game_home_team_logo = game_rows.append("svg:image")
                                                                                     .attr("id", "home_team_logo_img")
-                                                                                    .attr('x', game_padding_dict.left + 27)
-                                                                                    .attr('y',  game_row_height - 28 - team_logo_size)
+                                                                                    .attr('x', game_padding_dict.left + 17)
+                                                                                    .attr('y',  game_padding_dict.top + away_top_padding - 8)
                                                                                     .attr('width', team_logo_size + 'px')
                                                                                     .attr('xlink:href', function(d) {
 
@@ -321,7 +326,7 @@ function populateSchedule(schedule_array) {
                                                     return d.home_team_short_name
                                                 })
                                                 .attr('x', game_padding_dict.left + team_logo_size + 32)
-                                                .attr('y', game_row_height - game_padding_dict.bottom - 24)
+                                                .attr('y', game_padding_dict.top + away_top_padding + 8)
                                                 .attr('text-anchor', 'start')
                                                 .attr('dominant-baseline', 'baseline')
                                                 .attr('fill', color_dict.med_gray)
@@ -334,7 +339,7 @@ function populateSchedule(schedule_array) {
                                                     return d.home_conference_name
                                                 })
                                                 .attr('x', game_padding_dict.left + team_logo_size + 32)
-                                                .attr('y', game_row_height - 24)
+                                                .attr('y', game_padding_dict.top + away_top_padding + 22)
                                                 .attr('text-anchor', 'start')
                                                 .attr('dominant-baseline', 'baseline')
                                                 .attr('fill', color_dict.med_gray)
@@ -342,8 +347,8 @@ function populateSchedule(schedule_array) {
                                                 .style('font-weight', 500)
                                                 .style('font-family', 'Work Sans');
         
-    let score_padding_left = 260;
-    let team_score_font_size = '20px';
+    let score_padding_left = game_div_width < global_var_dict.mobile_screen_width ? 220 : 260;
+    let team_score_font_size = game_div_width < global_var_dict.mobile_screen_width ? '18px' : '20px';
 
     let game_away_team_score = game_rows.append('text')
                                             .text(function(d) {
@@ -382,7 +387,7 @@ function populateSchedule(schedule_array) {
 
                                             })
                                             .attr('x', score_padding_left)
-                                            .attr('y', game_row_height - game_padding_dict.bottom - 24)
+                                            .attr('y', game_padding_dict.top + away_top_padding + 12)
                                             .attr('id', function(d) {
 
                                                 //Replace "/" with "_" in game_url
@@ -405,7 +410,7 @@ function populateSchedule(schedule_array) {
                                                 
                                             })
                                             .attr('x', score_padding_left)
-                                            .attr('y', game_row_height - 15)
+                                            .attr('y', game_padding_dict.top + away_top_padding + 35)
                                             .attr('id', function(d) {
 
                                                 //Replace "/" with "_" in game_url
@@ -451,7 +456,7 @@ function populateSchedule(schedule_array) {
                                                 
                                             })
                                             .attr('x', game_padding_dict.left + team_logo_size)
-                                            .attr('y', game_row_height - 5)
+                                            .attr('y', game_row_height - 15)
                                             .attr('text-anchor', 'start')
                                             .attr('dominant-baseline', 'baseline')
                                             .attr('fill', color_dict.med_gray)
@@ -459,11 +464,11 @@ function populateSchedule(schedule_array) {
                                             .style('font-weight', 500)
                                             .style('font-family', 'Work Sans');
     
-    let game_odds_left = 320;
+    let game_odds_left = game_div_width < global_var_dict.mobile_screen_width ? 260 : 350;
     let game_odds_top = 20;
-    let game_odds_width = 250;
-    let game_odds_middle_padding = 2;
-    let game_odds_height = game_row_height - (2 * game_odds_top);
+    let game_odds_width = game_div_width - game_odds_left - 40;
+    let game_odds_middle_padding = 4;
+    let game_odds_height = game_row_height - (2 * game_odds_top) - 18;
 
     let game_odds_g = game_rows.append('g')
                                             .attr('id', function(d) {
@@ -478,6 +483,13 @@ function populateSchedule(schedule_array) {
                                             .attr('transform', 'translate(' + game_odds_left + ',' + game_odds_top + ')');
 
     let game_odds_cols = ["Spread", "Total", "ML", "TT"];
+
+    if (game_div_width < global_var_dict.mobile_screen_width) {
+
+        game_odds_cols = ["Spread", "Total", "ML"];
+
+    };
+
     let game_odds_col_width = (game_odds_width - ((game_odds_cols.length - 1) * game_odds_middle_padding)) / game_odds_cols.length;
     let game_odds_row_height = (game_odds_height - game_odds_middle_padding) / 2;
 
@@ -515,7 +527,7 @@ function populateSchedule(schedule_array) {
                                             .attr('dominant-baseline', 'baseline')
                                             .attr('fill', color_dict.med_gray)
                                             .style('font-size', '10px')
-                                            .style('font-weight', 500)
+                                            .style('font-weight', 700)
                                             .style('font-family', 'Work Sans');
 
     let game_odds_away_row_g = game_odds_col_g.append('g')
@@ -612,7 +624,7 @@ function populateSchedule(schedule_array) {
                                         .attr('dominant-baseline', 'middle')
                                         .attr('fill', color_dict.med_gray)
                                         .style('font-size', '12px')
-                                        .style('font-weight', 500)
+                                        .style('font-weight', 700)
                                         .style('font-family', 'Work Sans');
 
     let game_odds_home_row_g = game_odds_col_g.append('g')
@@ -707,30 +719,31 @@ function populateSchedule(schedule_array) {
                                         .attr('dominant-baseline', 'middle')
                                         .attr('fill', color_dict.med_gray)
                                         .style('font-size', '12px')
-                                        .style('font-weight', 500)
+                                        .style('font-weight', 700)
                                         .style('font-family', 'Work Sans');
 
-    
-    let game_button_width = 80;
-    let game_button_height = 20;
+    let game_button_width = game_row_width > 550 ? 80 : 60;
+    let game_button_height = game_row_width > 550 ? 23 : 20;
+    let game_button_padding = 8;
+    let game_button_left = game_odds_left + (game_odds_width / 2) - ((game_button_width * 3) + (game_button_padding * 2)) / 2;
 
     let matchup_button_g = game_rows.append('g')
-                                            .attr('id', function(d) {
+                                            .attr('id', function(d) {  
                                                 return 'matchup_button_' + d.game_url
                                             })
-                                            .attr('transform', 'translate(' + (game_row_width - game_button_width - 15) + ',' + ((game_row_height / 2) - (game_button_height / 2)) + ")")
+                                            .attr('transform', 'translate(' + game_button_left + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
                                             .style('cursor', 'pointer')
                                             .on('click', function(d) {
 
                                                 launchGamePage(d.game_url);
 
-                                            })
+                                            });
 
     let matchup_button_bg = matchup_button_g.append('rect')
                                             .attr('width', game_button_width)
                                             .attr('height', game_button_height)
-                                            .attr('rx', '9px')
-                                            .attr('ry', '9px')
+                                            .attr('rx', '12px')
+                                            .attr('ry', '12px')
                                             // .attr('stroke', color_dict.dark_gray)
                                             // .attr('stroke-width', '1px')
                                             .attr('fill', color_dict.orange)
@@ -738,6 +751,62 @@ function populateSchedule(schedule_array) {
 
     let matchup_button_text = matchup_button_g.append('text')
                                             .text("Matchup")
+                                            .attr('x', game_button_width / 2)
+                                            .attr('y', game_button_height / 2)
+                                            .attr('text-anchor', 'middle')
+                                            .attr('dominant-baseline', 'middle')
+                                            .attr('fill', color_dict.black)
+                                            .style('font-size', '12px')
+                                            .style('font-weight', 500)
+                                            .style('font-family', 'Work Sans');
+
+    let ingame_button_g = game_rows.append('g')
+                                            .attr('id', function(d) {
+                                                return 'ingame_button_' + d.game_url
+                                            })
+                                            .attr('transform', 'translate(' + (game_button_left + game_button_width + game_button_padding) + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
+                                            .style('cursor', 'not-allowed');
+
+    let ingame_button_bg = ingame_button_g.append('rect')
+                                            .attr('width', game_button_width)
+                                            .attr('height', game_button_height)
+                                            .attr('rx', '12px')
+                                            .attr('ry', '12px')
+                                            .attr('stroke', color_dict.dark_gray)
+                                            .attr('stroke-width', '1px')
+                                            .attr('fill', color_dict.dark_gray)
+                                            .style('shape-rendering', 'CrispEdges');
+
+    let ingame_button_text = ingame_button_g.append('text')
+                                            .text("Ingame")
+                                            .attr('x', game_button_width / 2)
+                                            .attr('y', game_button_height / 2)
+                                            .attr('text-anchor', 'middle')
+                                            .attr('dominant-baseline', 'middle')
+                                            .attr('fill', color_dict.black)
+                                            .style('font-size', '12px')
+                                            .style('font-weight', 500)
+                                            .style('font-family', 'Work Sans');
+
+    let recap_button_g = game_rows.append('g')
+                                            .attr('id', function(d) {
+                                                return 'recap_button_' + d.game_url
+                                            })
+                                            .attr('transform', 'translate(' + (game_button_left + (game_button_width * 2) + (game_button_padding * 2)) + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
+                                            .style('cursor', 'not-allowed');
+
+    let recap_button_bg = recap_button_g.append('rect')
+                                            .attr('width', game_button_width)
+                                            .attr('height', game_button_height)
+                                            .attr('rx', '12px')
+                                            .attr('ry', '12px')
+                                            // .attr('stroke', color_dict.dark_gray)
+                                            // .attr('stroke-width', '1px')
+                                            .attr('fill', color_dict.dark_gray)
+                                            .style('shape-rendering', 'CrispEdges');
+
+    let recap_button_text = recap_button_g.append('text')
+                                            .text("Recap")
                                             .attr('x', game_button_width / 2)
                                             .attr('y', game_button_height / 2)
                                             .attr('text-anchor', 'middle')
@@ -1058,8 +1127,8 @@ function updateGameState(game_state_dict) {
 }
 
 function startWebSocket() {
-    ws_conn = new WebSocket('wss://api.untouted.com');
-    console.log("Websocket Connected");
+    ws_conn = new WebSocket('ws://localhost:3030');
+    console.log("Websocket Connected.");
 
     ws_conn.onmessage = function incoming(event) {
 
@@ -1070,8 +1139,7 @@ function startWebSocket() {
 
         if (resp_type == "load_games") {
 
-            console.log(resp_dict);
-
+            global_var_dict['schedule_array'] = resp_dict['data'];
             populateSchedule(resp_dict['data']);
 
         }
@@ -1099,17 +1167,46 @@ function startWebSocket() {
     }
 }
 
-startWebSocket();
+// Handle browser resize
+let APP = (function () {
 
-global_var_dict['schedule_date_str'] = pullCurrentDateStr();
+    // Debounce is a private function
+      function debounce(func, wait, immediate) {
+          let timeout;
+          return function() {
+              let context = this, args = arguments;
+              clearTimeout(timeout);
+              timeout = setTimeout(function() {
+                  timeout = null;
+                  if (!immediate) func.apply(context, args);
+              }, wait);
+              if (immediate && !timeout) func.apply(context, args);
+          };
+      }
+  
+    // onResize function is made public
+      let me = {onResize : function(callback) {
+          callback(); // optionally execute callback func imediatly
+      
+      window.addEventListener('resize', debounce(function() {
+
+        console.log("Resized browser");
+
+        callback();
+      }, 100), false);
+      }};
+  
+    // returns the me object that has all the public functions in it
+      return me;
+  })();
+  
+
+startWebSocket();
 
 setTimeout(function() {
 
-    console.log(logged_in_user.email, "is logged in");
-
     let init_game_req_dict = {
         req_type: "load_games",
-        user_email: logged_in_user.email,
         params: {
             "schedule_date_str": global_var_dict['schedule_date_str'],
         }
@@ -1117,7 +1214,6 @@ setTimeout(function() {
 
     let init_games_for_day_req_dict = {
         req_type: "return_games_for_day",
-        user_email: logged_in_user.email,
         params: {
             "season": 2023,
         }
@@ -1126,5 +1222,15 @@ setTimeout(function() {
     ws_conn.send(JSON.stringify(init_game_req_dict));
     ws_conn.send(JSON.stringify(init_games_for_day_req_dict));
 
+    APP.onResize(function() {
 
-}, 3000);
+        //Remove all elements from game_filter_div and game_div
+        d3.select("#game_filter_div").selectAll("*").remove();
+        d3.select("#game_div").selectAll("*").remove();
+
+        populateGameFilter();
+        populateSchedule(global_var_dict['schedule_array']);
+
+    })
+}, 2000);
+
