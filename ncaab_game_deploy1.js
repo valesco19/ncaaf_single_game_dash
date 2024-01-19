@@ -735,10 +735,10 @@ function populateSchedule(schedule_array) {
                                                     return 'matchup_button_' + d.game_url
                                                 })
                                                 .attr('transform', 'translate(' + game_button_left + ',' + (game_row_height - (game_button_height / 2) - 15) + ')' )
-                                                .style('cursor', 'not-allowed')
+                                                .style('cursor', 'pointer')
                                                 .on('click', function(d) {
 
-                                                    //launchGamePage(d.game_url);
+                                                    launchGamePage(d.game_url);
 
                                                 });
 
@@ -749,7 +749,7 @@ function populateSchedule(schedule_array) {
                                                 .attr('ry', '12px')
                                                 // .attr('stroke', color_dict.dark_gray)
                                                 // .attr('stroke-width', '1px')
-                                                .attr('fill', color_dict.dark_gray)
+                                                .attr('fill', color_dict.orange)
                                                 .style('shape-rendering', 'CrispEdges');
 
         let matchup_button_text = matchup_button_g.append('text')
