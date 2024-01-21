@@ -776,9 +776,9 @@ function populateSchedule(schedule_array) {
                                                 .attr('height', game_button_height)
                                                 .attr('rx', '12px')
                                                 .attr('ry', '12px')
-                                                .attr('stroke', color_dict.dark_gray)
+                                                .attr('stroke', color_dict.black)
                                                 .attr('stroke-width', '1px')
-                                                .attr('fill', color_dict.dark_gray)
+                                                .attr('fill', color_dict.dark_bg)
                                                 .style('shape-rendering', 'CrispEdges');
 
         let ingame_button_text = ingame_button_g.append('text')
@@ -804,9 +804,9 @@ function populateSchedule(schedule_array) {
                                                 .attr('height', game_button_height)
                                                 .attr('rx', '12px')
                                                 .attr('ry', '12px')
-                                                // .attr('stroke', color_dict.dark_gray)
-                                                // .attr('stroke-width', '1px')
-                                                .attr('fill', color_dict.dark_gray)
+                                                .attr('stroke', color_dict.black)
+                                                .attr('stroke-width', '1px')
+                                                .attr('fill', color_dict.dark_bg)
                                                 .style('shape-rendering', 'CrispEdges');
 
         let recap_button_text = recap_button_g.append('text')
