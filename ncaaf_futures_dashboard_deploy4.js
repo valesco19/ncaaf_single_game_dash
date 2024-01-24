@@ -1,6 +1,6 @@
 const server_api_url = "https://ncaaf-season-sim-api.untouted.com"
 
-let user_id = logged_in_user.email;
+let user_id;
 
 let global_pricing_dict = {
     json_data: {},
@@ -3036,6 +3036,9 @@ function populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict) 
 
 //set timeout
 let sidebar_data_dict = setTimeout(() => {
+        
+        user_id = logged_in_user.email;
+    
         fetchSidebarData(server_api_url, user_id)
             .then((sidebar_data_dict) => {
                 
