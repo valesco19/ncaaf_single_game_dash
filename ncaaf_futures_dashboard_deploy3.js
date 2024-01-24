@@ -1,5 +1,7 @@
 const server_api_url = "https://ncaaf-season-sim-api.untouted.com"
 
+let user_id = logged_in_user.email;
+
 let global_pricing_dict = {
     json_data: {},
     pricing_market_id: 1001,
