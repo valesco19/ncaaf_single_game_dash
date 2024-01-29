@@ -317,13 +317,14 @@ body {
 
 #odds_table_dropdown {
     display: none;
+    margin-top: 20px;
     margin-bottom: 20px;
     font-size: 18px;
     background-color: #000;
     color: #cec1ae;
     border: none;
     border-radius: 16px;
-    padding: 5px;
+    padding-left: 10px;
     width: 180px;
 }
 
