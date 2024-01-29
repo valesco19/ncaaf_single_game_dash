@@ -3,7 +3,9 @@
 }
 
 body {
-    font-family: 'Work Sans';
+    font-family: 'Work Sans'; 
+    background-color: #1a1a1a;
+    color: #cec1ae;
 }
 
 #navbar {
@@ -23,7 +25,7 @@ body {
     text-align: center;
     padding-top: 5px;
     padding-left: 15px;
-    color: #000;
+    color: #1a1a1a;
 }
 
 #viz {
@@ -38,18 +40,48 @@ body {
     overflow: auto;
 }
 
+#loading_animation_modal {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    background-color: #1a1a1a;
+    z-index: 1;
+}
+
+#loading_animation_div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-10%, -50%);
+}
+
+#loading_animation_text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300px;
+    font-size: 24px;
+    font-weight: 500;
+    color: #cec1ae;
+    text-align: center;
+}
+
 #sidebar_select_div {
 
     display: inline-block;
     position: fixed;
-    background-color: #fff;
+    background-color: #1a1a1a;
     top: 0;
     left: 0;
     height: 100vh;
-    z-index: 1;
-    -webkit-box-shadow: 0px 0px 22px -6px rgba(135,135,135,1);
+    z-index: 2;
+    border-right: 1px solid #cec1ae;
+    /* -webkit-box-shadow: 0px 0px 22px -6px rgba(135,135,135,1);
     -moz-box-shadow: 0px 0px 22px -6px rgba(135,135,135,1);
-    box-shadow: 0px 0px 22px -6px rgba(135,135,135,1);
+    box-shadow: 0px 0px 22px -6px rgba(135,135,135,1); */
 }
 
 #sidebar_contents {
@@ -61,13 +93,13 @@ body {
 
 #team_elo_slider_track {
     stroke: #000;
-    stroke-opacity: 0.3;
-    stroke-width: 5px;
+    stroke-opacity: 1;
+    stroke-width: 15px;
     stroke-linecap: round;
 }
 
 #team_elo_slider_track_inset {
-    stroke: #c0c0c0;
+    stroke: #1a1a1a;
     stroke-width: 6px;
     }
 
@@ -87,24 +119,20 @@ body {
 #team_elo_slider_handle {
     fill: #fff;
     stroke: #000;
-    stroke-opacity: 0.5;
+    stroke-opacity: 1.0;
     stroke-width: 1.25px;
 }
 
 #odds_table_display {
     position: absolute;
     left: 420px;
-    top: 80px;
-}
-
-#odds_table_heading {
-    margin-bottom: 20px;
+    top: 40px;
 }
 
 #odds_table {
     border-collapse: collapse;
     width: 100%;
-    border: 1px solid #bdbdbd;
+    border: 1px solid #000;
 }
 
 #odds_table_container {
@@ -112,18 +140,43 @@ body {
     overflow-y: auto;
 }
 
+#odds_table_container::-webkit-scrollbar {
+    width: 12px; /* Adjust the width as needed */
+    
+  }
+  
+  #odds_table_container::-webkit-scrollbar-thumb {
+    background-color: rgba(245, 126, 66, 0.2); /* Color of the scroll rectangle */
+    border: 1px solid #e8220b; /* Set a background color */
+    border-radius: 8px; /* Adjust the border-radius for rounded corners */
+  }
+  
+  #odds_table_container::-webkit-scrollbar-button {
+    display: none; /* Hide default scrollbar buttons */
+  }
+  
+  #odds_table_container::-webkit-scrollbar-track {
+    background-color: transparent; /* No background for the scrollbar track */
+    padding-right: 5px;
+  }
+  
+  #odds_table_container::-webkit-scrollbar-corner {
+    background-color: transparent; /* No background for the scrollbar corner */
+  }
+
 #odds_table_thead {
-    background-color: #f2f2f2;
+    background-color: #1a1a1a;
     padding: 10px;
     text-align: center;
     font-weight: 300;
     font-size: 18px;
     font-family: "Work Sans";
+    border: 1px solid #cec1ae;
 }
 
 
 .odds_table_td {
-    border: 1px solid #bdbdbd;
+    border: 1px solid #cec1ae;
     padding: 5px;
     padding-left: 20px;
     font-size: 16px;
@@ -137,7 +190,7 @@ body {
 }
 
 .odds_table_th {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 500;
     font-family: Work Sans;
 }
@@ -148,30 +201,32 @@ body {
     top: 110px;
     height: auto;
     min-width: 180px;
-    border: 1px solid #bdbdbd;
     margin-top: 0px;
     display: None;
     flex-direction: column;
     align-items: center;
-    background-color: #fff;
+    background-color: #1a1a1a;
+    border: 1px solid #cec1ae;
+    border-radius: 8px;
     padding-bottom: 50px;
 }
 
 #market_settings_header_div {
-    background-color: #f2f2f2;
+    background-color: #1a1a1a;
     text-align: left;
     padding: 0px;
     margin-bottom: 20px;
+    border-radius: 8px;
     width: 100%;
-    border: 1px solid #bdbdbd;
-    border-top: None;
+
 }
 
 #market_settings_heading {
-    font-size: 18px;
-    font-weight: 500;
+    font-size: 22px;
+    font-weight: 400;
     font-family: Work Sans;
     text-align: center;
+    color: #cec1ae;
 }
 
 .market_settings_header {
@@ -185,8 +240,13 @@ body {
 #market_select_dropdown {
     margin-left: 10px;
     margin-right: 10px;
-    width: 200px;
-    background-color: #f0f0f0;
+    width: 240px;
+    font-size: 18px;
+    background-color: #000;
+    border: none;
+    border-radius: 16px;
+    padding: 5px;
+    color: #cec1ae;
 }
 
 #vig_settings_div {
@@ -198,53 +258,82 @@ body {
 }
 
 #vig_percent_input {
-    width: 190px;
+    width: 220px;
     margin-left: 10px;
     margin-right: 10px;
-    border-radius: 4px;
-    background-color: #f0f0f0;
+    border-radius: 16px;
+    font-size: 18px;
+    background-color: #000;
+    color: #cec1ae;
+    border: none;
+    padding: 5px;
+    padding-left: 15px;
 }
 
 #vig_method_dropdown {
     margin-left: 10px;
     margin-right: 10px;
-    width: 200px;
-    background-color: #f0f0f0;
+    width: 240px;
+    font-size: 18px;
+    background-color: #000;
+    color: #cec1ae;
+    border: none;
+    border-radius: 16px;
+    padding: 5px;
 }
 
 #apply_vig_button {
-    margin-top: 20px;
-    width: 120px;
+    margin-top: 30px;
+    width: 150px;
     cursor: pointer;
-    border: 1px solid #777;
+    background-color: #e8220b;
+    border: none;
+    padding:5px;
+    border-radius: 15px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 #save_vig_button {
     margin-top: 20px;
-    width: 160px;
+    width: 150px;
     cursor: pointer;
-    border: 1px solid #777;
+    background-color: #e8220b;
+    border: none;
+    padding:5px;
+    border-radius: 15px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
 }
 
 #save_vig_success_text{
     font-weight: 500;
     font-size: 14px;
     margin-top: 5px;
-    color: #f57e42;
+    color: #e8220b;
     opacity: 0;
 }
 
 #odds_table_dropdown {
     display: none;
     margin-bottom: 20px;
+    font-size: 18px;
+    background-color: #000;
+    color: #cec1ae;
+    border: none;
+    padding: 5px;
+    width: 180px;
 }
 
 #win_totals_screen {
     display: none;
     position: absolute;
-    left: 420px;
+    left: 480px;
     top: 70px;
     font-family: Work Sans;
+    color: #cec1ae;
 }
 
 #win_totals_header_div{
@@ -255,10 +344,6 @@ body {
     margin-top: 0px;
 }
 
-#win_totals_season_win_text {
-    margin-bottom: 20px;
-}
-
 #win_totals_team_dropdown_div {
 
     text-align: center;
@@ -267,6 +352,13 @@ body {
 #win_totals_team_dropdown {
     min-width: 200px;
     display: inline-block;
+    background-color: #000;
+    border: 1px solid #cec1ae;
+    border-radius: 16px;
+    color: #cec1ae;
+    border: none;
+    font-size: 18px;
+    padding: 5px;
 }
 
 #win_totals_slider_output {
@@ -281,22 +373,26 @@ body {
     text-align: center;
     font-size: 28px;
     margin-right: 8px;
+    color: #cec1ae;
 }
 
 #win_totals_slider_text {
     display: block;
     text-align: center;
     font-size: 22px;
+    color: #cec1ae;
 }
 
 #win_totals_slider_value {
     display: block;
     text-align: center;
     font-size: 22px;
+    color: #cec1ae;
 }
 
 #win_totals_header_div {
     font-size: 28px;
+    color: #cec1ae;
 }
 
 #win_totals_team_logo_div {
@@ -309,8 +405,8 @@ body {
 }
 
 #win_totals_team_logo {
-    max-height: 90px;
-    max-width: 90px;
+    max-height: 100px;
+    max-width: 100px;
     margin-right: 10px;
     margin-top: 10px;
 }
@@ -319,6 +415,7 @@ body {
     margin-top: 10px;
     font-weight: 500;
     font-size: 26px;
+    color: #cec1ae;
 }
 
 .win_totals_slider_info {
@@ -327,6 +424,7 @@ body {
     align-items: flex-start;
     margin-top: 0px;
     padding-top: 0px;
+    color: #cec1ae;
 }
 
 #win_totals_radio_div {
@@ -339,12 +437,14 @@ body {
 
 #win_totals_slider {
     min-width: 300px;
+    color: #cec1ae;
 }
 
 #win_totals_season_win_text { 
     text-align: center;
     font-size: 28px;
     font-weight: 500;
+    color: #cec1ae;
 }
 
 #win_totals_under_price {
@@ -353,6 +453,21 @@ body {
     font-weight: 500;
     margin-bottom: 0px;
     padding-bottom: 0px;
+    color: #cec1ae;
+}
+
+#win_totals_exact_price_div {
+    margin-left: 50%;
+    translate: -50%;
+}
+
+#win_totals_exact_price {
+    text-align: center;
+    font-size: 30px;
+    font-weight: 500;
+    margin-bottom: 0px;
+    padding-bottom: 0px;
+    color: #cec1ae;
 }
 
 #win_totals_over_price {
@@ -361,6 +476,7 @@ body {
     font-weight: 500;
     margin-bottom: 0px;
     padding-bottom: 0px;
+    color: #cec1ae;
 }
 
 .win_totals_ou_text {
@@ -368,6 +484,7 @@ body {
     font-size: 20px;
     font-weight: 300;
     text-align: center;
+    color: #cec1ae;
 }
 
 #h2h_screen {
@@ -377,11 +494,13 @@ body {
     top: 70px;
     padding-left: 40px;
     font-family: Work Sans;
+    color: #cec1ae;
 }
 
 #h2h_header {
     font-size: 28px;
     font-weight: 500;
+    color: #cec1ae;
 }
 
 #h2h_team_info_div {
@@ -398,11 +517,6 @@ body {
     margin-right: 20px;
 }
 
-#h2h_team_1_abbrev {
-    font-size: 24px;
-    font-weight: 500;
-}
-
 #h2h_team_2_div{
     position: relative;
     display: flex;
@@ -412,31 +526,35 @@ body {
     margin-top: 0px;
 }
 
-#h2h_team_2_abbrev {
-    font-size: 24px;
-    font-weight: 500;
-}
-
 #h2h_team_1_dropdown_div {
-
+    margin-right: 50px;
     text-align: center;
 }
 
 #h2h_team_2_dropdown_div {
-
     text-align: center;
 }
 
 #h2h_team_1_dropdown {
-    min-width: 100px;
-    max-width: 180px;
+    width: 220px;
     display: inline-block;
+    font-size: 18px;
+    background-color: #000;
+    color: #cec1ae;
+    border-radius: 16px;
+    border: none;
+    padding: 5px;
 }
 
 #h2h_team_2_dropdown {
-    min-width: 100px;
-    max-width: 180px;
+    width: 220px;
     display: inline-block;
+    font-size: 18px;
+    background-color: #000;
+    color: #cec1ae;
+    border: none;
+    border-radius: 16px;
+    padding: 5px;
 }
 
 #h2h_team_1_spread_slider {
@@ -455,12 +573,14 @@ body {
     text-align: center;
     font-size: 28px;
     margin-right: 8px;
+    color: #cec1ae;
 }
 
 #h2h_team_1_spread_slider_text {
     display: block;
     text-align: center;
     font-size: 22px;
+    color: #cec1ae;
 }
 
 #h2h_team_1_spread_abbrev_text {
@@ -468,6 +588,7 @@ body {
     text-align: center;
     font-size: 22px;
     margin-right: 10px;
+    color: #cec1ae;
 }
 
 #h2h_team_1_logo_div {
@@ -506,12 +627,14 @@ body {
     margin-top: 10px;
     font-weight: 500;
     font-size: 26px;
+    color: #cec1ae;
 }
 
 #h2h_team_2_name {
     margin-top: 10px;
     font-weight: 500;
     font-size: 26px;
+    color: #cec1ae;
 }
 
 .h2h_pricing_slider_info {
@@ -533,6 +656,7 @@ body {
     font-weight: 500;
     margin-bottom: 0px;
     padding-bottom: 0px;
+    color: #cec1ae;
 }
 
 #h2h_team_2_price {
@@ -541,6 +665,7 @@ body {
     font-weight: 500;
     margin-bottom: 0px;
     padding-bottom: 0px;
+    color: #cec1ae;
 }
 
 .h2h_team_price_text {
@@ -548,6 +673,7 @@ body {
     font-size: 20px;
     font-weight: 300;
     text-align: center;
+    color: #cec1ae;
 }
 
 
