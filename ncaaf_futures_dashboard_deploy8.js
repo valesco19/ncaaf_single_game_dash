@@ -87,6 +87,8 @@ async function fetchSidebarData(server_api_url, user_id) {
         }
     };
 
+    console.log("Sidebar request sent", payload);
+
     const response = await fetch(server_api_url, {
         method: "POST",
         headers: {
