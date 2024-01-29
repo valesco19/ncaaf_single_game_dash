@@ -4,14 +4,15 @@ let user_id;
 
 let global_pricing_dict = {
     json_data: {},
-    pricing_market_id: 1001,
+    pricing_market_id: 2001,
     conference_winner_display_id: 151,
     conference_exacta_display_id: 151,
-    division_conference_winner_display_id: 5,
-    division_winner_display_id: 103,
+    division_conference_winner_display_id: 37,
+    division_winner_display_id: 111,
     bowl_id: 101,
-    win_total_team_id: 2005,
+    win_totals_team_id: 2005,
     win_totals_slider_value: 8.5,
+    win_totals_radio_value: 1,
     h2h_win_total_team_1_id: 99,
     h2h_win_total_team_2_id: 333,
     h2h_team_1_spread_slider_value: 0,
@@ -22,55 +23,55 @@ let global_pricing_dict = {
 //Global Vars
 let color_dict = {
     black: "#000",
-    charcoal: "#333",
-    white: "#fff",
+    charcoal: "#1a1a1a",
+    white: "#cec1ae",
     light_gray: "#f2f2f2",
-    med_gray: "#bdbdbd",
-    dark_gray: ' #8d8d8d ',
-    orange: "#f57e42",
+    med_gray: "#cec1ae",
+    dark_gray: ' #cec1ae',
+    orange: "#e8220b",
 }
 
 let pricing_market_dict = {
-    1001: {
-        'market_title': 'Playoff Championship Winner',
+    2001: {
+        'market_title': 'Championship Winner',
         'market_type': 'ToWin',
         'market_type_id': 1,
     },
-    1002: {
+    2002: {
         'market_title': "Make Playoffs",
         'market_type': 'ToWin',
         'market_type_id': 1,
     },
-    1101: {
+    2101: {
         'market_title': 'Conference Winners',
         'market_type': 'ToWin',
         'market_type_id': 1,
     },
-    1102: {
+    2102: {
         'market_title': 'Division Winners',
         'market_type': 'ToWIn',
         'market_type_id': 1,
     },
-    1103: {
+    2103: {
         'market_title': "Bowl Winners",
         'market_type': "ToWin",
         'market_type_id': 1,
     },
-    1201: {
-        'market_title': "Team Season Win Totals",
+    2201: {
+        'market_title': "Season Win Totals",
         'market_type': 'WinTotals',
         'market_type_id': 2,
     },
-    1202: {
+    2202: {
         'market_title': "Team H2H Win Totals",
         'market_type': "WinTotals",
         'market_type_id': 2,
     },
-    1301: {
+    2301: {
         'market_title': "Conference Championship Exacta",
         'market_type': 'Exacta',
         'market_type_id': 3,
-    }
+    },
 }
 
 base_sidebar_width = 400
@@ -109,7 +110,9 @@ async function fetchTeamSchedule(server_api_url, user_id, sidebar_data_dict, tea
         'request_type': 'TeamSchedule',
         'request_params': {
             "team_id": team_id,
-            "user_elo_adj_map": sidebar_data_dict.user_elo_adj_map,
+            "user_elo_map": sidebar_data_dict.user_elo_map,
+            "user_homefield_adj_map": sidebar_data_dict.user_homefield_adj_map,
+            "user_game_adj_map": sidebar_data_dict.user_game_adj_map,
         }
     };
 
@@ -139,47 +142,56 @@ async function sendRunSimRequest(server_api_url, user_id, sidebar_data_dict) {
                             }
 
     //Determine request by global market id
-
-    if (global_pricing_id == 1001) {
+    if (global_pricing_id == 2001) {
         
         payload['request_params'] = {
                         'pricing_market_id': global_pricing_dict.pricing_market_id,
-                        'user_elo_adj_map': sidebar_data_dict.user_elo_adj_map,
+                        'user_elo_map': sidebar_data_dict.user_elo_map,
+                        'user_homefield_adj_map': sidebar_data_dict.user_homefield_adj_map,
+                        'user_game_adj_map': sidebar_data_dict.user_game_adj_map,
                          };
 
-    } else if (global_pricing_id == 1002) {
+    } else if (global_pricing_id == 2002) {
 
         payload['request_params'] = {
             'pricing_market_id': global_pricing_dict.pricing_market_id,
-            'user_elo_adj_map': sidebar_data_dict.user_elo_adj_map,
+            'user_elo_map': sidebar_data_dict.user_elo_map,
+            'user_homefield_adj_map': sidebar_data_dict.user_homefield_adj_map,
+            'user_game_adj_map': sidebar_data_dict.user_game_adj_map,
              };
 
-    } else if (global_pricing_id == 1101) {
+    } else if (global_pricing_id == 2101) {
 
         payload['request_params'] = {
             'pricing_market_id': global_pricing_dict.pricing_market_id,
             'conference_id': global_pricing_dict.conference_winner_display_id,
-            'user_elo_adj_map': sidebar_data_dict.user_elo_adj_map,
+            'user_elo_map': sidebar_data_dict.user_elo_map,
+            'user_homefield_adj_map': sidebar_data_dict.user_homefield_adj_map,
+            'user_game_adj_map': sidebar_data_dict.user_game_adj_map,
                      };
 
-    } else if (global_pricing_id == 1102) {
+    } else if (global_pricing_id == 2102) {
 
         payload['request_params'] = {
             'pricing_market_id': global_pricing_dict.pricing_market_id,
             'conference_id': global_pricing_dict.division_conference_winner_display_id,
             'division_id': global_pricing_dict.division_winner_display_id,
-            'user_elo_adj_map': sidebar_data_dict.user_elo_adj_map,
+            'user_elo_map': sidebar_data_dict.user_elo_map,
+            'user_homefield_adj_map': sidebar_data_dict.user_homefield_adj_map,
+            'user_game_adj_map': sidebar_data_dict.user_game_adj_map,
         };
 
-    } else if (global_pricing_id == 1201) {
+    } else if (global_pricing_id == 2201) {
 
         payload['request_params'] = {
             'pricing_market_id': global_pricing_dict.pricing_market_id,
-            'team_id': global_pricing_dict.win_total_team_id,
-            'user_elo_adj_map': sidebar_data_dict.user_elo_adj_map,
+            'team_id': global_pricing_dict.win_totals_team_id,
+            'user_elo_map': sidebar_data_dict.user_elo_map,
+            'user_homefield_adj_map': sidebar_data_dict.user_homefield_adj_map,
+            'user_game_adj_map': sidebar_data_dict.user_game_adj_map,
         };
 
-    } else if (global_pricing_id == 1202) {
+    } else if (global_pricing_id == 2202) {
 
         payload['request_params'] = {
             'pricing_market_id': global_pricing_dict.pricing_market_id,
@@ -187,15 +199,19 @@ async function sendRunSimRequest(server_api_url, user_id, sidebar_data_dict) {
                 'h2h_win_total_team_1_id': global_pricing_dict.h2h_win_total_team_1_id,
                 'h2h_win_total_team_2_id': global_pricing_dict.h2h_win_total_team_2_id,
             },
-            'user_elo_adj_map': sidebar_data_dict.user_elo_adj_map,
+            'user_elo_map': sidebar_data_dict.user_elo_map,
+            'user_homefield_adj_map': sidebar_data_dict.user_homefield_adj_map,
+            'user_game_adj_map': sidebar_data_dict.user_game_adj_map,
         };
 
-    } else if (global_pricing_id == 1301) {
+    } else if (global_pricing_id == 2301) {
         
         payload['request_params'] = {
             'pricing_market_id': global_pricing_dict.pricing_market_id,
             'conference_id': global_pricing_dict.conference_exacta_display_id,
-            'user_elo_adj_map': sidebar_data_dict.user_elo_adj_map,
+            'user_elo_map': sidebar_data_dict.user_elo_map,
+            'user_homefield_adj_map': sidebar_data_dict.user_homefield_adj_map,
+            'user_game_adj_map': sidebar_data_dict.user_game_adj_map,
         };
 
     } else {
@@ -203,7 +219,6 @@ async function sendRunSimRequest(server_api_url, user_id, sidebar_data_dict) {
         console.log("Market id not matched", global_pricing_id);
 
     }
-
 
     const response = await fetch(server_api_url, {
         method: "POST",
@@ -225,9 +240,9 @@ async function sendSaveEloRatingsRequest(server_api_url, user_id, sidebar_data_d
 
     const payload = {
         'user_id': user_id,
-        'request_type': 'SaveUserEloRatingAdj',
+        'request_type': 'SaveUserEloRatings',
         'request_params': {
-            'user_elo_adj_map': sidebar_data_dict.user_elo_adj_map,
+            'user_elo_map': sidebar_data_dict.user_elo_map,
         }
     };
 
@@ -347,8 +362,9 @@ async function sendSaveMarketVigRequest(server_api_url, user_id, sidebar_data_di
 
 async function sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict) {
 
-    console.log("Send pricing request for", pricing_request_params.pricing_market_id);
     global_pricing_dict.pricing_market_id = pricing_request_params.pricing_market_id;
+
+    console.log("---->>>", pricing_request_params);
 
     const payload = {
         'user_id': user_id,
@@ -382,35 +398,37 @@ function handlePricingResponse(json_data, sidebar_data_dict) {
 
     let pricing_market_id = json_data['pricing_market_id'];
 
-    if (pricing_market_id == 1001) {
+    console.log(pricing_market_id);
+
+    if (pricing_market_id == 2001) {
 
         populatePlayoffOddsPricingTable(json_data, sidebar_data_dict);
 
-    } else if (pricing_market_id == 1002) {
+    } else if (pricing_market_id == 2002) {
 
         populateMakePlayoffsPricingTable(json_data, sidebar_data_dict);
 
-    } else if (pricing_market_id == 1101) {
+    } else if (pricing_market_id == 2101) {
 
         populateConferenceOddsPricingTable(json_data, sidebar_data_dict);
     
-    } else if (pricing_market_id == 1102) {
+    } else if (pricing_market_id == 2102) {
 
         populateDivisionOddsPricingTable(json_data, sidebar_data_dict);
     
-    }  else if (pricing_market_id == 1103) {
+    }  else if (pricing_market_id == 2103) {
         
         populateBowlOddsPricingTable(json_data, sidebar_data_dict);
     
-    } else if (pricing_market_id == 1201) {
+    } else if (pricing_market_id == 2201) {
 
         populateTeamTotalsPricingScreen(json_data, sidebar_data_dict);
 
-    } else if (pricing_market_id == 1202) {
+    } else if (pricing_market_id == 2202) {
 
-        populateH2HTeamWinTotalPricingScreen(json_data, sidebar_data_dict);
+        populateH2HTeamWinTotalPricingScreeen(json_data, sidebar_data_dict);
 
-    } else if (pricing_market_id == 1301) {
+    } else if (pricing_market_id == 2301) {
 
         populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict);
         
@@ -419,6 +437,8 @@ function handlePricingResponse(json_data, sidebar_data_dict) {
         console.log("Pricing market not recognized: ", pricing_market_id);
     }
 
+    //Hide loading animation
+    stopLoadingAnimation();
 
 }
 
@@ -449,8 +469,6 @@ function CalcVig(vig, n, vig_type_id, base_prob) {
 }
 
 function AddVigToPricing(vig_int, vig_type_id, pricing_probs) {
-
-    console.log("AddVigToPricing here.", vig_int, vig_type_id);
 
     let vig_percent = vig_int / 100;
     let n = pricing_probs.length;
@@ -578,9 +596,7 @@ function adjEloRating(team_id, team_elo_rating, elo_slider_x_scale, sidebar_data
     elo_slider_handle.attr('cx', elo_slider_x_scale(team_elo_rating));
     elo_slider_rating_text.text(team_elo_rating)
 
-    let user_elo_adj = parseInt(team_elo_rating - sidebar_data_dict.team_elo_rating_map[team_id]);
-
-    sidebar_data_dict.user_elo_adj_map[team_id] = user_elo_adj;
+    sidebar_data_dict.user_elo_map[team_id] = team_elo_rating;
 
 
 }
@@ -652,6 +668,86 @@ function displayUserMarketVigSavedMessage() {
 }
 
 //******************************Populate Elements FNs******************************/
+function startLoadingAnimation() {
+
+    d3.select("#loading_animation_modal").style('display', 'block');
+    d3.select("#loading_animation_text")
+        .remove();
+
+    let loading_animation_div_width = 300;
+    let loading_animation_div_height = 200;
+
+    let loading_animation_svg = d3.select("#loading_animation_div")
+                                                            .append('svg')
+                                                            .attr('id', 'loading_animation_svg')
+                                                            .attr('width', loading_animation_div_width)
+                                                            .attr('height', loading_animation_div_height);
+
+    let loading_animation_circle = loading_animation_svg.append('circle')
+                                                            .attr('id', 'loading_animation_circle')
+                                                            .attr('r', 30)
+                                                            .attr('cx', loading_animation_div_width / 2)
+                                                            .attr('cy', loading_animation_div_height / 2)
+                                                            .attr('fill', 'none')
+                                                            .attr('stroke', color_dict.orange)
+                                                            .attr('stroke-width', 5)
+                                                            .attr('stroke-dasharray', '5, 5');
+                                                            
+
+    let loading_animation_text = loading_animation_svg.append('text')
+                                                            .text('Simulating Seasons')
+                                                            .attr('x', loading_animation_div_width / 2)
+                                                            .attr('y', loading_animation_div_height - 20)
+                                                            .attr('text-anchor', 'middle')
+                                                            .attr('dominant-baseline', 'baseline')
+                                                            .attr('font-size', '24px')
+                                                            .attr('font-weight', 500)
+                                                            .attr('fill', color_dict.med_gray)
+                                                            .style('font-family', 'Work Sans');
+
+    function animateCircle() {
+                                                        loading_animation_circle.transition()
+                                                            .duration(1500)
+                                                            .ease(d3.easeLinear)
+                                                            .attrTween("stroke-dasharray", function () {
+                                                                let len = this.getTotalLength();
+                                                                return function (t) {
+                                                                    return (t * len) + ", " + (len - (t * len));
+                                                                };
+                                                            })
+                                                            .on("end", function () {
+                                                                // Use setTimeout for a delay before the next iteration
+
+                                                                //Check to verify element still exists
+                                                                if (d3.select("#loading_animation_circle").empty()) {
+                                                                    return;
+                                                                } else {
+
+                                                                    setTimeout(animateCircle, 300);
+                                                                }
+                                                            });
+                                                    }
+
+    animateCircle();
+
+}
+
+function stopLoadingAnimation() {
+
+    //Phase out loading animation
+    d3.select("#loading_animation_svg").transition()
+                                                            .duration(300)
+                                                            .style('opacity', 0)
+                                                            .on('end', function() {
+
+                                                                d3.select("#loading_animation_modal").style('display', 'none');
+
+                                                                d3.select(this).remove();
+
+                                                            });
+
+}
+
 function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
 
     let sidebar_svg = d3.select("#sidebar_svg");
@@ -671,8 +767,7 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
         let append_dict = {
             "team_id": team_id,
             "team_name": sidebar_data_dict.team_info_map[team_id].team_abbrev,
-            "base_team_elo_rating": sidebar_data_dict.team_elo_rating_map[team_id],
-            "user_elo_adj": sidebar_data_dict.user_elo_adj_map[team_id],
+            "user_elo_rating": sidebar_data_dict.user_elo_map[team_id],
         }
 
         elo_data_array.push(append_dict)
@@ -680,15 +775,12 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
     });
 
     //Sort By ELO's descending
-    let sorted_elo_data_array = elo_data_array.sort((a,b) => d3.descending(
-                                        a.base_team_elo_rating + a.user_elo_adj,
-                                        b.base_team_elo_rating + b.user_elo_adj,
-                                        ));
+    let sorted_elo_data_array = elo_data_array.sort((a,b) => d3.descending(a.user_elo_rating, b.user_elo_rating,));
 
     console.log(sorted_elo_data_array);
                             
     //Create Sliders
-    let elo_slider_height = 36;
+    let elo_slider_height = 34;
     let elo_slider_width = parseInt(base_sidebar_width * .75);
     let elo_slider_padding_left = 50;
 
@@ -712,16 +804,17 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
     let team_elo_slider_bg = team_elo_slider_g.append('rect')
                                                             .attr('width', elo_slider_width)
                                                             .attr('height', elo_slider_height)
-                                                            .attr('fill', color_dict.white);
+                                                            .attr('fill', color_dict.charcoal);
 
     let team_elo_slider_team_text = team_elo_slider_g.append('text')
                                                             .text(d => d.team_name)
                                                             .attr('x', 3)
                                                             .attr('y', elo_slider_height / 2)
                                                             .attr('dominant-baseline', 'middle')
-                                                            .attr('font-size', '12px')
+                                                            .attr('font-size', '14px')
                                                             .style("font-weight", 500)
-                                                            .style("font-family", 'Work Sans');
+                                                            .style("font-family", 'Work Sans')
+                                                            .attr('fill', color_dict.light_gray);
 
     //Team Elo Slider
     let min_slider_elo= 700;
@@ -741,8 +834,8 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
                                                                 .attr('x2', elo_slider_x_scale.range()[1])
                                                                 .attr('y1', elo_slider_height / 2)
                                                                 .attr('y2', elo_slider_height / 2)
-                                                                .attr('stroke', color_dict.med_gray)
-                                                                .attr('stroke-width', '2px')
+                                                                .attr('stroke', color_dict.black)
+                                                                .attr('stroke-width', '1px')
                                                                 .style('shape-rendering', 'CrispEdges')
                                                         .select(function() {
                                                             return this.parentNode.appendChild(this.cloneNode(true));
@@ -781,7 +874,7 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
                                                                         .style('font-family', "Work Sans")
                                                                         .attr('x', elo_slider_x_scale)
                                                                         .attr('text-anchor', 'middle')
-                                                                        .attr('fill', color_dict.dark_gray)
+                                                                        .attr('fill', color_dict.med_gray)
                                                                         .style('shape-rendering', 'CrispEdges')
                                                                         .text(d => d);
 
@@ -793,14 +886,13 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
                                                                         .attr('cy', elo_slider_height / 2)
                                                                         .attr('cx', function(d) {
 
-                                                                            let base_team_elo_rating = sidebar_data_dict.team_elo_rating_map[d.team_id];
-                                                                            let user_elo_adj = sidebar_data_dict.user_elo_adj_map[d.team_id];
+                                                                            let user_elo_rating = sidebar_data_dict.user_elo_map[d.team_id];
 
-                                                                            return elo_slider_x_scale(base_team_elo_rating + user_elo_adj);
+                                                                            return elo_slider_x_scale(user_elo_rating);
 
                                                                         })
-                                                                        .attr('fill', color_dict.med_gray)
-                                                                        .attr('stroke', color_dict.dark_gray)
+                                                                        .attr('fill', color_dict.orange)
+                                                                        .attr('stroke', color_dict.black)
                                                                         .attr('stroke-width', '1px')
                                                                         .style('cursor', 'pointer');
     
@@ -812,14 +904,14 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
                                                                         .attr('y',  elo_slider_height / 2)
                                                                         .attr('text-anchor', 'start')
                                                                         .attr('dominant-baseline', 'middle')
-                                                                        .attr('font-size', '12px')
+                                                                        .attr('font-size', '14px')
+                                                                        .attr('fill', color_dict.light_gray)
                                                                         .style('font-family', 'Work Sans')
                                                                         .text(d => {
 
-                                                                            let base_team_elo_rating = sidebar_data_dict.team_elo_rating_map[d.team_id];
-                                                                            let user_elo_adj = sidebar_data_dict.user_elo_adj_map[d.team_id];
+                                                                            let user_elo_rating = sidebar_data_dict.user_elo_map[d.team_id];
 
-                                                                            return base_team_elo_rating + user_elo_adj;
+                                                                            return user_elo_rating;
                                                                         });
 
     let team_elo_slider_team_info_chevron = team_elo_slider_g.append('text')
@@ -837,7 +929,7 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
                                                                         .style('cursor', 'pointer')
                                                                         .on('mouseover', function(){
 
-                                                                            d3.select(this).attr('fill', color_dict.black);
+                                                                            d3.select(this).attr('fill', color_dict.orange);
 
                                                                         })
                                                                         .on('mouseout', function() {
@@ -853,9 +945,9 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
 
 
     //Save Elo values button
-    let save_elo_values_button_top = -25;
-    let save_elo_values_button_width = 140;
-    let save_elo_values_button_height = 20;
+    let save_elo_values_button_top = -40;
+    let save_elo_values_button_width = 120;
+    let save_elo_values_button_height = 24;
     let save_elo_values_button_left = 0;
 
     let save_elo_values_button_g = elo_slider_g.append('g')
@@ -872,21 +964,20 @@ function populateSidebarEloSliders(sidebar_data_dict, conference_id) {
                                                                         .attr('id', 'save_elo_values_button_bg')
                                                                         .attr('width', save_elo_values_button_width)
                                                                         .attr('height', save_elo_values_button_height)
-                                                                        .attr('fill', color_dict.white)
-                                                                        .attr('stroke', color_dict.med_gray)
-                                                                        .attr('stroke-width', '1px')
-                                                                        .attr('rx', 3)
-                                                                        .attr('ry', 3)
+                                                                        .attr('fill', color_dict.orange)
+                                                                        .attr('rx', 15)
+                                                                        .attr('ry', 15)
                                                                         .style('shape-rendering', 'CrispEdges');
 
     let save_elo_values_button_text = save_elo_values_button_g.append('text')
-                                                                        .text("Save ELO Ratings")
+                                                                        .text("Save Ratings")
                                                                         .attr('x', save_elo_values_button_width / 2)
                                                                         .attr('y', save_elo_values_button_height / 2)
                                                                         .attr('text-anchor', 'middle')
                                                                         .attr('dominant-baseline', 'middle')
-                                                                        .attr('font-size', '10px')
-                                                                        .style('font-weight', 300)
+                                                                        .attr('font-size', '14px')
+                                                                        .attr('fill', color_dict.light_gray)
+                                                                        .style('font-weight', 500)
                                                                         .style('font-family', "Work Sans")
                                                                         .style('shape-rendering', 'CrispEdges');
 
@@ -957,7 +1048,7 @@ function populateTeamSchedule(json_data, sidebar_data_dict, team_id) {
     let team_schedule_row_bg = team_schedule_rows.append('rect')
                         .attr('width', team_schedule_row_width)
                         .attr('height', team_schedule_row_height)
-                        .attr('fill', color_dict.white);
+                        .attr('fill', color_dict.charcoal);
 
     //Insert team game adjustments 
     let game_adj_input_height = 20;
@@ -967,8 +1058,6 @@ function populateTeamSchedule(json_data, sidebar_data_dict, team_id) {
                                                             .attr('y', team_schedule_row_height / 2 - (game_adj_input_height / 2))
                                                             .attr('width', game_adj_input_width + 'px')
                                                             .attr('height', game_adj_input_height + 'px')
-                                                            .attr('stroke', color_dict.dark_gray)
-                                                            .attr('stroke-width', '1px')
                                                             .attr('id', d => {
 
                                                                 return 'team_schedule_game_adj_' + d.game_id;
@@ -1001,9 +1090,12 @@ function populateTeamSchedule(json_data, sidebar_data_dict, team_id) {
                                                             })
                                                             .style('width', '99%')
                                                             .style('height', '99%')
-                                                            .on('click', function(d) {
+                                                            .style('background-color', color_dict.black)
+                                                            .style('color', color_dict.light_gray)
+                                                            .style('border', 'none')
+                                                            .on('change', function(d) {
 
-                                                                let new_value = parseFloat(this.value)
+                                                                let new_value = parseFloat(this.value);
 
                                                                 if (team_id === d.away_team_id) {
 
@@ -1024,21 +1116,28 @@ function populateTeamSchedule(json_data, sidebar_data_dict, team_id) {
     let team_schedule_away_team_text = team_schedule_rows.append('text')
                                                                     .text(function(d) {
 
-                                                                        return sidebar_data_dict.team_info_map[d.away_team_id]['team_abbrev'];
+                                                                        if (d.away_team_id in sidebar_data_dict.team_abbrev_map) {
 
+                                                                            return sidebar_data_dict.team_abbrev_map[d.away_team_id];
+
+                                                                        } else {
+
+                                                                            return "";
+                                                                        }
                                                                     })
                                                                     .attr('x', team_schedule_row_width / 2 - 20)
                                                                     .attr('y', team_schedule_row_height / 2)
                                                                     .attr('text-anchor', 'end')
                                                                     .attr('dominant-baseline', 'middle')
                                                                     .attr('font-size', '14px')
+                                                                    .attr('fill', color_dict.light_gray)
                                                                     .style('font-weight', 500);
 
     let team_schedule_at_text = team_schedule_rows.append('text')
                                                                     .text(function(d) {
 
                                                                         if (d.neutral_site) {
-                                                                            return 'V';
+                                                                            return 'v';
                                                                         } else {
                                                                             return "@"
                                                                         };
@@ -1048,19 +1147,27 @@ function populateTeamSchedule(json_data, sidebar_data_dict, team_id) {
                                                                     .attr('text-anchor', 'middle')
                                                                     .attr('dominant-baseline', 'middle')
                                                                     .attr('font-size', '16px')
+                                                                    .attr('fill', color_dict.light_gray)
                                                                     .style('font-weight', 500);
 
     let team_schedule_home_team_text = team_schedule_rows.append('text')
                                                                     .text(function(d) {
 
-                                                                        return sidebar_data_dict.team_info_map[d.home_team_id]['team_abbrev'];
+                                                                        if (d.home_team_id in sidebar_data_dict.team_abbrev_map) {
 
+                                                                            return sidebar_data_dict.team_abbrev_map[d.home_team_id];
+
+                                                                        } else {
+
+                                                                            return "";
+                                                                        }
                                                                     })
                                                                     .attr('x', team_schedule_row_width / 2 + 20)
                                                                     .attr('y', team_schedule_row_height / 2)
                                                                     .attr('text-anchor', 'start')
                                                                     .attr('dominant-baseline', 'middle')
                                                                     .attr('font-size', '14px')
+                                                                    .attr('fill', color_dict.light_gray)
                                                                     .style('font-weight', 500);
 
     let team_schedule_start_date_text = team_schedule_rows.append('text')
@@ -1077,6 +1184,7 @@ function populateTeamSchedule(json_data, sidebar_data_dict, team_id) {
                                                                     .attr('y', team_schedule_row_height)
                                                                     .attr('text-anchor', 'middle')
                                                                     .attr('font-size', '10px')
+                                                                    .attr('fill', color_dict.light_gray)
                                                                     .style('font-weight', 300);
 
     let format_number = d3.format(".2f");
@@ -1098,7 +1206,7 @@ function populateTeamSchedule(json_data, sidebar_data_dict, team_id) {
                                                                     .attr('dominant-baseline', 'middle')
                                                                     .attr('font-size', '12px')
                                                                     .style('font-weight', 500)
-                                                                    .attr('fill', color_dict.dark_gray);
+                                                                    .attr('fill', color_dict.light_gray);
 
     let team_schedule_home_team_spread = team_schedule_rows.append('text')
                                                                     .text(function(d) {
@@ -1118,7 +1226,7 @@ function populateTeamSchedule(json_data, sidebar_data_dict, team_id) {
                                                                     .attr('text-anchor', 'end')
                                                                     .attr('font-size', '12px')
                                                                     .style('font-weight', 500)
-                                                                    .attr('fill', color_dict.dark_gray);
+                                                                    .attr('fill', color_dict.light_gray);
 
     //Save Game Adj button
 
@@ -1162,7 +1270,7 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('x2', 5)
                                                             .attr('y1', 0)
                                                             .attr('y2', sidebar_height * .8)
-                                                            .attr('stroke', color_dict.med_gray)
+                                                            .attr('stroke', color_dict.dark_gray)
                                                             .attr('stroke-width', '1px')
                                                             .style('shape-rendering', 'CrispEdges');
 
@@ -1174,7 +1282,7 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .style('font-weight', 300)
                                                             .attr('text-anchor', 'end')
                                                             .attr('class', 'font_awesome_text_icon')
-                                                            .attr('fill', color_dict.dark_gray)
+                                                            .attr('fill', color_dict.orange)
                                                             .style('cursor', 'pointer')
                                                             .on("click", function() {
 
@@ -1186,7 +1294,7 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr("id", "team_settings_logo_img")
                                                             .attr('x', team_settings_left_margin)
                                                             .attr('y',  0)
-                                                            .attr('width', '80px')
+                                                            .attr('width', '90px')
                                                             .attr('xlink:href', function() {
 
                                                                 return sidebar_data_dict.team_info_map[team_id]['team_logo_url'];
@@ -1204,7 +1312,8 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('font-weight', 500)
                                                             .style('font-family', 'Work Sans')
                                                             .attr('x', team_settings_left_margin)
-                                                            .attr('y', 90)
+                                                            .attr('y', 95)
+                                                            .attr('fill', color_dict.light_gray)
                                                             .attr('dominant-baseline', 'hanging');
 
     let team_homefield_adv_top = 135;
@@ -1215,15 +1324,15 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('y', team_homefield_adv_top)
                                                             .attr('font-size', '14px')
                                                             .attr('font-weight', 500)
-                                                            .attr('dominant-baseline', 'hanging');
+                                                            .attr('dominant-baseline', 'hanging')
+                                                            .attr('fill', color_dict.light_gray);
 
     let team_settings_homefield_adv_foreign_obj = team_settings_g.append("foreignObject")
                                                             .attr('x', team_settings_left_margin + 120)
                                                             .attr('y', team_homefield_adv_top - 8)
                                                             .attr('width', '50px')
-                                                            .attr('height', '20px')
-                                                            .attr('stroke', color_dict.dark_gray)
-                                                            .attr('stroke-width', '1px');
+                                                            .attr('height', '24px')
+                                                            
    
 
     let team_settings_homefield_adv_input = team_settings_homefield_adv_foreign_obj.append('xhtml:input')
@@ -1234,9 +1343,13 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr("value", sidebar_data_dict.user_homefield_adj_map[team_id])
                                                             .style('width', '99%')
                                                             .style('height', '99%')
+                                                            .style('background-color', color_dict.black)
+                                                            .style('color', color_dict.light_gray)
+                                                            .style('border', 'none')
+                                                            .style('font-size', '14px')
                                                             .on('click', function() {
 
-                                                                let new_value = parseFloat(this.value).toFixed(1)
+                                                                let new_value = parseFloat(this.value);
 
                                                                 sidebar_data_dict.user_homefield_adj_map[team_id] = new_value;
 
@@ -1244,7 +1357,7 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
 
     let homefield_save_button_left = team_settings_left_margin + 190;
     let homefield_save_button_top = team_homefield_adv_top - 8;
-    let homefield_save_button_width = 120;
+    let homefield_save_button_width = 130;
     let homefield_save_button_height = 20;
 
     let homefield_save_button_g = team_settings_g.append('g')
@@ -1262,9 +1375,9 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('y', 0)
                                                             .attr('width', homefield_save_button_width)
                                                             .attr('height', homefield_save_button_height)
-                                                            .attr('fill', color_dict.white)
-                                                            .attr('stroke', color_dict.med_gray)
-                                                            .attr('stroke-width', '1px')
+                                                            .attr('fill', color_dict.orange)
+                                                            .attr('rx', 12)
+                                                            .attr('ry', 12)
                                                             .style('shape-rendering', 'CrispEdges');
 
     let homefield_save_button_text = homefield_save_button_g.append('text')
@@ -1273,8 +1386,9 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('y', homefield_save_button_height / 2)
                                                             .attr('dominant-baseline', 'middle')
                                                             .attr('text-anchor', 'middle')
-                                                            .attr('font-size', '10px')
-                                                            .style('font-weight', 300)
+                                                            .attr('font-size', '12px')
+                                                            .attr('fill', color_dict.light_gray)
+                                                            .style('font-weight', 500)
                                                             .style('font-family', "Work Sans");
 
     let homefield_save_button_success_text = homefield_save_button_g.append('text')
@@ -1309,6 +1423,7 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('y', 20)
                                                             .attr('dominant-baseline', 'hanging')
                                                             .attr('font-size', '14px')
+                                                            .attr("fill", color_dict.light_gray)
                                                             .style('font-weight', 500);
 
     let team_schedule_adj_text = team_schedule_g.append('text')
@@ -1319,7 +1434,7 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('text-anchor', 'start')
                                                             .attr('font-size', '10px')
                                                             .attr('font-weight', 500)
-                                                            .attr('fill', color_dict.black);
+                                                            .attr('fill', color_dict.light_gray);
     
     let team_schedule_away_spread_text = team_schedule_g.append('text')
                                                             .text("Away Spread")
@@ -1329,7 +1444,7 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('text-anchor', 'middle')
                                                             .attr('font-size', '10px')
                                                             .attr('font-weight', 500)
-                                                            .attr('fill', color_dict.black);
+                                                            .attr('fill', color_dict.light_gray);
 
     let team_schedule_home_spread_text = team_schedule_g.append('text')
                                                             .text("Home Spread")
@@ -1339,13 +1454,13 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('text-anchor', 'middle')
                                                             .attr('font-size', '10px')
                                                             .attr('font-weight', 500)
-                                                            .attr('fill', color_dict.black);
+                                                            .attr('fill', color_dict.light_gray);
 
     //Game Adj Save Button
     let game_adj_save_button_width = 120;
     let game_adj_save_button_height = 20;
     let game_adj_save_button_left = team_settings_left_margin;
-    let game_adj_save_button_top = sidebar_height - 180 - game_adj_save_button_height;
+    let game_adj_save_button_top = sidebar_height - 110 - game_adj_save_button_height;
    
 
     let game_adj_save_button_g = team_settings_g.append('g')
@@ -1363,9 +1478,9 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('y', 0)
                                                             .attr('width', game_adj_save_button_width)
                                                             .attr('height', game_adj_save_button_height)
-                                                            .attr('fill', color_dict.white)
-                                                            .attr('stroke', color_dict.med_gray)
-                                                            .attr('stroke-width', '1px')
+                                                            .attr('rx', 12)
+                                                            .attr('ry', 12)
+                                                            .attr('fill', color_dict.orange)
                                                             .style('shape-rendering', 'CrispEdges');
 
     let game_adj_save_button_text = game_adj_save_button_g.append('text')
@@ -1374,8 +1489,9 @@ function openTeamSettingsSidebar(team_id, sidebar_data_dict) {
                                                             .attr('y', game_adj_save_button_height / 2)
                                                             .attr('dominant-baseline', 'middle')
                                                             .attr('text-anchor', 'middle')
-                                                            .attr('font-size', '10px')
-                                                            .style('font-weight', 300)
+                                                            .attr('font-size', '12px')
+                                                            .attr('fill', color_dict.light_gray)
+                                                            .style('font-weight', 500)
                                                             .style('font-family', "Work Sans");
 
     let game_adj_save_button_success_text = game_adj_save_button_g.append('text')
@@ -1419,7 +1535,7 @@ function toggleConferenceDropdown(sidebar_data_dict,  conference_dropdown_width)
                                                     .enter()
                                                     .append("xhtml:div")
                                                     .style("cursor", "pointer")
-                                                    .style('background-color', color_dict.white)
+                                                    .style('background-color', color_dict.black)
                                                     .style('padding', '5px')
                                                     .style('display', 'flex')
                                                     .style('font-size', '14px')
@@ -1462,7 +1578,7 @@ function drawSidebarContents(sidebar_data_dict) {
 
     //Draw slider g first so  ratings drop down is above it
     sidebar_svg.append('g')
-            .attr('transform', 'translate(' + 20 + ',' + 120 + ')')
+            .attr('transform', 'translate(' + 20 + ',' + 130 + ')')
             .attr('id', 'elo_slider_g');
 
     let rating_g = sidebar_svg.append("g")
@@ -1474,7 +1590,7 @@ function drawSidebarContents(sidebar_data_dict) {
                                                         .attr("id", "rating_header")
                                                         .attr("x", (base_sidebar_width - sidebar_margin_dict.left) / 2)
                                                         .attr("y", sidebar_margin_dict.top)
-                                                        .attr("fill", color_dict.charcoal)
+                                                        .attr("fill", color_dict.light_gray)
                                                         .attr("text-anchor", "middle")
                                                         .attr("dominant-baseline", "middle")
                                                         .attr("font-size", "20px")
@@ -1483,10 +1599,10 @@ function drawSidebarContents(sidebar_data_dict) {
                                                         .style("position", "fixed");
 
     //Dropdown Params
-    let conference_dropdown_width = 180;
-    let conference_dropdown_height = 26;  
+    let conference_dropdown_width = 240;
+    let conference_dropdown_height = 32;  
     let conference_dropdown_header_padding = 10;                           
-    let conference_dropdown_top = sidebar_margin_dict.top + 20;
+    let conference_dropdown_top = sidebar_margin_dict.top + 10;
     let conference_dropdown_left = (base_sidebar_width - sidebar_margin_dict.left) / 2 - (conference_dropdown_width / 2);
     let conference_dropdown_option_text_x = conference_dropdown_width / 2;
     let conference_dropdown_option_text_y = conference_dropdown_header_padding + conference_dropdown_height / 2 + 1;
@@ -1512,11 +1628,9 @@ function drawSidebarContents(sidebar_data_dict) {
                                                         .attr("height", conference_dropdown_height)
                                                         .attr('x', 0)
                                                         .attr('y', conference_dropdown_header_padding)
-                                                        .attr("fill", color_dict.light_gray)
-                                                        .style("stroke", "#b3b3b3")
-                                                        .style("stroke-width", "1px")
-                                                        .attr('rx', 5)
-                                                        .attr('ry', 5)
+                                                        .attr("fill", color_dict.black)
+                                                        .attr('rx', 20)
+                                                        .attr('ry', 20)
                                                         .style("cursor", "pointer")
                                                         .style('shape-rendering', 'CrispEdges');
                                                         
@@ -1526,8 +1640,8 @@ function drawSidebarContents(sidebar_data_dict) {
                                                         .attr('class', 'font_awesome_text_icon')
                                                         .attr('font-size', '12px')
                                                         .style('font-weight', 300)
-                                                        .attr('fill', color_dict.charcoal)
-                                                        .attr('x', conference_dropdown_width - 10)
+                                                        .attr('fill', color_dict.med_gray)
+                                                        .attr('x', conference_dropdown_width - 20)
                                                         .attr('y', 20)
                                                         .attr('text-anchor', 'middle')
                                                         .attr('dominant-baseline', 'hanging');
@@ -1541,21 +1655,24 @@ function drawSidebarContents(sidebar_data_dict) {
                                                         .attr('id', 'conference_selected_option_text')
                                                         .attr("text-anchor", "middle")
                                                         .attr("dominant-baseline", "middle")
-                                                        .attr("font-size", "14px")
+                                                        .attr("font-size", "16px")
+                                                        .attr('fill', color_dict.light_gray)
                                                         .style("font-weight", 400)
                                                         .style("font-family", "Work Sans")
     
 
     let run_sim_button_width = 200;
-    let run_sim_button_height = 25;
+    let run_sim_button_height = 35;
     let run_sim_button_left = (base_sidebar_width / 2) - (run_sim_button_width / 2);
-    let run_sim_button_top = sidebar_height - 110 - run_sim_button_height;
+    let run_sim_button_top = sidebar_height - 80 - run_sim_button_height;
 
     let run_sim_button_g = sidebar_svg.append('g')
                                                         .attr('id', 'run_sim_button_g')
                                                         .attr('transform', 'translate(' + run_sim_button_left + ',' + run_sim_button_top + ')')
                                                         .style('cursor', 'pointer')
                                                         .on('click', function() {
+
+                                                            startLoadingAnimation();
 
                                                             sendRunSimRequest(server_api_url, user_id, sidebar_data_dict);
 
@@ -1566,18 +1683,17 @@ function drawSidebarContents(sidebar_data_dict) {
                                                         .attr('width', run_sim_button_width)
                                                         .attr('height', run_sim_button_height)
                                                         .attr('fill', color_dict.orange)
-                                                        .attr('stroke', color_dict.dark_gray)
-                                                        .attr('stroke-width', '1px')
-                                                        .attr('rx', 5)
-                                                        .attr('ry', 5)
+                                                        .attr('rx', 20)
+                                                        .attr('ry', 20)
                                                         .style('shape-rendering', 'CrispEdges');
 
     let run_sim_button_text = run_sim_button_g.append('text')
-                                                        .text("Run Futures Sim")
+                                                        .text("Run Simulation")
                                                         .attr('x', run_sim_button_width / 2)
                                                         .attr('y', run_sim_button_height / 2)
                                                         .attr('font-size', '16px')
                                                         .attr('font-weight', 500)
+                                                        .attr('fill', color_dict.light_gray)
                                                         .attr('text-anchor', 'middle')
                                                         .attr('dominant-baseline', 'middle')
                                                         .style('font-family', 'Work Sans')
@@ -1614,93 +1730,95 @@ function createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data
                                                                 .text(d => d.market_title)
                                                                 .attr('value', d => d.market_id);
 
-
-
-    market_select_dropdown.on("change", function() {
+    market_select_dropdown.on("click", function() {
                                                                     
-                                                                    populateVigSettingValues(sidebar_data_dict, this.value);
+                                                                    let market_id = parseInt(this.value);
+
+                                                                    populateVigSettingValues(sidebar_data_dict, market_id);
 
                                                                     //Playoff Market
-                                                                    if (this.value == 1001) {
+                                                                    if (market_id == 2001) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(this.value),
+                                                                            pricing_market_id: market_id,
 
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
-                                                                    } else if (this.value == 1002) {
+                                                                    } else if (market_id == 2002) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(this.value),
+                                                                            pricing_market_id: market_id,
                                                                         };
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
                                                                     
-                                                                    } else if (this.value == 1101) {
+                                                                    } else if (market_id == 2101) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(this.value),
+                                                                            pricing_market_id: market_id,
                                                                             conference_id: global_pricing_dict.conference_winner_display_id,
 
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
-                                                                    } else if (this.value == 1102) {
+                                                                    } else if (market_id == 2102) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(this.value),
+                                                                            pricing_market_id: market_id,
                                                                             conference_id: global_pricing_dict.division_conference_winner_display_id,
                                                                             division_id: global_pricing_dict.division_winner_display_id,
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
-                                                                    } else if (this.value == 1103) {
+                                                                    } else if (market_id == 2103) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(this.value),
+                                                                            pricing_market_id: market_id,
                                                                             bowl_id: global_pricing_dict.bowl_id,
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
                                                                     
-                                                                    } else if (this.value == 1201) {
+                                                                    } else if (market_id == 2201) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(this.value),
-                                                                            team_id: global_pricing_dict.win_total_team_id,
+                                                                            pricing_market_id: market_id,
+                                                                            team_id: global_pricing_dict.win_totals_team_id,
                                                                         }
 
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
-                                                                    } else if (this.value == 1202) {
+                                                                    } else if (market_id == 2202) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(this.value),
+                                                                            pricing_market_id: market_id,
                                                                             h2h_win_params: {
                                                                                 h2h_win_total_team_1_id: global_pricing_dict.h2h_win_total_team_1_id,
                                                                                 h2h_win_total_team_2_id: global_pricing_dict.h2h_win_total_team_2_id,
                                                                             }
                                                                         }
 
+                                                                        console.log(pricing_request_params);
+
                                                                         sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
 
                                                                     
-                                                                    } else if (this.value == 1301) {
+                                                                    } else if (market_id == 2301) {
 
                                                                         let pricing_request_params = {
 
-                                                                            pricing_market_id: parseInt(this.value),
+                                                                            pricing_market_id: market_id,
                                                                             conference_id: global_pricing_dict.conference_exacta_display_id,
                                                                         }
 
@@ -1709,7 +1827,7 @@ function createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data
 
                                                                     } else {
 
-                                                                        console.log("Dropdown Market id not list: ", this.value);
+                                                                        console.log("Dropdown Market id not list: ", market_id);
 
                                                                     }
 
@@ -1733,7 +1851,17 @@ apply_vig_button.on('click', function() {
 function populateConferenceWinSelectDropdown(sidebar_data_dict) {
 
     //Create option values
-    let conference_options_array = sidebar_data_dict.conferences;
+    let conference_options_array = [];
+
+    //Filter conferences without conference championship
+    sidebar_data_dict.conferences.forEach(d => {
+
+        if (d.conference_id != 18) {
+
+            conference_options_array.push(d);
+        }
+
+    });
 
     let sorted_conference_options_array = d3.nest()
                             .key((d) => d.conference_abbrev)
@@ -1760,21 +1888,21 @@ function populateConferenceWinSelectDropdown(sidebar_data_dict) {
 
     odds_table_dropdown.on("change", function() {
 
-                                //set  global conference id
-                                let conference_id = parseInt(this.value);
+                                                                    //set  global conference id
+                                                                    let conference_id = parseInt(this.value);
 
-                                global_pricing_dict.conference_winner_display_id = conference_id;
-                                
-                                let pricing_request_params = {
+                                                                    global_pricing_dict.conference_winner_display_id = conference_id;
+                                                                    
+                                                                    let pricing_request_params = {
 
-                                    pricing_market_id: global_pricing_dict.pricing_market_id,
-                                    conference_id: conference_id,
+                                                                        pricing_market_id: global_pricing_dict.pricing_market_id,
+                                                                        conference_id: conference_id,
 
-                                }
+                                                                    }
 
-                                    sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                                
-                            });
+                                                                     sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                                                                    
+                                                                });
 }
 
 function createDivisionOptionsArray(sidebar_data_dict) {
@@ -1839,27 +1967,27 @@ function populateDivisionWinSelectDropdown(sidebar_data_dict) {
         112: 37,
     }
 
-    odds_table_dropdown.on("change", function() {
+    odds_table_dropdown.on("change", function(d) {
 
-                                                //set  global conference id
-                                                let division_id = parseInt(this.value);
-                                                let conference_id = division_id_to_conference_map[division_id];
-                                                global_pricing_dict.division_conference_winner_display_id = conference_id;
-                                                global_pricing_dict.division_winner_display_id = division_id;
-                                                
+                                                                    //set  global conference id
+                                                                    let division_id = parseInt(this.value);
+                                                                    let conference_id = division_id_to_conference_map[division_id];
 
-                                                let pricing_request_params = {
+                                                                    global_pricing_dict.division_conference_winner_display_id = conference_id;
+                                                                    global_pricing_dict.division_winner_display_id = division_id;
+                                                                    
+                                                                    let pricing_request_params = {
 
-                                                    pricing_market_id: 1102,
-                                                    conference_id: conference_id,
-                                                    division_id: division_id,
+                                                                        pricing_market_id: 2102,
+                                                                        conference_id: conference_id,
+                                                                        division_id: division_id,
 
-                                                };
+                                                                    }
 
-                                                console.log(pricing_request_params);
-                                                    sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                                                
-                                            });
+                                                                    console.log(pricing_request_params);
+                                                                     sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                                                                    
+                                                                });
 }
 
 function populateBowlWinSelectDropdown(sidebar_data_dict) {
@@ -1869,7 +1997,7 @@ function populateBowlWinSelectDropdown(sidebar_data_dict) {
 
     let odds_table_dropdown = d3.select("#odds_table_dropdown");
 
-    odds_table_dropdown.attr('pricing_market_id', 1103);
+    odds_table_dropdown.attr('pricing_market_id', 2103);
 
     odds_table_dropdown.selectAll("option").remove();
 
@@ -1880,30 +2008,29 @@ function populateBowlWinSelectDropdown(sidebar_data_dict) {
                                                                 .enter()
                                                                 .append("option")
                                                                 .text(d => d.bowl_name)
-                                                                .attr('value', d => d.bowl_id)
-
+                                                                .attr('value', d => d.bowl_id);
 
     odds_table_dropdown.on("change", function() {
 
-                            //set  global conference id
-                            let bowl_id = parseInt(this.value);
+                                                                    //set  global conference id
+                                                                    let bowl_id = parseInt(this.value);
 
-                            global_pricing_dict.bowl_id = bowl_id;
-                            
-                            let pricing_request_params = {
+                                                                    global_pricing_dict.bowl_id = bowl_id;
+                                                                    
+                                                                    let pricing_request_params = {
 
-                                pricing_market_id: 1103,
-                                bowl_id: bowl_id,
+                                                                        pricing_market_id: 2103,
+                                                                        bowl_id: bowl_id,
 
-                            }
+                                                                    }
 
-                            console.log(pricing_request_params);
-                                sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                            
-                        });
+                                                                    console.log(pricing_request_params);
+                                                                     sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                                                                    
+                                                                });
 }
 
-function populateWinTotalsTeamSelectDropdown(sidebar_data_dict) {
+function populateTeamSelectDropdown(sidebar_data_dict) {
 
     //Create team_options_array
     let team_options_array = [];
@@ -1927,38 +2054,40 @@ function populateWinTotalsTeamSelectDropdown(sidebar_data_dict) {
                             .entries(team_options_array)
                             .map((group) => group.values)
                             .flat();
+
+    let team_dropdown = undefined;
+    let pricing_market_id = undefined;
     
-    let win_totals_team_dropdown = d3.select("#win_totals_team_dropdown");
+    team_dropdown = d3.select("#win_totals_team_dropdown");
+    pricing_market_id = 2201
 
-    win_totals_team_dropdown.selectAll("*").remove();
+    team_dropdown.selectAll("*").remove();
 
-    let dropdown_options = win_totals_team_dropdown.selectAll("option")
+    let dropdown_options = team_dropdown.selectAll("option")
                             .data(sorted_team_option_array)
                             .enter()
                             .append("option")
                             .text(d => d.team_name + " " + d.team_mascot)
                             .attr('value', d => d.team_id)
-                            .property('selected', d => d.team_id === global_pricing_dict.win_total_team_id);
+                            .property('selected', d => d.team_id === global_pricing_dict.win_totals_team_id);
 
 
-    win_totals_team_dropdown.on("change", function() {
+    team_dropdown.on("change", function() {
+                                //set  global conference id
+                                let team_id = parseInt(this.value);
 
-                    //set  global conference id
-                    let team_id = parseInt(this.value);
+                                global_pricing_dict.win_totals_team_id = team_id;
+                                
+                                let pricing_request_params = {
 
-                    global_pricing_dict.win_total_team_id = team_id;
-                    
-                    let pricing_request_params = {
+                                    pricing_market_id: pricing_market_id,
+                                    team_id: team_id,
+                                }
 
-                        pricing_market_id: 1201,
-                        team_id: team_id,
-
-                    }
-
-                    console.log(pricing_request_params);
-                        sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                    
-                });
+                                console.log(pricing_request_params);
+                                 sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                                
+                            });
 
 }
 
@@ -1998,26 +2127,27 @@ function populateH2HWinTotalTeamsSelectDropdown(sidebar_data_dict) {
                             .attr('value', d => d.team_id)
                             .property('selected', d => d.team_id === global_pricing_dict.h2h_win_total_team_1_id);
 
-    h2h_team_1_dropdown.on("change", function(d) {
 
-                //set  global conference id
-                let team_id = parseInt(this.value);
+    h2h_team_1_dropdown.on("change", function() {
 
-                global_pricing_dict.h2h_win_total_team_1_id = team_id;
-                
-                let pricing_request_params = {
+                                //set  global conference id
+                                let team_id = parseInt(this.value);
 
-                    pricing_market_id: 1202,
-                    h2h_win_params: {
-                        h2h_win_total_team_1_id: team_id,
-                        h2h_win_total_team_2_id: global_pricing_dict.h2h_win_total_team_2_id,
-                    }
+                                global_pricing_dict.h2h_win_total_team_1_id = team_id;
+                                
+                                let pricing_request_params = {
 
-                }
+                                    pricing_market_id: 2202,
+                                    h2h_win_params: {
+                                        h2h_win_total_team_1_id: team_id,
+                                        h2h_win_total_team_2_id: global_pricing_dict.h2h_win_total_team_2_id,
+                                    }
 
-                    sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                
-            });
+                                }
+
+                                 sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                                
+                            });
 
     let h2h_team_2_dropdown = d3.select("#h2h_team_2_dropdown");
 
@@ -2031,26 +2161,28 @@ function populateH2HWinTotalTeamsSelectDropdown(sidebar_data_dict) {
                             .attr('value', d => d.team_id)
                             .property('selected', d => d.team_id === global_pricing_dict.h2h_win_total_team_2_id);
 
-    h2h_team_2_dropdown.on("change", function(d) {
 
-                        //set  global conference id
-                        let team_id = parseInt(this.value);
 
-                        global_pricing_dict.h2h_win_total_team_2_id = team_id;
-                        
-                        let pricing_request_params = {
+    h2h_team_2_dropdown.on("change", function() {
 
-                            pricing_market_id: 1202,
-                            h2h_win_params: {
-                                h2h_win_total_team_1_id: global_pricing_dict.h2h_win_total_team_1_id,
-                                h2h_win_total_team_2_id: team_id,
-                            }
+                                //set  global conference id
+                                let team_id = parseInt(this.value);
 
-                        }
+                                global_pricing_dict.h2h_win_total_team_2_id = team_id;
+                                
+                                let pricing_request_params = {
 
-                            sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
-                        
-                    });
+                                    pricing_market_id: 2202,
+                                    h2h_win_params: {
+                                        h2h_win_total_team_1_id: global_pricing_dict.h2h_win_total_team_1_id,
+                                        h2h_win_total_team_2_id: team_id,
+                                    }
+
+                                }
+
+                                    sendPricingRequest(server_api_url, user_id, pricing_request_params, sidebar_data_dict);
+                                
+                            });
 
 }
 
@@ -2093,6 +2225,8 @@ function populatePlayoffOddsPricingTable(pricing_data, sidebar_data_dict) {
 
     let pricing_results_data = pricing_data['win_pricing_results'];
 
+    console.log("--->", pricing_data.pricing_market_id);
+
     let vig_int = sidebar_data_dict.user_market_vig_map[pricing_data.pricing_market_id].market_vig_percent;
     let vig_type_id = sidebar_data_dict.user_market_vig_map[pricing_data.pricing_market_id].market_vig_type;
 
@@ -2110,7 +2244,7 @@ function populatePlayoffOddsPricingTable(pricing_data, sidebar_data_dict) {
     let odds_table_heading_text = pricing_market_dict[pricing_market_id]['market_title'];
     d3.select("#odds_table_heading").text(odds_table_heading_text);
 
-    let odds_table_columns = ['Team Name', 'Vig', 'Vig Free'];
+    let odds_table_columns = ['Team Name', 'Vig (Vig Free)']; // 'FanDuel', 'DraftKings', 'Ceasers'];
 
     //Set column headers 
     let odds_table_headers = d3.select('#odds_table_thead');
@@ -2138,7 +2272,7 @@ function populatePlayoffOddsPricingTable(pricing_data, sidebar_data_dict) {
 
     
     //Create Min Width array for columns
-    let col_width_array = [160, 140, 120, 120, 120, 120];
+    let col_width_array = [160, 180, 120, 120, 120, 120];
 
     let odds_table_cells = odds_table_rows.each(function(d) {
 
@@ -2156,24 +2290,25 @@ function populatePlayoffOddsPricingTable(pricing_data, sidebar_data_dict) {
             .style('min-width', col_width_array[0] + 'px');
 
         row.append('td')
-            .text(vig_odds)
+            .text(vig_odds + " (" + vig_free_odds + ")")
             .attr('class', 'odds_table_td')
             .style('min-width', col_width_array[1] + 'px');
 
-        row.append('td')
-            .text(vig_free_odds)
-            .attr('class', 'odds_table_td')
-            .style('min-width', col_width_array[2] + 'px');
+        // row.append('td')
+        //     .text('--')
+        //     .attr('class', 'odds_table_td')
+        //     .style('min-width', col_width_array[2] + 'px');
 
         // row.append('td')
-        //     .text("-")
+        //     .text('--')
         //     .attr('class', 'odds_table_td')
         //     .style('min-width', col_width_array[3] + 'px');
 
         // row.append('td')
-        //     .text("-")
+        //     .text('--')
         //     .attr('class', 'odds_table_td')
         //     .style('min-width', col_width_array[4] + 'px');
+
 
     });
 }
@@ -2339,7 +2474,7 @@ function populateConferenceOddsPricingTable(pricing_data, sidebar_data_dict) {
     //Display and populate conference dropdown
     let current_dropdown_pricing_market_id = parseInt(d3.select('#odds_table_dropdown').attr('pricing_market_id'));
 
-    if (current_dropdown_pricing_market_id != 1101) {
+    if (current_dropdown_pricing_market_id != 2101) {
         populateConferenceWinSelectDropdown(sidebar_data_dict);
     }
 
@@ -2446,7 +2581,7 @@ function populateDivisionOddsPricingTable(pricing_data, sidebar_data_dict) {
     let is_odds_table_hidden = d3.select('#odds_table_display').style('display') == 'none';
 
     if (is_odds_table_hidden) {
-        d3.select('#odds_table_display').style('display', 'flex');
+        d3.select('#odds_table_display').style('display', 'block');
     }
 
     //Display Market Settings if hidden
@@ -2723,7 +2858,7 @@ function populateTeamTotalsPricingScreen(json_data, sidebar_data_dict) {
         d3.select("#market_settings_container").style("display", "flex");
     }
 
-    populateWinTotalsTeamSelectDropdown(sidebar_data_dict);
+    populateTeamSelectDropdown(sidebar_data_dict);
 
     //Update team logo image
     let team_logo = sidebar_data_dict.team_info_map[pricing_data.team_id]['team_logo_url'];
@@ -2732,45 +2867,57 @@ function populateTeamTotalsPricingScreen(json_data, sidebar_data_dict) {
     d3.select("#win_totals_team_logo").attr("src", team_logo);
     d3.select("#win_totals_team_name").text(team_name);
 
+    //Set radio button listener
+    d3.selectAll("input[name='win_total_radio']")
+            .property('checked', function() {
+
+                let input_value = parseInt(this.value);
+
+                if (input_value  === global_pricing_dict.win_totals_radio_value) {
+                    return true;
+                } else {
+                    return false;
+                }
+
+            })
+            .on('click', function() {
+
+                let radio_button = d3.select(this);
+
+                console.log(radio_button.attr('value'));
+
+                global_pricing_dict.win_totals_radio_value = parseInt(radio_button.attr('value'));
+
+                populateTeamTotalsPricingScreen(json_data, sidebar_data_dict);
+
+            })
+
+
     //Add event listeners for slider and slider value
     const slider = document.getElementById('win_totals_slider');
     const sliderValue = document.getElementById('win_totals_slider_value');
+    let win_total_radio_value = global_pricing_dict.win_totals_radio_value;
 
     //Set initial values on load
     slider.value = global_pricing_dict.win_totals_slider_value;
-
     let vig_int = sidebar_data_dict.user_market_vig_map[json_data.pricing_market_id].market_vig_percent;
     let vig_type_id = sidebar_data_dict.user_market_vig_map[json_data.pricing_market_id].market_vig_type;
+    
+    console.log("-->>", win_total_radio_value);
 
-    let win_index = parseInt(slider.value * 2);
+    //If Over/Under selected for Odds type
+    if (win_total_radio_value == 1) {
 
-    let under_prob = pricing_data['over_win_total_map'][win_index];
-    let over_prob = 1 - under_prob;
+        //Show O/U text
+        d3.select("#win_totals_under_price_div").style('display', 'inline');
+        d3.select('#win_totals_over_price_div').style('display', 'inline');
 
-    let vig_percent = vig_int / 100;
+        //Hide exact text
+        d3.select('#win_totals_exact_price_div').style('display', 'none');
 
-    let under_prob_with_vig = CalcVig(vig_percent, 2, vig_type_id, under_prob);
-    let over_prob_with_vig = CalcVig(vig_percent, 2, vig_type_id, over_prob);
-
-    let under_american_odds = convertProbToAmericanOdds(under_prob_with_vig);
-    let over_american_odds = convertProbToAmericanOdds(over_prob_with_vig);
-
-    d3.select("#win_totals_under_price").text(under_american_odds);
-    d3.select("#win_totals_over_price").text(over_american_odds);
-
-    slider.addEventListener('input', () => {
-        const sliderPosition = (slider.value - slider.min) / (slider.max - slider.min);
-        const thumbWidth = getComputedStyle(slider).getPropertyValue('--thumb-width') || '20px';
-        const thumbOffset = parseInt(thumbWidth) * sliderPosition;
-
-
-        sliderValue.textContent = slider.value;
-        sliderValue.style.left = `calc(${sliderPosition * 100}% - ${thumbOffset}px)`;
-
+        d3.select("#win_totals_slider").attr('step', '0.5');
+    
         let win_index = parseInt(slider.value * 2);
-
-        let vig_int = sidebar_data_dict.user_market_vig_map[json_data.pricing_market_id].market_vig_percent;
-        let vig_type_id = sidebar_data_dict.user_market_vig_map[json_data.pricing_market_id].market_vig_type;
 
         let under_prob = pricing_data['over_win_total_map'][win_index];
         let over_prob = 1 - under_prob;
@@ -2785,15 +2932,108 @@ function populateTeamTotalsPricingScreen(json_data, sidebar_data_dict) {
 
         d3.select("#win_totals_under_price").text(under_american_odds);
         d3.select("#win_totals_over_price").text(over_american_odds);
+
+        const sliderPosition = (slider.value - slider.min) / (slider.max - slider.min);
+        const thumbWidth = getComputedStyle(slider).getPropertyValue('--thumb-width') || '20px';
+        const thumbOffset = parseInt(thumbWidth) * sliderPosition;
+
+        sliderValue.textContent = slider.value;
+        sliderValue.style.left = `calc(${sliderPosition * 100}% - ${thumbOffset}px)`;
+
+        slider.addEventListener('input', () => {
+            const sliderPosition = (slider.value - slider.min) / (slider.max - slider.min);
+            const thumbWidth = getComputedStyle(slider).getPropertyValue('--thumb-width') || '20px';
+            const thumbOffset = parseInt(thumbWidth) * sliderPosition;
+
+
+            sliderValue.textContent = slider.value;
+            sliderValue.style.left = `calc(${sliderPosition * 100}% - ${thumbOffset}px)`;
+
+            let win_index = parseInt(slider.value * 2);
+
+            let vig_int = sidebar_data_dict.user_market_vig_map[json_data.pricing_market_id].market_vig_percent;
+            let vig_type_id = sidebar_data_dict.user_market_vig_map[json_data.pricing_market_id].market_vig_type;
+
+            let under_prob = pricing_data['over_win_total_map'][win_index];
+            let over_prob = 1 - under_prob;
+
+            let vig_percent = vig_int / 100;
+
+            let under_prob_with_vig = CalcVig(vig_percent, 2, vig_type_id, under_prob);
+            let over_prob_with_vig = CalcVig(vig_percent, 2, vig_type_id, over_prob);
+
+            let under_american_odds = convertProbToAmericanOdds(under_prob_with_vig);
+            let over_american_odds = convertProbToAmericanOdds(over_prob_with_vig);
+
+            d3.select("#win_totals_under_price").text(under_american_odds);
+            d3.select("#win_totals_over_price").text(over_american_odds);
+            
+            global_pricing_dict.win_totals_slider_value = slider.value;
+
+        });
+
+    } else {
+
+        //Hide O/U text
+        d3.select("#win_totals_under_price_div").style('display', 'none');
+        d3.select('#win_totals_over_price_div').style('display', 'none');
+
+        //Show exact text
+        d3.select('#win_totals_exact_price_div').style('display', 'inline');
         
-        global_pricing_dict.win_totals_slider_value = slider.value;
+        //Set values to just even numbers for the slider
+        d3.select("#win_totals_slider").attr('step', '1');
 
-    });
+        let win_index = parseInt(slider.value * 2);
 
+        let exact_prob = pricing_data['exact_win_total_map'][win_index];
+
+        let vig_percent = vig_int / 100;
+
+        let exact_prob_with_vig = CalcVig(vig_percent, 2, vig_type_id, exact_prob);
+        let exact_american_odds = convertProbToAmericanOdds(exact_prob_with_vig);
+
+        d3.select("#win_totals_exact_price").text(exact_american_odds);
+
+        const sliderPosition = (slider.value - slider.min) / (slider.max - slider.min);
+        const thumbWidth = getComputedStyle(slider).getPropertyValue('--thumb-width') || '20px';
+        const thumbOffset = parseInt(thumbWidth) * sliderPosition;
+
+        sliderValue.textContent = slider.value;
+        sliderValue.style.left = `calc(${sliderPosition * 100}% - ${thumbOffset}px)`;
+
+        slider.addEventListener('input', () => {
+            const sliderPosition = (slider.value - slider.min) / (slider.max - slider.min);
+            const thumbWidth = getComputedStyle(slider).getPropertyValue('--thumb-width') || '20px';
+            const thumbOffset = parseInt(thumbWidth) * sliderPosition;
+
+
+            sliderValue.textContent = slider.value;
+            sliderValue.style.left = `calc(${sliderPosition * 100}% - ${thumbOffset}px)`;
+
+            let win_index = parseInt(slider.value * 2);
+
+            let exact_prob = pricing_data['exact_win_total_map'][win_index];
+
+            let vig_percent = vig_int / 100;
+
+            let exact_prob_with_vig = CalcVig(vig_percent, 2, vig_type_id, exact_prob);
+            let exact_american_odds = convertProbToAmericanOdds(exact_prob_with_vig);
+
+            d3.select("#win_totals_exact_price").text(exact_american_odds);
+            
+            global_pricing_dict.win_totals_slider_value = slider.value;
+
+        });
+
+
+
+
+    }
     
 }
 
-function populateH2HTeamWinTotalPricingScreen(json_data, sidebar_data_dict) {
+function populateH2HTeamWinTotalPricingScreeen(json_data, sidebar_data_dict) {
 
     let pricing_data = json_data["h2h_pricing_results"];
 
@@ -2947,7 +3187,7 @@ function populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict) 
     //Display and populate conference dropdown if not already existing
     let current_dropdown_pricing_market_id = parseInt(d3.select('#odds_table_dropdown').attr('pricing_market_id'));
 
-    if (current_dropdown_pricing_market_id != 1301) {
+    if (current_dropdown_pricing_market_id != 2301) {
        populateConferenceWinSelectDropdown(sidebar_data_dict);
     }
 
@@ -3033,17 +3273,16 @@ function populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict) 
 
 
 //*******************************Start of APP ***********************************************/
-
 //set timeout
 let sidebar_data_dict = setTimeout(() => {
         
-        user_id = logged_in_user.email;
-    
-        fetchSidebarData(server_api_url, user_id)
-            .then((sidebar_data_dict) => {
-                
-                drawSidebarContents(sidebar_data_dict);
-                createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data_dict);
+    user_id = logged_in_user.email;
 
-            });
+    fetchSidebarData(server_api_url, user_id)
+        .then((sidebar_data_dict) => {
+            
+            drawSidebarContents(sidebar_data_dict);
+            createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data_dict);
+
+        });
 }, 1000);
