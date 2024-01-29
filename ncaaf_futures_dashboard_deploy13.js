@@ -25,7 +25,7 @@ let color_dict = {
     black: "#000",
     charcoal: "#1a1a1a",
     white: "#cec1ae",
-    light_gray: "#f2f2f2",
+    light_gray: "#cec1ae",
     med_gray: "#cec1ae",
     dark_gray: ' #cec1ae',
     orange: "#e8220b",
