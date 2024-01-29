@@ -3046,4 +3046,4 @@ let sidebar_data_dict = setTimeout(() => {
                 createMarketSettingsHandlers(pricing_market_dict, user_id, sidebar_data_dict);
 
             });
-}, 3000);
+}, 1000);
