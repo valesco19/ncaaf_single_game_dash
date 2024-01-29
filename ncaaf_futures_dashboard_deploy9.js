@@ -1,4 +1,4 @@
-const server_api_url = "https://ncaaf-season-sim-api.untouted.com"
+const server_api_url = "https://ncaaf-season-sim-api.untouted.com/api"
 
 let user_id;
 
