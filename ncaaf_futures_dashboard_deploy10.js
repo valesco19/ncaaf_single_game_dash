@@ -1568,7 +1568,7 @@ function toggleConferenceDropdown(sidebar_data_dict,  conference_dropdown_width)
 function drawSidebarContents(sidebar_data_dict) {
     let width = d3.select('#viz').node().getBoundingClientRect().width;
     let height = d3.select('#viz').node().getBoundingClientRect().height;
-    let navbar_height = d3.select('#navbar').node().getBoundingClientRect().height;
+    let navbar_height = 70;
     let sidebar_height = d3.select('#sidebar_contents').node().getBoundingClientRect().height;
     let sidebar_margin_dict = {top: 10, bottom: 0, left: 10, right: 8};
 
