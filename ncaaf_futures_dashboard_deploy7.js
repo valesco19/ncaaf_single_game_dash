@@ -3278,7 +3278,7 @@ let sidebar_data_dict = setTimeout(() => {
         
     user_id = logged_in_user.email;
 
-    console.log(user_id, ": logged in);
+    console.log(user_id, ": logged in");
 
     fetchSidebarData(server_api_url, user_id)
         .then((sidebar_data_dict) => {
