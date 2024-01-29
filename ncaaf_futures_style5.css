@@ -15,7 +15,7 @@ body {
     left: 0;
     height: 55px;
     width: 100vw;
-    background: #fff;
+    background: #1a1a1a;
 }
 
 #navbar_logo {
@@ -32,8 +32,7 @@ body {
     display: inline-block;
     position: fixed;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0px;
     width: 100%;
     max-width: 1200px;
     height: 100vh;
@@ -117,7 +116,7 @@ body {
 }
 
 #team_elo_slider_handle {
-    fill: #fff;
+    fill: #cec1ae;
     stroke: #000;
     stroke-opacity: 1.0;
     stroke-width: 1.25px;
@@ -126,7 +125,7 @@ body {
 #odds_table_display {
     position: absolute;
     left: 420px;
-    top: 80px;
+    top: 40px;
 }
 
 #odds_table {
@@ -197,7 +196,7 @@ body {
 
 #market_settings_container {
     position: absolute;
-    right: 60px;
+    left: 1100px;
     top: 110px;
     height: auto;
     min-width: 180px;
@@ -290,9 +289,9 @@ body {
     border: none;
     padding:5px;
     border-radius: 15px;
-    color: #fff;
+    color: #cec1ae;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 700;
 }
 
 #save_vig_button {
@@ -303,13 +302,13 @@ body {
     border: none;
     padding:5px;
     border-radius: 15px;
-    color: #fff;
+    color: #cec1ae;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 700;
 }
 
 #save_vig_success_text{
-    font-weight: 500;
+    font-weight: 700;
     font-size: 14px;
     margin-top: 5px;
     color: #e8220b;
@@ -323,6 +322,7 @@ body {
     background-color: #000;
     color: #cec1ae;
     border: none;
+    border-radius: 16px;
     padding: 5px;
     width: 180px;
 }
