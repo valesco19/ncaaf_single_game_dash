@@ -3246,8 +3246,8 @@ function populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict) 
         const row = d3.select(this);
 
         //Convert cell data
-        let winning_team_name = sidebar_data_dict.team_info_map[d.conference_winner_team_id].team_name;
-        let runner_up_team_name = sidebar_data_dict.team_info_map[d.conference_runner_up_team_id].team_name;
+        let winning_team_name = sidebar_data_dict.team_info_map[d.winner_team_id].team_name;
+        let runner_up_team_name = sidebar_data_dict.team_info_map[d.runner_up_team_id].team_name;
         let full_text = winning_team_name + " beats " + runner_up_team_name;
         let vig_odds_text = convertProbToAmericanOdds(d.probability_with_vig);
         let vig_free_odds_text = convertProbToAmericanOdds(d.win_probability);
