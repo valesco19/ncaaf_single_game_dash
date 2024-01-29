@@ -3193,7 +3193,7 @@ function populateConferenceExactaOddsPricingTable(json_data, sidebar_data_dict) 
        populateConferenceWinSelectDropdown(sidebar_data_dict);
     }
 
-    let pricing_results_data = json_data['conference_exacta_pricing_results'];
+    let pricing_results_data = json_data['exacta_pricing_results'];
     let pricing_market_id = json_data['pricing_market_id'];
 
 
