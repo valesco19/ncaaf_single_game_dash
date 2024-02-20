@@ -233,6 +233,9 @@ function createArrayWithIndices(length) {
 //Main Populate Functions
 function populateTeamCompareStatRanks(stat_group_array, model_input_rank, num_teams_to_display, is_first_populate, is_elo) {
 
+    console.log("stat_group_array ->>", stat_group_array);
+    console.log("model_input_rank ->>", model_input_rank);
+
     let team_compare_dict = getEntriesAroundRank(stat_group_array, model_input_rank, num_teams_to_display);
     let teams_above_array = team_compare_dict['teams_above'];
     let teams_below_array = team_compare_dict['teams_below'];
@@ -410,7 +413,7 @@ function populateModelInputsELODistPlot(stat_group_array) {
                                                                                         .attr('y', dist_panel_height)
                                                                                         .attr("text-anchor", 'middle')
                                                                                         .attr('dominant-baseline', 'middle')
-                                                                                        .attr('fill', color_dict.black)
+                                                                                        .attr('fill', color_dict.med_gray)
                                                                                         .attr('font-size', '12px')
                                                                                         .attr('font-weight', 500);
 
@@ -1932,13 +1935,66 @@ function populateModelInputsGameResults(json_dict) {
 
 }
 
-function closeModelInputModal() {
+function closeModal() {
 
     //Display Modal and Overlay
-    d3.select("#model_input_modal_overlay").style('display', 'none');
-    d3.select("#model_input_modal").style('display', 'none')
+    d3.select("#modal_overlay").style('display', 'none');
+    d3.select("#modal_div").style('display', 'none')
                                                                     .selectAll("*")
                                                                     .remove();
+}
+
+function launchTeamRosterModal(is_home) {
+
+    console.log("Launch Team Roster Modal, is_home ->", is_home);
+
+    //Display Modal and Overlay
+    d3.select("#modal_overlay").style('display', 'block');
+    d3.select("#modal_div").style('display', 'block');
+
+    let modal_div = d3.select("#modal_div");
+
+    let team_roster_header_div = modal_div.append('div')
+                                                                    .attr('id', 'team_roster_header_div');
+
+    let team_roster_close_div = team_roster_header_div.append('div')
+                                                                    .attr('id', 'modal_close_div')
+                                                                    .on("click", function() {
+
+                                                                        closeModal();
+
+                                                                    });
+
+    let team_roster_header_close_x = team_roster_close_div.append('text')
+                                                                                                                    .text('x')
+                                                                                                                    .attr('id', 'modal_div_close_x');
+
+    let team_abbrev = is_home ? "home": "away";
+
+    let team_logo_url = team_abbrev + "_team_logo_url";
+    let team_roster_logo_image = team_roster_header_div.append('img')
+                                                                        .attr('src', matchup_info_dict[team_logo_url])
+                                                                        .attr('alt', 'Team Logo')
+                                                                        .attr('id', 'modal_team_logo_image');
+
+    let team_name = team_abbrev + "_team_short_name";
+    let team_roster_team_header = team_roster_header_div.append('h2')
+                                                                        .text(matchup_info_dict[team_name])
+                                                                        .attr('id', 'modal_team_header');
+
+    //Create Roster Table Div
+    let team_roster_table_div = modal_div.append('div')
+                                                                        .attr('id', 'team_roster_table_div');
+
+    //Create Plot SVG
+    let roster_plot_svg = modal_div.append('div')
+                                                                    .attr('id', 'roster_plot_div')
+                                                                    .style('position', 'relative')
+                                                                    .append('svg')
+                                                                    .attr('id', 'roster_plot_svg')
+                                                                    .attr('width', '100%')
+                                                                    .attr('height', '400px');
+
 }
 
 function launchModelInputModal(model_input_id, model_input_stat_group, is_home) {
@@ -1946,41 +2002,41 @@ function launchModelInputModal(model_input_id, model_input_stat_group, is_home) 
     console.log("Model Input ID ->", model_input_id, "Stat Group ->", model_input_stat_group);
 
     //Display Modal and Overlay
-    d3.select("#model_input_modal_overlay").style('display', 'block');
-    d3.select("#model_input_modal").style('display', 'block');
+    d3.select("#modal_overlay").style('display', 'block');
+    d3.select("#modal_div").style('display', 'block');
 
-    let model_input_modal = d3.select("#model_input_modal");
+    let modal_div = d3.select("#modal_div");
 
-    let model_input_header_div = model_input_modal.append('div')
+    let model_input_header_div = modal_div.append('div')
                                                                     .attr('id', 'model_input_header_div');
 
     let model_input_close_div = model_input_header_div.append('div')
-                                                                    .attr('id', 'model_input_modal_close_div')
+                                                                    .attr('id', 'modal_close_div')
                                                                     .on("click", function() {
 
-                                                                        closeModelInputModal();
+                                                                        closeModal();
 
                                                                     });
 
     let model_input_header_close_x = model_input_close_div.append('text')
                                                                                                                     .text('x')
-                                                                                                                    .attr('id', 'model_input_modal_close_x');
+                                                                                                                    .attr('id', 'modal_div_close_x');
                                                                    
     let team_abbrev = is_home ? "home": "away";
                     
     let team_logo_url = team_abbrev + "_team_logo_url";
-    let model_input_logo_image = model_input_modal.append('img')
+    let model_input_logo_image = modal_div.append('img')
                                                                         .attr('src', matchup_info_dict[team_logo_url])
                                                                         .attr('alt', 'Team Logo')
-                                                                        .attr('id', 'model_input_logo_image');
+                                                                        .attr('id', 'modal_team_logo_image');
 
     let team_name = team_abbrev + "_team_short_name";
-    let model_input_team_header = model_input_modal.append('h2')
+    let model_input_team_header = modal_div.append('h2')
                                                                         .text(matchup_info_dict[team_name])
-                                                                        .attr('id', 'model_input_team_header');
+                                                                        .attr('id', 'modal_team_header');
 
     //Create update model input button
-    let model_input_update_model_button = model_input_modal.append('button')
+    let model_input_update_model_button = modal_div.append('button')
                                                                         .text("Update Models")
                                                                         .attr('id', 'model_input_update_model_button')
                                                                         .style("border-radius", "20px")
@@ -1991,7 +2047,7 @@ function launchModelInputModal(model_input_id, model_input_stat_group, is_home) 
     //Stat Name Header
     let stat_col_dict = projection_col_array.find(d => d.stat_group === model_input_stat_group);
     
-    let model_input_stat_group_header = model_input_modal.append('h3')
+    let model_input_stat_group_header = modal_div.append('h3')
                                                                         .text(stat_col_dict.display_name)
                                                                         .attr('id', 'model_input_stat_group_header');
                                                                         
@@ -2000,7 +2056,7 @@ function launchModelInputModal(model_input_id, model_input_stat_group, is_home) 
     let model_input_value = projections_dict[projection_key_name];
     
     //Distribution SVG
-    let model_input_svg = model_input_modal.append('div')
+    let model_input_svg = modal_div.append('div')
                                                                         .attr('id', 'model_input_slider_div')
                                                                         .style('position', 'relative')
                                                                         .append('svg')
@@ -2009,7 +2065,7 @@ function launchModelInputModal(model_input_id, model_input_stat_group, is_home) 
                                                                         .attr('height', '200px');
                                                
     //Time Series SVG
-    let time_series_svg = model_input_modal.append('div')
+    let time_series_svg = modal_div.append('div')
                                                                       .attr('id', 'model_input_time_series_div')
                                                                       .style('position', 'relative')
                                                                       .append('svg')
@@ -2018,7 +2074,7 @@ function launchModelInputModal(model_input_id, model_input_stat_group, is_home) 
                                                                       .attr('height', '200px');
 
     //Game Results SVG
-    let game_results_div = model_input_modal.append('div')
+    let game_results_div = modal_div.append('div')
                                                                     .attr("id", "model_input_game_results_div")
                                                                     .style('position', 'relative');
                                                                     
@@ -2211,12 +2267,26 @@ function populateTeamProjections(json_dict) {
                                                                                                             console.log("Clicked D->", d);
 
                                                                                                             let away_team_seo_name = matchup_info_dict['away_team_seo_name'];
+                                                                                                            let game_start_date = matchup_info_dict['start_date'];
 
                                                                                                             global_vars_dict['modal_stat_id'] = d.stat_id;
                                                                                                             global_vars_dict['model_stat_group_is_home'] = false;
 
-                                                                                                            sendModelInputRequest(d.stat_id, away_team_seo_name);
+                                                                                                            sendModelInputRequest(d.stat_id, away_team_seo_name, game_start_date);
                                                                                                             launchModelInputModal(d.stat_id,d.stat_group, false);
+
+                                                                                                        })
+                                                                                                        .on('mouseover', function() {
+
+                                                                                                            let rect = d3.select(this).select("#projection_row_away_highlight_rect");
+                                                                                                            rect.style('display', 'block');
+                                                                                                            
+                                                                                                        })
+                                                                                                        .on('mouseout', function() {
+
+                                                                                                            let rect = d3.select(this).select("#projection_row_away_highlight_rect");
+
+                                                                                                            rect.style('display', 'none');
 
                                                                                                         });
 
@@ -2244,12 +2314,27 @@ function populateTeamProjections(json_dict) {
                                                                                                             console.log("Clicked D->", d);
 
                                                                                                             let home_team_seo_name = matchup_info_dict['home_team_seo_name'];
+                                                                                                            let game_start_date = matchup_info_dict['start_date'];
 
                                                                                                             global_vars_dict['modal_stat_id'] = d.stat_id;
                                                                                                             global_vars_dict['model_stat_group_is_home'] = true;
 
-                                                                                                            sendModelInputRequest(d.stat_id, home_team_seo_name);
+                                                                                                            sendModelInputRequest(d.stat_id, home_team_seo_name, game_start_date);
                                                                                                             launchModelInputModal(d.stat_id,d.stat_group, true);
+
+                                                                                                        })
+                                                                                                        .on('mouseover', function() {
+
+                                                                                                            let rect = d3.select(this).select("#projection_row_home_highlight_rect");
+
+                                                                                                            rect.style('display', 'block');
+
+                                                                                                        })
+                                                                                                        .on('mouseout', function() {
+
+                                                                                                            let rect = d3.select(this).select("#projection_row_home_highlight_rect");
+
+                                                                                                            rect.style('display', 'none');
 
                                                                                                         });
 
@@ -2287,6 +2372,28 @@ function populateTeamProjections(json_dict) {
                                                                                                     .attr('stroke', '#000')
                                                                                                     .attr('stroke-width', '1px')
                                                                                                     .style('shape-rendering', 'CrispEdges');
+
+    //Draw Hover Highlight Rects
+    let projection_highlight_rect_width = 6;
+
+    let projection_row_away_highlight_rect = projection_row_away_g.append('rect')
+                                                                                                    .attr('id', 'projection_row_away_highlight_rect')
+                                                                                                    .attr('x', 0)
+                                                                                                    .attr('y', 0)
+                                                                                                    .attr('width', projection_highlight_rect_width)
+                                                                                                    .attr('height', projection_row_height)
+                                                                                                    .attr('fill', color_dict.orange)
+                                                                                                    .style('display', 'none');
+
+    let projection_row_home_highlight_rect = projection_row_home_g.append('rect')
+                                                                                                    .attr('id', 'projection_row_home_highlight_rect')
+                                                                                                    .attr('x', projection_div_width - projection_highlight_rect_width)
+                                                                                                    .attr('y', 0)
+                                                                                                    .attr('width', projection_highlight_rect_width)
+                                                                                                    .attr('height', projection_row_height)
+                                                                                                    .attr('fill', color_dict.orange)
+                                                                                                    .style('display', 'none');
+                                                                                                    
 
     //*******Away Projection Plots************* */
     let away_projection_scales = projection_col_array.map((d) => d3.scaleLinear()
@@ -3931,7 +4038,7 @@ function populateMatchupGameModels() {
                                                                                                         .attr('transform', function(d, i) {
 
                                                                                                             let odds_pricing_x = prediction_div_width / 2 - odds_bg_width / 2;
-                                                                                                            let odds_pricing_y = odds_pricing_top_padding + (odds_pricing_line_height * i);
+                                                                                                            let odds_pricing_y = odds_pricing_top_padding + (odds_pricing_line_height * i) + (i * 1);
 
                                                                                                             return 'translate(' + odds_pricing_x + ', ' + odds_pricing_y + ')';
 
@@ -3942,13 +4049,30 @@ function populateMatchupGameModels() {
                                                                                                             launchModelDetails(d, i, predictions_dict);
                                                                                                             sendModelDetailsRequest(d.market_id);
 
+                                                                                                        })
+                                                                                                        .on('mouseover', function() {
+
+                                                                                                            d3.select(this)
+                                                                                                                    .select('.odds_pricing_highlight')
+                                                                                                                    .style('display', 'block');
+
+                                                                                                        })
+                                                                                                        .on('mouseout', function() {
+
+                                                                                                            d3.select(this)
+                                                                                                                    .select('.odds_pricing_highlight')
+                                                                                                                    .style('display', 'none');
+
                                                                                                         });
 
     let odds_pricing_bg = odds_pricing_g.append('rect')
                                                                                             .attr('x', 0)
                                                                                             .attr('y', 0)
+                                                                                            .attr('class', 'odds_pricing_bg')
                                                                                             .attr('width', odds_bg_width)
                                                                                             .attr('height', odds_pricing_line_height)
+                                                                                            .attr('stroke', color_dict.dark_bg)
+                                                                                            .attr('stroke-width', '1px')
                                                                                             .attr('fill', color_dict.dark_bg)
                                                                                             .attr('shape-rendering', "CrispEdges")
                                                                                             .style('box-sizing', 'border-box');                                                      
@@ -3960,13 +4084,25 @@ function populateMatchupGameModels() {
                                                                                             })
                                                                                             .attr('class', 'odds_pricing_line_title_texts')
                                                                                             .attr('x', odds_bg_width / 2)
-                                                                                            .attr('y', odds_pricing_line_height / 2)
+                                                                                            .attr('y', odds_pricing_line_height / 2 - 5)
                                                                                             .attr('fill', color_dict.med_gray)
                                                                                             .attr('text-anchor', 'middle')
                                                                                             .attr('dominant-baseline', 'middle')
                                                                                             .attr('font-size', '14px')
                                                                                             .attr('font-weight', 500)
                                                                                             .style('font-family', 'Work Sans');
+                                                                                
+    let odds_pricing_highlight_width = 90;
+    let odds_pricing_highlight_height = 2;
+
+    let odds_pricing_line_highight = odds_pricing_g.append('rect')
+                                                                                            .attr('x', odds_bg_width / 2 - odds_pricing_highlight_width / 2)
+                                                                                            .attr('y', odds_pricing_line_height / 2 + 2)
+                                                                                            .attr('class', 'odds_pricing_highlight')
+                                                                                            .attr('width', odds_pricing_highlight_width)
+                                                                                            .attr('height', odds_pricing_highlight_height)
+                                                                                            .attr('fill', color_dict.orange)
+                                                                                            .style('display', 'none');                                                                                     
 
     let odds_padding = 60;
 
@@ -4539,7 +4675,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .attr('width', matchup_header_button_width)
                                                                 .attr('height', matchup_header_button_height)
                                                                 .attr('fill', color_dict.dark_bg)
-                                                                .attr('stroke', color_dict.black)
+                                                                .attr('stroke', color_dict.med_gray)
                                                                 .attr('stroke-width', 1)
                                                                 .attr('rx', 10)
                                                                 .attr('ry', 10)
@@ -4550,7 +4686,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .text('Team')
                                                                 .attr('x', matchup_header_button_width / 2)
                                                                 .attr('y', matchup_header_button_height / 2)
-                                                                .attr('fill', color_dict.black)
+                                                                .attr('fill', color_dict.med_gray)
                                                                 .attr('text-anchor', 'middle')
                                                                 .attr('dominant-baseline', 'middle')
                                                                 .attr('font-size', '12px')
@@ -4567,10 +4703,13 @@ function populateMatchupHeader(json_dict) {
                                                                     return 'translate(' + away_team_lineups_button_x + ',' + away_team_lineups_button_y + ')';
 
                                                                 })
-                                                                .style('cursor', 'not-allowed')
+                                                                .style('cursor', 'pointer')
                                                                 .on('click', function() {
 
-                                                                    console.log("Clicked away team lineups button");
+                                                                    let away_team_seo_name = matchup_info_dict['away_team_seo_name'];
+
+                                                                    sendTeamRosterRequest(away_team_seo_name);
+                                                                    launchTeamRosterModal(false);
 
                                                                 });
 
@@ -4580,8 +4719,8 @@ function populateMatchupHeader(json_dict) {
                                                                 .attr('width', matchup_header_button_width)
                                                                 .attr('height', matchup_header_button_height)
                                                                 .attr('fill', color_dict.dark_bg)
-                                                                .attr('stroke', color_dict.black)
-                                                                .attr('stroke-width', 1)
+                                                                .attr('stroke', color_dict.med_gray)
+                                                                .attr('stroke-width', '1px')
                                                                 .attr('rx', 10)
                                                                 .attr('ry', 10)
                                                                 .attr('shape-rendering', "CrispEdges")
@@ -4591,7 +4730,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .text('Roster')
                                                                 .attr('x', matchup_header_button_width / 2)
                                                                 .attr('y', matchup_header_button_height / 2)
-                                                                .attr('fill', color_dict.black)
+                                                                .attr('fill', color_dict.med_gray)
                                                                 .attr('text-anchor', 'middle')
                                                                 .attr('dominant-baseline', 'middle')
                                                                 .attr('font-size', '12px')
@@ -4621,7 +4760,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .attr('width', matchup_header_button_width)
                                                                 .attr('height', matchup_header_button_height)
                                                                 .attr('fill', color_dict.dark_bg)
-                                                                .attr('stroke', color_dict.black)
+                                                                .attr('stroke', color_dict.med_gray)
                                                                 .attr('stroke-width', 1)
                                                                 .attr('rx', 10)
                                                                 .attr('ry', 10)
@@ -4632,7 +4771,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .text('News')
                                                                 .attr('x', matchup_header_button_width / 2)
                                                                 .attr('y', matchup_header_button_height / 2)
-                                                                .attr('fill', color_dict.black)
+                                                                .attr('fill', color_dict.med_gray)
                                                                 .attr('text-anchor', 'middle')
                                                                 .attr('dominant-baseline', 'middle')
                                                                 .attr('font-size', '12px')
@@ -4736,7 +4875,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .attr('width', matchup_header_button_width)
                                                                 .attr('height', matchup_header_button_height)
                                                                 .attr('fill', color_dict.dark_bg)
-                                                                .attr('stroke', color_dict.black)
+                                                                .attr('stroke', color_dict.med_gray)
                                                                 .attr('stroke-width', 1)
                                                                 .attr('rx', 10)
                                                                 .attr('ry', 10)
@@ -4747,7 +4886,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .text('Team')
                                                                 .attr('x', matchup_header_button_width / 2)
                                                                 .attr('y', matchup_header_button_height / 2)
-                                                                .attr('fill', color_dict.black)
+                                                                .attr('fill', color_dict.med_gray)
                                                                 .attr('text-anchor', 'middle')
                                                                 .attr('dominant-baseline', 'middle')
                                                                 .attr('font-size', '12px')
@@ -4764,10 +4903,13 @@ function populateMatchupHeader(json_dict) {
                                                                     return 'translate(' + home_team_lineups_button_x + ',' + home_team_lineups_button_y + ')';
 
                                                                 })
-                                                                .style('cursor', 'not-allowed')
+                                                                .style('cursor', 'pointer')
                                                                 .on('click', function() {
+                                                                    
+                                                                    let home_team_seo_name = matchup_info_dict['home_team_seo_name'];
 
-                                                                    console.log("Clicked home team lineups button");
+                                                                    sendTeamRosterRequest(home_team_seo_name);
+                                                                    launchTeamRosterModal(true);
 
                                                                 });
 
@@ -4777,8 +4919,8 @@ function populateMatchupHeader(json_dict) {
                                                                 .attr('width', matchup_header_button_width)
                                                                 .attr('height', matchup_header_button_height)
                                                                 .attr('fill', color_dict.dark_bg)
-                                                                .attr('stroke', color_dict.black)
-                                                                .attr('stroke-width', 1)
+                                                                .attr('stroke', color_dict.med_gray)
+                                                                .attr('stroke-width', '1px')
                                                                 .attr('rx', 10)
                                                                 .attr('ry', 10)
                                                                 .attr('shape-rendering', "CrispEdges")
@@ -4788,7 +4930,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .text('Roster')
                                                                 .attr('x', matchup_header_button_width / 2)
                                                                 .attr('y', matchup_header_button_height / 2)
-                                                                .attr('fill', color_dict.black)
+                                                                .attr('fill', color_dict.med_gray)
                                                                 .attr('text-anchor', 'middle')
                                                                 .attr('dominant-baseline', 'middle')
                                                                 .attr('font-size', '12px')
@@ -4818,7 +4960,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .attr('width', matchup_header_button_width)
                                                                 .attr('height', matchup_header_button_height)
                                                                 .attr('fill', color_dict.dark_bg)
-                                                                .attr('stroke', color_dict.black)
+                                                                .attr('stroke', color_dict.med_gray)
                                                                 .attr('stroke-width', 1)
                                                                 .attr('rx', 10)
                                                                 .attr('ry', 10)
@@ -4829,7 +4971,7 @@ function populateMatchupHeader(json_dict) {
                                                                 .text('News')
                                                                 .attr('x', matchup_header_button_width / 2)
                                                                 .attr('y', matchup_header_button_height / 2)
-                                                                .attr('fill', color_dict.black)
+                                                                .attr('fill', color_dict.med_gray)
                                                                 .attr('text-anchor', 'middle')
                                                                 .attr('dominant-baseline', 'middle')
                                                                 .attr('font-size', '12px')
@@ -5044,7 +5186,7 @@ function sendInitRequests(game_url) {
 
 }
 
-function sendModelInputRequest(stat_id, team_seo_name) {
+function sendModelInputRequest(stat_id, team_seo_name, game_start_date) {
 
     //Stat Group Request
     let stat_group_req_dict = {
@@ -5052,6 +5194,7 @@ function sendModelInputRequest(stat_id, team_seo_name) {
         params: {
             "stat_id": stat_id,
             "team_seo_name": team_seo_name,
+            "game_start_date": game_start_date,
         }
     }
 
@@ -5067,6 +5210,19 @@ function sendModelInputRequest(stat_id, team_seo_name) {
     }
 
     ws_conn.send(JSON.stringify(game_result_req_dict));
+
+}
+
+function sendTeamRosterRequest(team_seo_name) {
+
+    let team_roster_req_dict = {
+        req_type: "team_roster",
+        params: {
+            "team_seo_name": team_seo_name,
+        }
+    }
+
+    ws_conn.send(JSON.stringify(team_roster_req_dict));
 
 }
 
@@ -5157,7 +5313,7 @@ function updateModelInputsAndSendRequest() {
     updateModelProjections(modal_stat_base_name, for_team_value, against_team_value);
 
     //Close Modal
-    closeModelInputModal();
+    closeModal();
 
 
 };
