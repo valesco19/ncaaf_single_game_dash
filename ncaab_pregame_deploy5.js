@@ -2272,8 +2272,9 @@ function populateTeamProjections(json_dict) {
                                                                                                             global_vars_dict['modal_stat_id'] = d.stat_id;
                                                                                                             global_vars_dict['model_stat_group_is_home'] = false;
 
-                                                                                                            sendModelInputRequest(d.stat_id, away_team_seo_name, game_start_date);
                                                                                                             launchModelInputModal(d.stat_id,d.stat_group, false);
+                                                                                                            sendModelInputRequest(d.stat_id, away_team_seo_name, game_start_date);
+                                                                                                            
 
                                                                                                         })
                                                                                                         .on('mouseover', function() {
@@ -2319,8 +2320,8 @@ function populateTeamProjections(json_dict) {
                                                                                                             global_vars_dict['modal_stat_id'] = d.stat_id;
                                                                                                             global_vars_dict['model_stat_group_is_home'] = true;
 
-                                                                                                            sendModelInputRequest(d.stat_id, home_team_seo_name, game_start_date);
                                                                                                             launchModelInputModal(d.stat_id,d.stat_group, true);
+                                                                                                            sendModelInputRequest(d.stat_id, home_team_seo_name, game_start_date);
 
                                                                                                         })
                                                                                                         .on('mouseover', function() {
