@@ -5399,7 +5399,7 @@ setTimeout(function() {
 
     ws_conn.send(JSON.stringify(init_projection_range_req_dict));
 
-}, 500)
+}, 1500)
 
 
 setTimeout(function() {
@@ -5411,4 +5411,4 @@ setTimeout(function() {
     //Show update sim button
     d3.select("#update_models_button").style('display', 'block');
     
-}, 1000);
+}, 2000);
