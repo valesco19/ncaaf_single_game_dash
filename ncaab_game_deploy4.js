@@ -1222,7 +1222,7 @@ setTimeout(function() {
         user_email: logged_in_user.email,
         req_type: "return_games_for_day",
         params: {
-            "season": 2023,
+            "season": 2024,
         }
     };
     
