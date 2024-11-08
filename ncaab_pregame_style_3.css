@@ -85,9 +85,9 @@ body {
 
 #player_props_button {
   background-color: #1a1a1a;
-  color: #000;
-  border: 1px solid #000;
-  cursor: not-allowed;
+  color: #cec1ae;
+  border: 1px solid #cec1ae;
+  cursor: pointer;
 }
 
 #matchup_predictions_div {
@@ -218,4 +218,23 @@ body {
   .model_inputs_game_results_cell {
     text-align: center;
     border-top: 1px solid #000;
+  }
+
+  #team_roster_table {
+    font-size: 12px;
+  }
+
+  #player_props_player_image {
+    position: absolute;
+    top: 30px;
+    left: 30px;
+    width: 200px;
+  }
+
+  #player_props_model_player_header {
+    position: absolute;
+    top: 0px;
+    left: 250px;
+    font-size: 38px;
+    font-weight: 700;
   }
