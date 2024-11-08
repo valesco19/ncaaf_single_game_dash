@@ -21,6 +21,10 @@ let global_var_dict = {
 
 }
 
+let logged_in_user = {
+    email: 'testemail@untouted.com',
+};
+
 function convertWinProbToAmericanOdds(win_prob) {
     // Ensure american_odds is a valid probability (between 0 and 1)
     if (win_prob < 0 || win_prob > 1) {
@@ -127,6 +131,10 @@ function calcGameStatus(d) {
 
         return game_clock_str;
 
+    } else if (d.game_status === "postponed") {
+
+        return "Postponed"
+
     } else {
 
         console.log("Error: game_status not recognized", d.game_status)
@@ -162,7 +170,7 @@ function sendLoadGamesReq() {
     };
 
     //Remove currently displayed games
-    d3.selectAll(".game_rows").remove();
+    d3.select("#game_div").selectAll("*").remove();
 
     ws_conn.send(JSON.stringify(games_req_dict));
 
@@ -170,13 +178,22 @@ function sendLoadGamesReq() {
 
 function launchGamePage(game_url) {
 
-    let full_game_url = "https://www.untouted.com/ncaab-pregame-ti?game_url=" + game_url;
+    let full_game_url = "http://127.0.0.1:5501?game_url=" + game_url;
 
     window.open(full_game_url, '_blank');
 
 };
 
 function populateSchedule(schedule_array) {
+
+    console.log(schedule_array[0]);
+
+    //Filter Out Games where  either teams rank is null not the string "null"
+    schedule_array = schedule_array.filter(function(d) {
+
+        return d.away_team_rank !== null && d.home_team_rank !== null
+
+    });
 
     let game_div = d3.select('#game_div');
     let game_div_width = game_div.node().getBoundingClientRect().width;
@@ -776,9 +793,9 @@ function populateSchedule(schedule_array) {
                                                 .attr('height', game_button_height)
                                                 .attr('rx', '12px')
                                                 .attr('ry', '12px')
-                                                .attr('stroke', color_dict.black)
+                                                .attr('stroke', color_dict.dark_gray)
                                                 .attr('stroke-width', '1px')
-                                                .attr('fill', color_dict.dark_bg)
+                                                .attr('fill', color_dict.dark_gray)
                                                 .style('shape-rendering', 'CrispEdges');
 
         let ingame_button_text = ingame_button_g.append('text')
@@ -804,9 +821,9 @@ function populateSchedule(schedule_array) {
                                                 .attr('height', game_button_height)
                                                 .attr('rx', '12px')
                                                 .attr('ry', '12px')
-                                                .attr('stroke', color_dict.black)
-                                                .attr('stroke-width', '1px')
-                                                .attr('fill', color_dict.dark_bg)
+                                                // .attr('stroke', color_dict.dark_gray)
+                                                // .attr('stroke-width', '1px')
+                                                .attr('fill', color_dict.dark_gray)
                                                 .style('shape-rendering', 'CrispEdges');
 
         let recap_button_text = recap_button_g.append('text')
@@ -927,6 +944,24 @@ function populateDateSelector() {
     let end_date_index = Math.min(global_var_dict.games_for_day.length, selected_date_index + num_days_to_display);
 
     let display_games_dates_array = global_var_dict.games_for_day.slice(start_date_index, end_date_index + 1);
+
+    if (display_games_dates_array.length === 0) {
+
+        console.log("No Games for Selected Date");
+
+        //If no games for selected date, display no games message
+        let no_games_text = d3.select("#game_div").append('h3')
+                                                    .text("No Games Today")
+                                                    .attr('fill', color_dict.dark_gray)
+                                                    .attr("width", "100%")
+                                                    .style('font-size', '22px')
+                                                    .style('font-weight', 500)
+                                                    .style('font-family', 'Work Sans')
+                                                    .style("text-align", "center")
+                                                    .style("margin-top", "80px");
+
+        return
+    };
 
     //Add Game Rects
     let display_game_dates_g = game_filter_svg.selectAll(".display_game_dates_g")
@@ -1132,7 +1167,7 @@ function updateGameState(game_state_dict) {
 }
 
 function startWebSocket() {
-    ws_conn = new WebSocket('wss://api.untouted.com');
+    ws_conn = new WebSocket('ws://localhost:3030');
     console.log("Websocket Connected.");
 
     ws_conn.onmessage = function incoming(event) {
