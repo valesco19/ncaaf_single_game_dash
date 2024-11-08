@@ -77,6 +77,10 @@ let projections_dict = {};
 let predictions_dict = {};
 let projection_range_dict = {};
 let projection_col_array = [];
+let away_player_prop_price_array = [];
+let home_player_prop_price_array = [];
+let away_player_prop_feature_array = [];
+let home_player_prop_feature_array = [];
 let time_series_y_scale;
 let model_input_dict;
 
@@ -228,6 +232,29 @@ function createArrayWithIndices(length) {
     }
 
     return resultArray;
+}
+
+function formatPlayerPropName(input) {
+    // Split the string by underscore
+    const parts = input.split('_');
+
+    //Extract Last Name and capitalize first letter
+    let lastName = parts[parts.length - 1].charAt(0).toUpperCase() + parts[parts.length - 1].slice(1);
+
+    return lastName;
+}
+
+function convertPlayerIdtDisplayName(player_id) {
+
+    //player_id is in the format zach_edey covernt to Zach Edey
+    let player_name_parts = player_id.split('_');
+
+    let player_display_name = player_name_parts.map(function(part) {
+        return part.charAt(0).toUpperCase() + part.slice(1);
+    }).join(' ');
+
+    return player_display_name;
+
 }
 
 //Main Populate Functions
@@ -1935,6 +1962,100 @@ function populateModelInputsGameResults(json_dict) {
 
 }
 
+function populateTeamRosterModal(json_dict) {
+
+    let team_player_log_array = json_dict["team_player_log"];
+    let team_summary_array = json_dict["team_summary"];
+
+    let team_roster_table_div = d3.select("#team_roster_table_div");
+
+    let team_roster_stat_cols = [
+        {"display_name": "Player", "id": 0, "base_name": "player_display_name", "col_width": 200, "type": "STRING"},
+        {"display_name": "Minutes", "id": 1, "base_name": "player_minutes_mean", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "Starts", "id": 2, "base_name": "player_starts", "col_width": 50, "type": "INTEGER"},
+        {"display_name": "Usage", "id": 3, "base_name": "player_usage_mean", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "Off Rating", "id": 4, "base_name": "player_offensive_rating_mean", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "Points", "id": 5, "base_name": "player_points_mean", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "eFG %", "id": 6, "base_name": "player_efg_pct", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "3P %", "id": 7, "base_name": "player_three_pt_pct", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "Rebs", "id": 8, "base_name": "player_total_rebs_mean", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "Off Rebs", "id": 9, "base_name": "player_off_rebs_mean", "col_width": 50, "type": "DECIMAL"},
+        {'display_name': "Assists", "id": 10, "base_name": "player_assists_mean", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "Steals", "id": 11, "base_name": "player_steals_mean", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "Blocks", "id": 12, "base_name": "player_blocks_mean", "col_width": 50, "type": "DECIMAL"},
+        {"display_name": "TOs", "id": 13, "base_name": "player_turnovers_mean", "col_width": 50, "type": "DECIMAL"},
+    ];
+
+    let team_roster_table = team_roster_table_div.append('table')
+                                                                        .attr('id', 'team_roster_table');      
+
+    let team_roster_table_header = team_roster_table.append('thead')
+                                                                            .attr('id', 'team_roster_table_thead')
+                                                                            .selectAll(".team_roster_table_th")
+                                                                            .data(team_roster_stat_cols)
+                                                                            .enter()
+                                                                            .append('th')
+                                                                            .text(d => d.display_name)
+                                                                            .attr('class', 'team_roster_table_th')
+                                                                            .style('text-align', 'left');
+
+    let team_roster_table_body = team_roster_table.append('tbody')
+                                                                            .attr('id', 'team_roster_table_tbody');
+
+    let team_roster_table_rows = team_roster_table_body.selectAll(".team_roster_table_row")
+                                                                            .data(team_summary_array)
+                                                                            .enter()
+                                                                            .append('tr')
+                                                                            .attr('class', 'team_roster_table_row')
+                                                                            .attr('id', function(d) {
+                                                                                return d.player_name + "_team_roster_table_row";
+                                                                            });
+
+    let team_roster_table_cells = team_roster_table_rows.each(function(d) {
+
+        let row = d3.select(this);
+
+        //Append Cells
+        team_roster_stat_cols.forEach(function(col) {
+
+            let cell = row.append('td')
+                                .attr('class', 'team_roster_table_cell')
+                                .style('min-width', col.col_width + "px");
+
+            if (col.base_name === "player_display_name") {
+
+                //Format for name and height/weight/class
+                let player_name_div = cell.append('div')
+                                                        .attr('class', 'player_name_div')
+                                                        .text(d['player_number'] + '-' + d[col.base_name])
+                                                        .style('font-size', '14px')
+                                                        .style('font-weight', 700);
+
+                //Capitalize player_class
+                let player_height_string = parseInt(d.player_height_ft) + "'" + parseInt(d.player_height_in) + '"';
+                let player_info_text = d.player_class.toUpperCase() + "   " + player_height_string + "   " + d.player_weight + " lbs";
+
+                let player_info_div = cell.append('div')
+                                                        .attr('class', 'player_info_div')
+                                                        .text(player_info_text)
+                                                        .style('font-size', '10px')
+                                                        .style('font-weight', 500);
+
+            } else {
+
+                if (col.type === "DECIMAL") {
+                    cell.text(formatDecimal2Places(d[col.base_name]))
+                } else if (col.type === "INTEGER") {
+                    cell.text(parseInt(d[col.base_name]))
+                } else {
+                    cell.text(d[col.base_name])
+                }
+            }
+        });
+    });
+
+}
+
 function closeModal() {
 
     //Display Modal and Overlay
@@ -2322,6 +2443,7 @@ function populateTeamProjections(json_dict) {
 
                                                                                                             launchModelInputModal(d.stat_id,d.stat_group, true);
                                                                                                             sendModelInputRequest(d.stat_id, home_team_seo_name, game_start_date);
+                                                                                                            
 
                                                                                                         })
                                                                                                         .on('mouseover', function() {
@@ -5055,8 +5177,792 @@ function populateMatchupHeader(json_dict) {
                                                                 
 }
 
+//*************Player Props*************//
+function launchPlayerPropModal(player_info_dict, is_home) {
+
+    let player_id = player_info_dict.player_name;
+
+    console.log("Player ID ->", player_id, "Is Home ->", is_home);
+
+    //Display Modal and Overlay
+    d3.select("#modal_overlay").style('display', 'block');
+    d3.select("#modal_div").style('display', 'block');
+
+    let modal_div = d3.select("#modal_div");
+
+    let model_input_header_div = modal_div.append('div')
+                                                                    .attr('id', 'model_input_header_div');
+
+    let model_input_close_div = model_input_header_div.append('div')
+                                                                    .attr('id', 'modal_close_div')
+                                                                    .on("click", function() {
+
+                                                                        closeModal();
+
+                                                                    });
+
+    let model_input_header_close_x = model_input_close_div.append('text')
+                                                                                                                    .text('x')
+                                                                                                                    .attr('id', 'modal_div_close_x');
+                                                                   
+    let team_abbrev = is_home ? "home": "away";
+
+    let player_image_url = "https://d2560u4h06m0te.cloudfront.net/images/2023/9/22/Ryan_Kalkbrenner_2324mug.jpg?width=240&quality=90";
+    let player_props_player_image = modal_div.append('img')
+                                                                            .attr("src", player_image_url)
+                                                                            .attr("alt", "Player Image")
+                                                                            .attr("id", "player_props_player_image");
+    
+    let player_display_name = convertPlayerIdtDisplayName(player_id);
+    let player_props_player_header = modal_div.append('h2')
+                                                                        .text(player_display_name)
+                                                                        .attr('id', 'player_props_model_player_header');
+
+    //Create update model input button
+    let model_input_update_model_button = modal_div.append('button')
+                                                                        .text("Update Models")
+                                                                        .attr('id', 'player_props_update_model_button')
+                                                                        .style("border-radius", "20px")
+                                                                        .on('click', function() {
+                                                                            //updateModelInputsAndSendRequest()
+
+                                                                        });
+
+    //Stat Name Header
+    let stat_col_dict = projection_col_array.find(d => d.stat_group === model_input_stat_group);
+    
+    let model_input_stat_group_header = modal_div.append('h3')
+                                                                        .text(stat_col_dict.display_name)
+                                                                        .attr('id', 'model_input_stat_group_header');
+                                                                        
+    
+    let projection_key_name = model_input_id === 0 ? team_abbrev + "_starting_elo" : team_abbrev + "_for_" + model_input_stat_group + "_q50";
+    let model_input_value = projections_dict[projection_key_name];
+    
+    //Distribution SVG
+    let model_input_svg = modal_div.append('div')
+                                                                        .attr('id', 'model_input_slider_div')
+                                                                        .style('position', 'relative')
+                                                                        .append('svg')
+                                                                        .attr('id', 'model_input_distribution_svg')
+                                                                        .attr('width', '100%')
+                                                                        .attr('height', '200px');
+                                               
+    //Time Series SVG
+    let time_series_svg = modal_div.append('div')
+                                                                      .attr('id', 'model_input_time_series_div')
+                                                                      .style('position', 'relative')
+                                                                      .append('svg')
+                                                                      .attr('id', 'model_input_time_series_svg')
+                                                                      .attr('width', '100%')
+                                                                      .attr('height', '200px');
+
+    //Game Results SVG
+    let game_results_div = modal_div.append('div')
+                                                                    .attr("id", "model_input_game_results_div")
+                                                                    .style('position', 'relative');
+                                                                    
+    
+}
+
+function populateMatchupPlayerProps() {
+
+    let player_props_display_col_array = [
+        {'display_name': 'Player', 'col_name': 'player_name'},
+        {'display_name': "Mins", 'col_name': 'minutes'},
+        {'display_name': 'Pts', 'col_name': 'points'},
+        {'display_name': "3pts", 'col_name': 'three_pts_made'},
+        {'display_name': 'Rebs', 'col_name': 'rebounds'},
+        {'display_name': 'Assts', 'col_name': 'assists'},
+        {'display_name': "Stls", 'col_name': 'steals'},
+        {'display_name': 'Blks', 'col_name': 'blocks'},
+        {'display_name': 'TOs', 'col_name': 'turnovers'},
+    ];
+
+    let matchup_predictions_div = d3.select("#matchup_predictions_div");
+
+    let prediction_div_width = matchup_predictions_div.node().getBoundingClientRect().width
+    let prediction_div_height = matchup_predictions_div.node().getBoundingClientRect().height
+
+    //Append SVG
+    let player_props_svg = matchup_predictions_div.append('svg')
+                                                                .attr('id', 'player_props_svg')
+                                                                .attr('width', prediction_div_width)
+                                                                .attr('height', prediction_div_height);
+
+    let player_props_padding_dict = {
+        top: 30,
+        bottom: 20,
+        left: 30,
+        right: 0,
+        player_padding: 20,
+        middle_padding: 30,
+    };
+
+    let away_player_props_team_total_dict = {};
+    let home_player_props_team_total_dict = {};
+
+    player_props_display_col_array.forEach(function(d) {
+
+        if (d.col_name !== 'player_name') {
+
+            away_player_props_team_total_dict[d.col_name] = 0;
+            home_player_props_team_total_dict[d.col_name] = 0;
+
+        }
+    });
+
+    let player_props_height = prediction_div_height - player_props_padding_dict.top - player_props_padding_dict.bottom;
+    let player_props_width = prediction_div_width - player_props_padding_dict.left - player_props_padding_dict.right;
+    let player_props_row_height = (player_props_height - player_props_padding_dict.player_padding) / 7;
+    let player_props_cols_width = ((player_props_width - player_props_padding_dict.middle_padding) / 2) / player_props_display_col_array.length;
+
+    let player_props_away_g = player_props_svg.append('g')
+                                                                .attr("id", "player_props_away_g")
+                                                                .attr('transform', 'translate(' + player_props_padding_dict.left + ',' + player_props_padding_dict.top + ')');                                                                
+
+    let player_props_home_g = player_props_svg.append('g')
+                                                                .attr("id", "player_props_home_g")
+                                                                .attr('transform', 'translate(' + (player_props_width / 2 + (player_props_padding_dict.middle_padding)) + ',' + player_props_padding_dict.top + ')');
+
+    let player_props_title_text = player_props_svg.append('text')
+                                                                .text('Player Props')
+                                                                .attr('x', prediction_div_width / 2)
+                                                                .attr('y', 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'hanging')
+                                                                .attr('font-size', '18px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_away_stat_titles_g = player_props_away_g.append('g')
+                                                                .attr('id', 'player_props_away_stat_titles_g');
+                                                                
+    let player_props_away_stat_title_text = player_props_away_stat_titles_g.selectAll('.player_props_away_stat_title_text')
+                                                                .data(player_props_display_col_array)
+                                                                .enter()
+                                                                .append('text')
+                                                                .text(function(d) {return d.display_name})
+                                                                .attr('x', function(d, i) {
+                                                                        
+                                                                        return player_props_cols_width * i;
+    
+                                                                })
+                                                                .attr('y', 0)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'hanging')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_away_row_g = player_props_away_g.selectAll('.player_props_away_row_g')
+                                                                .data(away_player_prop_price_array)
+                                                                .enter()
+                                                                .append('g')
+                                                                .attr('class', 'player_props_away_row_g')
+                                                                .attr('transform', function(d, i) {
+
+                                                                    let row_y = player_props_row_height * (i + 1);
+
+                                                                    return 'translate(0,' + row_y + ')';
+
+                                                                })
+                                                                .style("cursor", "pointer")
+                                                                .on('click', function(event, d) {
+
+                                                                    let player_stats_dict = d3.select(this).data()[0];
+
+                                                                    console.log(i, player_stats_dict);
+
+                                                                    launchPlayerPropModal(player_stats_dict, false);
+                                                                });
+
+    let player_props_away_bg = player_props_away_row_g.append('rect')
+                                                                .attr('x', 0)
+                                                                .attr('y', 0)
+                                                                .attr('width', player_props_width / 2)
+                                                                .attr('height', player_props_row_height)
+                                                                .attr('fill', color_dict.dark_bg);
+    
+    let player_props_away_player_name_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    let name_text = formatPlayerPropName(d['player_name']);
+
+                                                                    return name_text;
+                                                                })
+                                                                .attr('x', player_props_cols_width - 25)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'end')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_away_mins_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    away_player_props_team_total_dict['minutes'] += d['player_minutes'];
+                                                                
+                                                                    return formatDecimal1Place(d['player_minutes'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_away_pts_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    away_player_props_team_total_dict['points'] += d['player_points'];
+                                                                
+                                                                    return formatDecimal1Place(d['player_points'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 2)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_away_3pts_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    away_player_props_team_total_dict['three_pts_made'] += d['player_three_pts_made'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_three_pts_made'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 3)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_away_rebs_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    away_player_props_team_total_dict['rebounds'] += d['player_rebounds'];
+                                                                
+                                                                    return formatDecimal1Place(d['player_rebounds'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 4)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_away_assts_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    away_player_props_team_total_dict['assists'] += d['player_assists'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_assists'])
+
+                                                                })
+                                                                .attr('x', player_props_cols_width * 5)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_away_stls_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    away_player_props_team_total_dict['steals'] += d['player_steals'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_steals'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 6)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_away_blks_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    away_player_props_team_total_dict['blocks'] += d['player_blocks'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_blocks'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 7)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_away_tos_text = player_props_away_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    away_player_props_team_total_dict['turnovers'] += d['player_turnovers'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_turnovers'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 8)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_team_total_away_g = player_props_away_g.append('g')
+                                                                .attr('id', 'player_props_team_total_away_g')
+                                                                .attr('transform', 'translate(0,' + player_props_row_height * 7 + ')');
+
+    let player_props_team_total_away_bg = player_props_team_total_away_g.append('rect')
+                                                                .attr('x', 0)
+                                                                .attr('y', 0)
+                                                                .attr('width', player_props_width / 2)
+                                                                .attr('height', player_props_row_height)
+                                                                .attr('fill', color_dict.dark_bg);
+
+    let player_props_team_total_away_text = player_props_team_total_away_g.append('text')
+                                                                .text('Total') 
+                                                                .attr('x', player_props_cols_width - 25)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'end')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_away_mins_text = player_props_team_total_away_g.append('text')
+                                                                .text(formatDecimal1Place(away_player_props_team_total_dict['minutes']))
+                                                                .attr('x', player_props_cols_width)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_away_pts_text = player_props_team_total_away_g.append('text')
+                                                                .text(formatDecimal1Place(away_player_props_team_total_dict['points']))
+                                                                .attr('x', player_props_cols_width * 2)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_away_3pts_text = player_props_team_total_away_g.append('text')
+                                                                .text(formatDecimal2Places(away_player_props_team_total_dict['three_pts_made']))
+                                                                .attr('x', player_props_cols_width * 3)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_away_rebs_text = player_props_team_total_away_g.append('text')
+                                                                .text(formatDecimal1Place(away_player_props_team_total_dict['rebounds']))
+                                                                .attr('x', player_props_cols_width * 4)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_away_assts_text = player_props_team_total_away_g.append('text')
+                                                                .text(formatDecimal2Places(away_player_props_team_total_dict['assists']))
+                                                                .attr('x', player_props_cols_width * 5)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_away_stls_text = player_props_team_total_away_g.append('text')
+                                                                .text(formatDecimal2Places(away_player_props_team_total_dict['steals']))
+                                                                .attr('x', player_props_cols_width * 6)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_away_blks_text = player_props_team_total_away_g.append('text')
+                                                                .text(formatDecimal2Places(away_player_props_team_total_dict['blocks']))
+                                                                .attr('x', player_props_cols_width * 7)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_away_tos_text = player_props_team_total_away_g.append('text')
+                                                                .text(formatDecimal2Places(away_player_props_team_total_dict['turnovers']))
+                                                                .attr('x', player_props_cols_width * 8)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    //Home Player Props
+    let player_props_home_stat_titles_g = player_props_home_g.append('g')
+                                                                .attr('id', 'player_props_home_stat_titles_g');
+
+    let player_props_home_stat_title_text = player_props_home_stat_titles_g.selectAll('.player_props_home_stat_title_text')
+                                                                .data(player_props_display_col_array)
+                                                                .enter()
+                                                                .append('text')
+                                                                .text(function(d) {return d.display_name})
+                                                                .attr('x', function(d, i) {
+                                                                            
+                                                                            return player_props_cols_width * i;
+        
+                                                                })
+                                                                .attr('y', 0)                                               
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'hanging')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_home_row_g = player_props_home_g.selectAll('.player_props_home_row_g')
+                                                                .data(home_player_prop_price_array)
+                                                                .enter()
+                                                                .append('g')
+                                                                .attr('class', 'player_props_home_row_g')
+                                                                .attr('transform', function(d, i) {
+
+                                                                    let row_y = player_props_row_height * (i + 1);
+
+                                                                    return 'translate(0,' + row_y + ')';
+
+                                                                })
+                                                                .style("cursor", "pointer")
+                                                                .on('click', function(d, i) {
+
+                                                                    let player_stats_dict = d3.select(this).data()[0];
+                                                                    launchPlayerPropModal(player_stats_dict, true);
+
+                                                                });
+
+    let player_props_home_bg = player_props_home_row_g.append('rect')
+                                                                .attr('x', 0)
+                                                                .attr('y', 0)
+                                                                .attr('width', player_props_width / 2)
+                                                                .attr('height', player_props_row_height)
+                                                                .attr('fill', color_dict.dark_bg);
+
+    let player_props_home_player_name_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    let name_text = formatPlayerPropName(d['player_name']);
+
+                                                                    return name_text;
+                                                                })
+                                                                .attr('x', player_props_cols_width - 25)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'end')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_home_mins_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    home_player_props_team_total_dict['minutes'] += d['player_minutes'];
+                                                                
+                                                                    return formatDecimal1Place(d['player_minutes'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_home_pts_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    home_player_props_team_total_dict['points'] += d['player_points'];
+                                                                
+                                                                    return formatDecimal1Place(d['player_points'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 2)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_home_3pts_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    home_player_props_team_total_dict['three_pts_made'] += d['player_three_pts_made'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_three_pts_made'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 3)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_home_rebs_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    home_player_props_team_total_dict['rebounds'] += d['player_rebounds'];
+                                                                
+                                                                    return formatDecimal1Place(d['player_rebounds'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 4)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_home_assts_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    home_player_props_team_total_dict['assists'] += d['player_assists'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_assists'])
+
+                                                                })
+                                                                .attr('x', player_props_cols_width * 5)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_home_stls_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    home_player_props_team_total_dict['steals'] += d['player_steals'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_steals'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 6)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_home_blks_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    home_player_props_team_total_dict['blocks'] += d['player_blocks'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_blocks'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 7)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_home_tos_text = player_props_home_row_g.append('text')
+                                                                .text(function(d) {
+
+                                                                    home_player_props_team_total_dict['turnovers'] += d['player_turnovers'];
+                                                                
+                                                                    return formatDecimal2Places(d['player_turnovers'])
+                                                                    
+                                                                })
+                                                                .attr('x', player_props_cols_width * 8)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 500);
+
+    let player_props_team_total_home_g = player_props_home_g.append('g')
+                                                                .attr('id', 'player_props_team_total_home_g')
+                                                                .attr('transform', 'translate(0,' + player_props_row_height * 7 + ')');
+
+    let player_props_team_total_home_bg = player_props_team_total_home_g.append('rect')
+                                                                .attr('x', 0)
+                                                                .attr('y', 0)
+                                                                .attr('width', player_props_width / 2)
+                                                                .attr('height', player_props_row_height)
+                                                                .attr('fill', color_dict.dark_bg);
+
+    let player_props_team_total_home_text = player_props_team_total_home_g.append('text')
+                                                                .text('Total') 
+                                                                .attr('x', player_props_cols_width - 25)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'end')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_home_mins_text = player_props_team_total_home_g.append('text')
+                                                                .text(formatDecimal1Place(home_player_props_team_total_dict['minutes']))
+                                                                .attr('x', player_props_cols_width)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_home_pts_text = player_props_team_total_home_g.append('text')
+                                                                .text(formatDecimal1Place(home_player_props_team_total_dict['points']))
+                                                                .attr('x', player_props_cols_width * 2)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_home_3pts_text = player_props_team_total_home_g.append('text')
+                                                                .text(formatDecimal2Places(home_player_props_team_total_dict['three_pts_made']))
+                                                                .attr('x', player_props_cols_width * 3)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_home_rebs_text = player_props_team_total_home_g.append('text')
+                                                                .text(formatDecimal1Place(home_player_props_team_total_dict['rebounds']))
+                                                                .attr('x', player_props_cols_width * 4)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_home_assts_text = player_props_team_total_home_g.append('text')
+                                                                .text(formatDecimal2Places(home_player_props_team_total_dict['assists']))
+                                                                .attr('x', player_props_cols_width * 5)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_home_stls_text = player_props_team_total_home_g.append('text')
+                                                                .text(formatDecimal2Places(home_player_props_team_total_dict['steals']))
+                                                                .attr('x', player_props_cols_width * 6)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_home_blks_text = player_props_team_total_home_g.append('text')
+                                                                .text(formatDecimal2Places(home_player_props_team_total_dict['blocks']))
+                                                                .attr('x', player_props_cols_width * 7)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+    let player_props_team_total_home_tos_text = player_props_team_total_home_g.append('text')
+                                                                .text(formatDecimal2Places(home_player_props_team_total_dict['turnovers']))
+                                                                .attr('x', player_props_cols_width * 8)
+                                                                .attr('y', player_props_row_height / 2)
+                                                                .attr('fill', color_dict.med_gray)
+                                                                .attr('text-anchor', 'middle')
+                                                                .attr('dominant-baseline', 'middle')
+                                                                .attr('font-size', '12px')
+                                                                .style('font-family', 'Work Sans')
+                                                                .style('font-weight', 700);
+
+}
+
 function startWebSocket() {
-    ws_conn = new WebSocket('wss://api.untouted.com');
+    ws_conn = new WebSocket('ws://localhost:3030');
     console.log("Websocket Connected.");
 
     ws_conn.onmessage = function incoming(event) {
@@ -5074,6 +5980,9 @@ function startWebSocket() {
         }
 
         if (resp_type == "main_models") {
+
+            console.log("Main Models ->", resp_dict['data']);
+
             projections_dict = resp_dict['data']['projections'];
             model_input_dict = resp_dict['data']['projections'];
             predictions_dict = resp_dict['data']['predictions'];
@@ -5138,6 +6047,20 @@ function startWebSocket() {
 
         }
 
+        if (resp_type === "team_roster") {
+
+            console.log("Team Roster ->", resp_dict['data']);
+            populateTeamRosterModal(resp_dict['data']);
+        }
+
+        if (resp_type == "game_player_props") {
+            console.log("Game Player Props ->", resp_dict['data']);
+            away_player_prop_price_array = resp_dict['data']['away_team_player_props']['team_player_props_response']['player_prop_array'];
+            away_player_prop_feature_array = resp_dict['data']['away_team_player_props']['team_player_props_response']['player_feature_array'];
+            home_player_prop_price_array = resp_dict['data']['home_team_player_props']['team_player_props_response']['player_prop_array'];
+            home_player_prop_feature_array = resp_dict['data']['home_team_player_props']['team_player_props_response']['player_feature_array'];
+        }
+
     }
 
     ws_conn.onclose = function() {
@@ -5181,9 +6104,17 @@ function sendInitRequests(game_url) {
         }
     };
 
+    let init_player_prop_req_dict = {
+        req_type: "game_player_props",
+        params: {
+            "game_url": game_url,
+        }
+    }
+
 
     ws_conn.send(JSON.stringify(init_game_req_dict));
     ws_conn.send(JSON.stringify(init_model_req_dict));
+    ws_conn.send(JSON.stringify(init_player_prop_req_dict));
 
 }
 
@@ -5346,6 +6277,13 @@ d3.select("#odds_button").on('click', function() {
             .style('border', '1px solid ' + color_dict.dark_gray)
             .style("color", color_dict.med_gray);
 
+        d3.select("#player_props_button")
+            .transition()
+            .duration(button_transition_duration)
+            .style('background-color', color_dict.dark_bg)
+            .style('border', '1px solid ' + color_dict.dark_gray)
+            .style('color', color_dict.med_gray);
+
         //Clear matchup_predictions_div
         d3.select("#matchup_predictions_div").selectAll("*").remove();
 
@@ -5379,6 +6317,13 @@ d3.select("#models_button").on('click', function() {
             .style('border', '1px solid ' + color_dict.dark_gray)
             .style('color', color_dict.med_gray);
 
+        d3.select("#player_props_button")
+            .transition()
+            .duration(button_transition_duration)
+            .style('background-color', color_dict.dark_bg)
+            .style('border', '1px solid ' + color_dict.dark_gray)
+            .style('color', color_dict.med_gray);
+
         //Clear matchup_predictions_div
         d3.select("#matchup_predictions_div").selectAll("*").remove();
 
@@ -5386,7 +6331,46 @@ d3.select("#models_button").on('click', function() {
         populateMatchupGameModels();
 
     }
+});
 
+d3.select("#player_props_button").on('click', function() {
+
+    let button_transition_duration = 100;
+
+    if (global_vars_dict['matchup_prediction_display_id'] != 2) {
+
+        //Update global var
+        global_vars_dict['matchup_prediction_display_id'] = 2;
+
+        //Update button colors
+        d3.select("#player_props_button")
+            .transition()
+            .duration(button_transition_duration)
+            .style('background-color', color_dict.orange)
+            .style('border', "none")
+            .style("color", color_dict.dark_bg)
+
+        d3.select("#odds_button")
+            .transition()
+            .duration(button_transition_duration)
+            .style('background-color', color_dict.dark_bg)
+            .style('border', '1px solid ' + color_dict.dark_gray)
+            .style('color', color_dict.med_gray);
+
+        d3.select("#models_button")
+            .transition()
+            .duration(button_transition_duration)
+            .style('background-color', color_dict.dark_bg)
+            .style('border', '1px solid ' + color_dict.dark_gray)
+            .style('color', color_dict.med_gray);
+
+        //Clear matchup_predictions_div
+        d3.select("#matchup_predictions_div").selectAll("*").remove();
+
+        //Repopulate Matchup Player Props
+        populateMatchupPlayerProps();
+
+    }
 });
 
 
