@@ -21,6 +21,10 @@ let global_var_dict = {
 
 }
 
+let logged_in_user = {
+    email: 'testemail@untouted.com',
+};
+
 function convertWinProbToAmericanOdds(win_prob) {
     // Ensure american_odds is a valid probability (between 0 and 1)
     if (win_prob < 0 || win_prob > 1) {
@@ -158,7 +162,7 @@ function sendLoadGamesReq() {
 
     //Send request for new day's games
     let games_req_dict = {
-        user_email: logged_in_user.uid,
+        user_email: logged_in_user.email,
         req_type: "load_games",
         params: {
             "schedule_date_str": global_var_dict.schedule_date_str,
@@ -174,7 +178,7 @@ function sendLoadGamesReq() {
 
 function launchGamePage(game_url) {
 
-    let full_game_url = "https://www.untouted.com/ncaab-pregame-ti?game_url=" + game_url;
+    let full_game_url = "http://127.0.0.1:5501?game_url=" + game_url;
 
     window.open(full_game_url, '_blank');
 
@@ -182,7 +186,7 @@ function launchGamePage(game_url) {
 
 function populateSchedule(schedule_array) {
 
-    console.log(schedule_array[0]);
+    console.log("----> populate_schedule", schedule_array[0]);
 
     //Filter Out Games where  either teams rank is null not the string "null"
     schedule_array = schedule_array.filter(function(d) {
@@ -588,7 +592,7 @@ function populateSchedule(schedule_array) {
 
                                             if (i === 0) {
                                                 
-                                                let away_odds_spread = formatDecimal1Place(schedule_array[game_row_index]['consensus_pricing_dict']['consensus_away_fg_spread']);
+                                                let away_odds_spread = formatDecimal1Place(schedule_array[game_row_index]['consensus_pricing_dict']['away_fg_spread_consensus']);
 
                                                 if (away_odds_spread > 0) {
                                                     return "+" + away_odds_spread
@@ -599,13 +603,13 @@ function populateSchedule(schedule_array) {
 
                                             } else if (i === 1) {
                                                 
-                                                let game_total_line = formatDecimal1Place(schedule_array[game_row_index]['consensus_pricing_dict']['consensus_fg_game_total']);
+                                                let game_total_line = formatDecimal1Place(schedule_array[game_row_index]['consensus_pricing_dict']['fg_total_points_consensus']);
 
                                                 return game_total_line
 
                                             } else if (i === 2) {
                                                 
-                                                let away_win_prob = schedule_array[game_row_index]['consensus_pricing_dict']['consensus_away_fg_win_prob'];
+                                                let away_win_prob = schedule_array[game_row_index]['consensus_pricing_dict']['away_fg_win_prob_consensus'];
 
                                                 let away_odds_ml = convertWinProbToAmericanOdds(away_win_prob);
 
@@ -617,8 +621,8 @@ function populateSchedule(schedule_array) {
 
                                             } else if (i === 3) {
 
-                                                let away_odds_spread = schedule_array[game_row_index]['consensus_pricing_dict']['consensus_away_fg_spread'];
-                                                let game_total_line = schedule_array[game_row_index]['consensus_pricing_dict']['consensus_fg_game_total'];
+                                                let away_odds_spread = schedule_array[game_row_index]['consensus_pricing_dict']['away_fg_spread_consensus'];
+                                                let game_total_line = schedule_array[game_row_index]['consensus_pricing_dict']['fg_total_points_consensus'];
 
                                                 let away_team_total = formatDecimal1Place(calcTeamTotal(-away_odds_spread, game_total_line));
 
@@ -684,7 +688,7 @@ function populateSchedule(schedule_array) {
 
                                             if (i === 0) {
                                                 
-                                                let home_odds_spread = formatDecimal1Place(schedule_array[game_row_index]['consensus_pricing_dict']['consensus_home_fg_spread']);
+                                                let home_odds_spread = formatDecimal1Place(schedule_array[game_row_index]['consensus_pricing_dict']['home_fg_spread_consensus']);
 
                                                 if (home_odds_spread > 0) {
                                                     return "+" + home_odds_spread
@@ -694,13 +698,13 @@ function populateSchedule(schedule_array) {
                                   
                                             } else if (i === 1) {
                                                 
-                                                let game_total_line = formatDecimal1Place(schedule_array[game_row_index]['consensus_pricing_dict']['consensus_fg_game_total']);
+                                                let game_total_line = formatDecimal1Place(schedule_array[game_row_index]['consensus_pricing_dict']['fg_total_points_consensus']);
 
                                                 return game_total_line
 
                                             } else if (i === 2) {
                                                 
-                                                let home_win_prob = schedule_array[game_row_index]['consensus_pricing_dict']['consensus_home_fg_win_prob'];
+                                                let home_win_prob = schedule_array[game_row_index]['consensus_pricing_dict']['home_fg_win_prob_consensus'];
 
                                                 let home_odds_ml = convertWinProbToAmericanOdds(home_win_prob);
 
@@ -712,8 +716,8 @@ function populateSchedule(schedule_array) {
 
                                             } else if (i === 3) {
 
-                                                let home_odds_spread = schedule_array[game_row_index]['consensus_pricing_dict']['consensus_home_fg_spread'];
-                                                let game_total_line = schedule_array[game_row_index]['consensus_pricing_dict']['consensus_fg_game_total'];
+                                                let home_odds_spread = schedule_array[game_row_index]['consensus_pricing_dict']['home_fg_spread_consensus'];
+                                                let game_total_line = schedule_array[game_row_index]['consensus_pricing_dict']['fg_total_points_consensus'];
 
                                                 let home_team_total = formatDecimal1Place(calcTeamTotal(-home_odds_spread, game_total_line));
 
@@ -1266,9 +1270,9 @@ setTimeout(function() {
         d3.select("#game_filter_div").selectAll("*").remove();
         d3.select("#game_div").selectAll("*").remove();
 
-        populateGameFilter();
-        populateSchedule(global_var_dict['schedule_array']);
-
+        if (global_var_dict['schedule_array'].length > 0) {
+            populateGameFilter();
+            populateSchedule(global_var_dict['schedule_array']);
+        }
     })
 }, 2000);
-
