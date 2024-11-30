@@ -21,10 +21,6 @@ let global_var_dict = {
 
 }
 
-let logged_in_user = {
-    email: 'testemail@untouted.com',
-};
-
 function convertWinProbToAmericanOdds(win_prob) {
     // Ensure american_odds is a valid probability (between 0 and 1)
     if (win_prob < 0 || win_prob > 1) {
