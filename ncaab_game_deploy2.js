@@ -174,7 +174,7 @@ function sendLoadGamesReq() {
 
 function launchGamePage(game_url) {
 
-    let full_game_url = "https://www.untouted.com?game_url=" + game_url;
+    let full_game_url = "https://www.untouted.com/ncaab-pregame-ti?game_url=" + game_url;
 
     window.open(full_game_url, '_blank');
 
